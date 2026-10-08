@@ -3409,7 +3409,7 @@
           {label:"Положительные (PTP — обещание оплаты)", value: fmtInt.format(totalRow.ptp)+' <small>'+fmtPct(totalRow.ptpPct)+'</small>', delta: deltaTag(totalRow.ptp, prevTotal?prevTotal.ptp:null), icon:"✓", iconCls:"good"}
         ];
         var extraHeadCells = extraLabels.map(function(lbl){ return '<th class="amt">'+esc(lbl)+', шт</th>'; }).join("");
-        var rows = block.groups.map(function(g){
+        var rows = block.groups.filter(function(g){ return g.isTotal || !/^Спирин Вадим/.test(g.name); }).map(function(g){
           var extraCells = extraLabels.map(function(lbl){
             var e = findExtra(g, lbl);
             return '<td class="amt">'+fmtInt.format(e.count)+'</td>';
