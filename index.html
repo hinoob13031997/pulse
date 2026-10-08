@@ -2228,6 +2228,16 @@
         var prevEnd = new Date(curStart.getTime()-msDay);
         var prevStart = new Date(prevEnd.getTime()-(periodDays-1)*msDay);
         var curStartStr=normalizeDate(curStart), curEndStr=normalizeDate(curEnd), prevStartStr=normalizeDate(prevStart), prevEndStr=normalizeDate(prevEnd);
+        // Если в файле данные за несколько календарных месяцев — сравниваем месяцы: «текущий» —
+        // последний месяц (по последнюю дату в файле), «предыдущий» — предыдущий календарный месяц.
+        var lastD = dates[dates.length-1];
+        if(dates[0].slice(0,7) < lastD.slice(0,7)){
+          var yy = +lastD.slice(0,4), mm = +lastD.slice(5,7);
+          var py = mm===1 ? yy-1 : yy, pm = mm===1 ? 12 : mm-1;
+          curStartStr = lastD.slice(0,7)+"-01"; curEndStr = lastD;
+          prevStartStr = py+"-"+(pm<10?"0":"")+pm+"-01";
+          prevEndStr = normalizeDate(new Date(yy, mm-1, 0));
+        }
         function inRange(d,a,b){ return d>=a && d<=b; }
         current = rows.filter(function(r){ return inRange(normalizeDate(r[dateCol]), curStartStr, curEndStr); });
         var prevRows = rows.filter(function(r){ return inRange(normalizeDate(r[dateCol]), prevStartStr, prevEndStr); });
@@ -3275,7 +3285,7 @@
       var ageCol = pickInitiationDateColumn(state.headers, state.colInfo);
       var realOpCol = pickRealOperatorColumn(state.headers);
       var kept = state.headers.filter(function(h){
-        return matchesKeepList(h) || idRe.test(h) || (opts.portfolioAnalytics && /портфел/i.test(h)) ||
+        return matchesKeepList(h) || idRe.test(h) || (opts.portfolioAnalytics && /портфел|цесси/i.test(h)) ||
           h===amountCol || h===dateCol || h===ageCol || h===realOpCol;
       });
       var keptSet = {}; kept.forEach(function(h){ keptSet[h]=true; });
@@ -3540,8 +3550,8 @@
     function payListColumns(){
       var h = state.headers;
       var ids = h.filter(function(x){ return /договор|фио|клиент|заёмщик|заемщик/i.test(x); });
-      var pf = h.filter(function(x){ return /портфел/i.test(x) && ids.indexOf(x)<0; });
-      pf.sort(function(a,b){ return (/наименование|назван/i.test(b)?1:0) - (/наименование|назван/i.test(a)?1:0); });
+      var pf = h.filter(function(x){ return /портфел|цесси/i.test(x) && ids.indexOf(x)<0; });
+      pf.sort(function(a,b){ return (/цесси|наименование|назван/i.test(b)?1:0) - (/цесси|наименование|назван/i.test(a)?1:0); });
       var used = {}; ids.concat(pf).forEach(function(x){ used[x]=1; });
       return {cols: ids.concat(pf).concat(h.filter(function(x){ return !used[x]; })), hasPortfolio: pf.length>0};
     }
@@ -4365,7 +4375,7 @@
               }, 60);
             }, 60);
           }, {
-            keep: (opts.keepColumns && opts.keepColumns.length) ? {names:opts.keepColumns, idRe:"договор|клиент|заёмщик|заемщик|фио|\\bid\\b", moneyRe:"сумм|долг|плат[её]ж|остаток|взыскан", extraRe:"возбужд|открыт|начал|id\\s*операт|портфел"} : null,
+            keep: (opts.keepColumns && opts.keepColumns.length) ? {names:opts.keepColumns, idRe:"договор|клиент|заёмщик|заемщик|фио|\\bid\\b", moneyRe:"сумм|долг|плат[её]ж|остаток|взыскан", extraRe:"возбужд|открыт|начал|id\\s*операт|портфел|цесси"} : null,
             onProgress: function(n){
               var now = Date.now(); if(now - (runGenericUpload._t||0) < 400) return; runGenericUpload._t = now;
               pulseBusy(true, "Идёт загрузка: «"+file.name+"»", "шаг 1 из 3 — читаем файл, прочитано строк: "+fmtInt.format(n));
@@ -5608,7 +5618,7 @@
   // Портфель может приходить с сотнями тысяч строк — лишние колонки умножают на каждую строку
   // (память, поиск, экспорт), поэтому оставляем только те, что реально нужны для разбивок и
   // расчётов; всё остальное отбрасывается сразу после загрузки файла.
-  var PORTFOLIO_KEEP_COLUMNS = ["Наименование портфеля","Портфель","Наименование цедента","Оператор взаимодействия","Статус ИП КСК","Основание окончания ИП","Вид судебного взыскания","Рабочий статус","Статус ОВ"];
+  var PORTFOLIO_KEEP_COLUMNS = ["Наименование портфеля","Портфель","Наименование цессии в КСК","Наименование цедента","Оператор взаимодействия","Статус ИП КСК","Основание окончания ИП","Вид судебного взыскания","Рабочий статус","Статус ОВ"];
   createGenericModule("po_", "pulse_portfolio_odv", {allowSecondary:false, label:"Портфель ОДВ", hideDateCharts:true, portfolioAnalytics:true, keepColumns:PORTFOLIO_KEEP_COLUMNS});
   createGenericModule("pw_", "pulse_portfolio_all", {allowSecondary:false, label:"Портфель весь", portfolioAnalytics:true, keepColumns:PORTFOLIO_KEEP_COLUMNS});
   createDistribModule("ds_", "pulse_distrib_settings", "pulse_distrib_data", "Распределение договоров");
