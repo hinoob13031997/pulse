@@ -2231,7 +2231,8 @@
         // Если в файле данные за несколько календарных месяцев — сравниваем месяцы: «текущий» —
         // последний месяц (по последнюю дату в файле), «предыдущий» — предыдущий календарный месяц.
         var lastD = dates[dates.length-1];
-        if(dates[0].slice(0,7) < lastD.slice(0,7)){
+        var multiMonth = dates[0].slice(0,7) < lastD.slice(0,7);
+        if(multiMonth){
           var yy = +lastD.slice(0,4), mm = +lastD.slice(5,7);
           var py = mm===1 ? yy-1 : yy, pm = mm===1 ? 12 : mm-1;
           curStartStr = lastD.slice(0,7)+"-01"; curEndStr = lastD;
@@ -2239,13 +2240,32 @@
           prevEndStr = normalizeDate(new Date(yy, mm-1, 0));
         }
         function inRange(d,a,b){ return d>=a && d<=b; }
-        current = rows.filter(function(r){ return inRange(normalizeDate(r[dateCol]), curStartStr, curEndStr); });
-        var prevRows = rows.filter(function(r){ return inRange(normalizeDate(r[dateCol]), prevStartStr, prevEndStr); });
-        curRange = {from:curStartStr, to:curEndStr}; prevRange = {from:prevStartStr, to:prevEndStr};
-        previous = prevRows.length ? prevRows : null;
+        function mkVariant(pEnd){
+          var cR = rows.filter(function(r){ return inRange(normalizeDate(r[dateCol]), curStartStr, curEndStr); });
+          var pR = rows.filter(function(r){ return inRange(normalizeDate(r[dateCol]), prevStartStr, pEnd); });
+          return { current: buildBlock(cR, {from:curStartStr, to:curEndStr}), previous: pR.length ? buildBlock(pR, {from:prevStartStr, to:pEnd}) : null };
+        }
+        var fullPrevEnd = prevEndStr;
+        var res = mkVariant(fullPrevEnd);
+        if(multiMonth){
+          // Режим «по дням»: те же дни месяца, что и в текущем (1–8 октября против 1–8 сентября).
+          var dayN = +curEndStr.slice(8,10);
+          var lastDayPrev = +fullPrevEnd.slice(8,10);
+          var dd = Math.min(dayN, lastDayPrev);
+          var daysEnd = fullPrevEnd.slice(0,8)+(dd<10?"0":"")+dd;
+          var curMonthEnd = normalizeDate(new Date(+curEndStr.slice(0,4), +curEndStr.slice(5,7), 0));
+          var incomplete = curEndStr < curMonthEnd;
+          if(incomplete && daysEnd !== fullPrevEnd){
+            var daysV = mkVariant(daysEnd);
+            var monthsV = res;
+            // По умолчанию: неполный последний месяц → сравнение по одинаковым дням.
+            res = daysV; res.mode = "days"; res.alt = monthsV; res.alt.mode = "months";
+          } else { res.mode = "months"; }
+        }
+        return res;
       }
     }
-    return { current: buildBlock(current, curRange), previous: previous ? buildBlock(previous, prevRange) : null };
+    return { current: buildBlock(current, curRange), previous: null };
   }
   function aoaFromPasteText(text){
     var lines = text.split(/\r\n|\r|\n/).filter(function(l){ return l.length; });
@@ -3429,6 +3449,9 @@
       }
       var html = '<section><div class="head"><h2>Воронка обращений <span class="info-tip" title="Сводка звонков (не строки журнала): RC — дозвон/контакт установлен, PTP — обещание оплаты (положительный результат). Загружается отдельным файлом «Воронка» и не увеличивает число записей журнала.">i</span></h2>'+
         (state.funnelSource?'<span class="hint">'+esc(state.funnelSource)+'</span>':'')+'</div>'+
+        (state.funnel.alt ? '<div class="fn-mode" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0 12px"><span class="hint">Сравнение:</span>'+
+          '<button type="button" class="btn'+(state.funnel.mode==="days"?'':' ghost')+'" data-fnmode="days" style="font-size:14px">По дням (одинаковые дни месяца)</button>'+
+          '<button type="button" class="btn'+(state.funnel.mode==="months"?'':' ghost')+'" data-fnmode="months" style="font-size:14px">Целые месяцы</button></div>' : '')+
         periodBlock(state.funnel.current, state.funnel.previous, "Текущий период"+funnelRangeText(state.funnel.current)) +
         (state.funnel.previous ? periodBlock(state.funnel.previous, null, "Предыдущий период"+funnelRangeText(state.funnel.previous)) : '') +
         '</section>';
@@ -3461,6 +3484,17 @@
           rowsHtml+'</section>';
       }
       wrap.innerHTML = html + histHtml;
+      Array.prototype.forEach.call(wrap.querySelectorAll("[data-fnmode]"), function(btn){
+        btn.addEventListener("click", function(){
+          var m = btn.getAttribute("data-fnmode");
+          if(!state.funnel || !state.funnel.alt || state.funnel.mode===m) return;
+          var f = state.funnel, other = f.alt;
+          other.alt = { current:f.current, previous:f.previous, mode:f.mode };
+          other.mode = m;
+          state.funnel = other;
+          persist(); renderFunnel();
+        });
+      });
     }
 
     // History of the module's own uploads (not the funnel's) — one dated summary snapshot per
