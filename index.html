@@ -5604,15 +5604,23 @@
       [/тип лица/,/цесси/,/id договора внешний/].forEach(function(re){ for(var i=0;i<h.length;i++) if(re.test(h[i])) known[i]=1; });
       var unk = []; for(var i=0;i<h.length;i++) if(!known[i]) unk.push(i);
       if(idx.name==null && unk.length) idx.name = unk[0];
-      if(idx.com==null && unk.length>1) idx.com = unk[unk.length-1];
+      // колонка комментариев: если по заголовку не нашли — среди нераспознанных колонок (кроме «ФИО») берём ту, где больше всего заполненных ячеек
+      var comHdrText = "";
+      if(idx.com==null || idx.com===idx.name){
+        var cand = unk.filter(function(i){ return i!==idx.name; }), bestN = 0, bestI = null;
+        cand.forEach(function(i){ var n=0; for(var r=1;r<aoa.length;r++){ var v=aoa[r]&&aoa[r][i]; if(v!=null && String(v).trim()) n++; } if(n>bestN){ bestN=n; bestI=i; } });
+        if(bestI!=null){ idx.com = bestI; if(h[bestI] && h[bestI].length>40) comHdrText = h[bestI]; }
+      }
       var rows = [];
       for(var r=1;r<aoa.length;r++){
         var row = aoa[r]; if(!row) continue;
         var id = normId(row[idx.id]), debt = debtNum(row[idx.debt]), nm = idx.name!=null ? String(row[idx.name]||"").trim() : "";
         if(!id && !debt && !nm) continue;
-        var cm = idx.com!=null ? String(row[idx.com]==null?"":row[idx.com]).trim() : "";
+        var cm = idx.com!=null ? String(row[idx.com]==null?"":row[idx.com]) : ""; // непустая ячейка (даже с одним пробелом) — как в отчёте
         rows.push({ id:id, name:nm, debt:debt, hasC:cm?1:0, status:idx.status!=null?String(row[idx.status]||"").trim():"", resp:idx.resp!=null?String(row[idx.resp]||"").trim():"", op:idx.op!=null?String(row[idx.op]||"").trim():"" });
       }
+      // в выгрузке заголовок колонки комментариев часто затёрт текстом комментария первой строки — учитываем его
+      if(comHdrText && rows.length && !rows[0].hasC) rows[0].hasC = 1;
       return { name:name, rows:rows };
     }
     function parseCalls(aoa, name){
@@ -5759,6 +5767,13 @@
       html += '<div class="tiles">'+tiles.map(function(t){ return '<div class="tile'+(t.accent?" accent":"")+'"><div class="tile-icon'+(t.iconCls?" "+t.iconCls:"")+'">'+t.icon+'</div><div class="label" title="'+esc(t.tip)+'">'+esc(t.label)+'</div><div class="value mono">'+t.value+'</div></div>'; }).join("")+'</div>';
 
       if(total){
+        var cRows = 0, cDebt = 0, wRows = 0, withId = 0, withIdDebt = 0;
+        C.forEach(function(c){ if(c.hasC){ cRows++; cDebt += c.debt; } if(c.id){ withId++; withIdDebt += c.debt; } });
+        var mny = function(x){ return fmtInt.format(Math.round(x))+' ₽'; };
+        html += '<section><div class="head"><h2>Объём базы и отработка'+tipI("Строки файла ТОП (с повторами) и уникальные ID. Отработано — по ID найдено хотя бы одно действие.")+'</h2></div><div class="table-wrap"><table><thead><tr><th>Показатель</th><th class="amt">Договоров</th><th class="amt">% базы</th><th class="amt">Остаток долга</th><th class="amt">% суммы</th></tr></thead><tbody>'+
+          [['Всего строк ТОП',total,debt],['Строк с внутренним ID',withId,withIdDebt],['Отработано',worked,workedDebt],['Не отработано',total-worked,debt-workedDebt],['Есть комментарий',cRows,cDebt]].map(function(r){ return '<tr><td>'+r[0]+'</td><td class="amt">'+fmtInt.format(r[1])+'</td><td class="amt">'+pct(r[1],total)+'</td><td class="amt">'+mny(r[2])+'</td><td class="amt">'+pct(r[2],debt)+'</td></tr>'; }).join("")+
+          [['Уникальных ID',uniq],['Отработано уникальных ID',uw],['Не отработано уникальных ID',uniq-uw]].map(function(r){ return '<tr><td>'+r[0]+'</td><td class="amt">'+fmtInt.format(r[1])+'</td><td class="amt">'+pct(r[1],uniq)+'</td><td class="amt">—</td><td class="amt">—</td></tr>'; }).join("")+
+          '</tbody></table></div></section>';
         var segColors = ["#1aa9bd","#2fcf95","#f0a941","#c4cad6"];
         html += '<section><div class="head"><h2>Отработка и комментарии'+tipI("Лист «Сверка_ID»: сопоставление наличия действий (отработки) и непустого комментария по договору. Доли — от всех строк базы и от суммы долга.")+'</h2><span class="hint">полоса — доля суммы долга</span></div>'+
           '<div style="display:flex;height:16px;border-radius:999px;overflow:hidden;margin-bottom:12px">'+segD.map(function(d,i){ return '<div title="'+esc(SEG[i])+': '+pct(d,debt)+'" style="width:'+(debt?d/debt*100:0)+'%;background:'+segColors[i]+'"></div>'; }).join("")+'</div>'+
