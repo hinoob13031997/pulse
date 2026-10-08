@@ -163,6 +163,10 @@
   .app-tab[data-cat="portfolio"]{ --tab-dot:#f0a941; }
   .app-tab[data-cat="journal"]{ --tab-dot:#22c3a6; }
   .app-tab[data-cat="distrib"]{ --tab-dot:#d1479c; }
+  .app-tab[data-cat="plan"]{ --tab-dot:#4c8dff; }
+  .app-tab[data-cat="plan"].active{ background:linear-gradient(135deg,#1f4fb0,#3b78e7); }
+  .tab-page.cat-plan{ --grad-a:#2f6fe0; --grad-b:#5aa0ff; --accent:#2f6fe0; --accent2:#5aa0ff; --accent-soft:#2f6fe01c; --accent-ink:#1f4fb0; --btn-a:#1f4fb0; --btn-b:#3b78e7; }
+  :root[data-theme="dark"] .tab-page.cat-plan{ --accent-ink:#8cb8ff; }
   .app-tab[data-cat="portfolio"].active{ background:linear-gradient(135deg,#9c540a,#b36a10); }
   .app-tab[data-cat="journal"].active{ background:linear-gradient(135deg,#0a7488,#0e8a5f); }
   .app-tab[data-cat="distrib"].active{ background:linear-gradient(135deg,#a02f74,#c24a92); }
@@ -174,6 +178,7 @@
     :root:not([data-theme="light"]) .tab-page.cat-portfolio{ --accent-ink:#ffb15c; }
     :root:not([data-theme="light"]) .tab-page.cat-journal{ --accent-ink:#4fd6c3; }
     :root:not([data-theme="light"]) .tab-page.cat-distrib{ --accent-ink:#f08cc6; }
+    :root:not([data-theme="light"]) .tab-page.cat-plan{ --accent-ink:#8cb8ff; }
   }
   :root[data-theme="dark"] .tab-page.cat-portfolio{ --accent-ink:#ffb15c; }
   :root[data-theme="dark"] .tab-page.cat-journal{ --accent-ink:#4fd6c3; }
@@ -600,6 +605,7 @@
   <button class="app-tab" data-page="page-funnel" data-cat="journal">Воронка</button>
   <button class="app-tab" data-page="page-portodv" data-cat="portfolio">Портфель ОДВ</button>
   <button class="app-tab" data-page="page-portall" data-cat="portfolio">Портфель весь</button>
+  <button class="app-tab" data-page="page-plan" data-cat="plan">План и обещания</button>
   <button class="app-tab" data-page="page-distrib" data-cat="distrib">Распределение договоров</button>
 </nav>
 
@@ -1076,6 +1082,25 @@
     </div>
     <div id="pw_bodyWrap" style="display:none"></div>
     <div id="pw_historyWrap"></div>
+  </div>
+</div>
+
+<div id="page-plan" class="tab-page cat-plan">
+  <div id="pl_root">
+    <div class="module-head">
+      <div class="module-info">
+        <span class="module-title">План и обещания</span>
+        <span class="badge empty" id="pl_sourceBadge">нет данных</span>
+      </div>
+      <div class="controls">
+        <label class="btn primary" for="pl_fileInput">⭱ Загрузить объединённый отчёт</label>
+        <input type="file" id="pl_fileInput" accept=".xlsx,.xls" />
+        <button class="btn ghost" id="pl_resetBtn">✕ Очистить</button>
+      </div>
+    </div>
+    <div class="module-subtitle" style="margin-bottom:14px;">Загрузите «Объединённый отчёт по сбору и обещаниям» (книга с листами «По группам», «По сотрудникам», «По дням», «Обещания …», «Исходные данные»). Дашборд покажет выполнение плана по группам и сотрудникам, накопительный сбор по дням в сравнении с планом и прошлым периодом, обещания оплаты и разбивку исходных платежей.</div>
+    <div id="pl_emptyState" class="empty-state"><div class="es-icon">⭱</div>Загрузите объединённый отчёт по сбору и обещаниям — всё построится само.</div>
+    <div id="pl_bodyWrap" style="display:none"></div>
   </div>
 </div>
 
@@ -4965,6 +4990,261 @@
   // загрузки файла. Модель распределения — жадный взвешенный баланс: каждый следующий договор
   // уходит тому, у кого сейчас меньше всего нагрузки относительно его доли (load/weight), что
   // при равных долях даёт равномерный баланс, а при разных — пропорциональный.
+  // ===== «План и обещания»: объединённый отчёт по сбору (план/факт по группам и сотрудникам,
+  // по дням, обещания, сводка по исходным платежам). Читает листы книги по названиям. =====
+  function createPlanModule(prefix, storageKey){
+    var root = document.getElementById(prefix+"root");
+    function el(id){ return document.getElementById(prefix+id); }
+    var state = { model:null, empGroup:null, empSort:"pct", empDir:-1, promGroup:null, showAllDetails:false };
+    try{ var saved = JSON.parse(localStorage.getItem(storageKey)||"null"); if(saved && saved.groups) state.model = saved; }catch(e){}
+
+    function num(v){ if(v==null||v==="") return 0; if(typeof v==="number") return v; var n = parseFloat(String(v).replace(/\s| /g,"").replace(",",".")); return isFinite(n)?n:0; }
+    function pad(n){ return (n<10?"0":"")+n; }
+    function isoDate(v){
+      if(v==null||v==="") return "";
+      if(v instanceof Date && !isNaN(v)) return v.getFullYear()+"-"+pad(v.getMonth()+1)+"-"+pad(v.getDate());
+      var s = String(v).trim(), m;
+      if((m=/^(\d{2})\.(\d{2})\.(\d{4})/.exec(s))) return m[3]+"-"+m[2]+"-"+m[1];
+      if((m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s))) return m[1]+"-"+m[2]+"-"+m[3];
+      return "";
+    }
+    function ru(d){ var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(d||""); return m? m[3]+"."+m[2]+"."+m[1] : (d||""); }
+    function ruShort(d){ var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(d||""); return m? m[3]+"."+m[2] : (d||""); }
+    function pct(v, dig){ if(v==null||!isFinite(v)) return "—"; return (v*100).toFixed(dig==null?1:dig).replace(".",",")+"%"; }
+    function sheetByName(sheets, re){ return sheets.filter(function(s){ return re.test(String(s.name).toLowerCase()); })[0] || null; }
+    function table(aoa){
+      // первая строка — заголовки → массив объектов
+      if(!aoa || aoa.length<2) return [];
+      var h = aoa[0].map(function(x){ return String(x==null?"":x).trim(); });
+      var out = [];
+      for(var i=1;i<aoa.length;i++){
+        var r = aoa[i]; if(!r || r.every(function(c){ return c===""||c==null; })) continue;
+        var o = {}; h.forEach(function(k,j){ if(k) o[k] = r[j]; }); out.push(o);
+      }
+      return out;
+    }
+    function pick(o, re){ for(var k in o){ if(re.test(k.toLowerCase())) return o[k]; } return undefined; }
+
+    function parseWorkbook(sheets){
+      var m = { ts:Date.now(), general:[], groups:[], emps:[], days:[], pGroups:[], pEmps:[], pDays:[], pDetails:[], raw:null, title:"", reportDate:"" };
+      var sg = sheetByName(sheets, /общая информация/);
+      if(sg){
+        var a = sg.aoa;
+        m.title = String((a[0]&&a[0][0])||"");
+        for(var i=1;i<a.length;i++){
+          var r = a[i]; if(!r) continue;
+          var k = r[0], v = r[1];
+          if(k===""||k==null||v===""||v==null) continue;
+          if(/^(отчетная дата|отчётная дата)$/i.test(String(k).trim())){ m.reportDate = isoDate(v); continue; }
+          if(i<40) m.general.push({label:String(k).trim(), value:v});
+        }
+      }
+      var t;
+      if((t = sheetByName(sheets, /^по группам/))) m.groups = table(t.aoa).map(function(o){ return {
+        name:String(pick(o,/^группа/)||"").trim(), plan:num(pick(o,/месячный план/)), fact:num(pick(o,/фактический сбор/)),
+        planDate:num(pick(o,/план на отчетную|план на отчётную/)), prev:num(pick(o,/факт предыдущего/)),
+        cnt:num(pick(o,/количество платежей текущего/)), cntPrev:num(pick(o,/количество платежей предыдущего/)) }; }).filter(function(g){ return g.name; });
+      if((t = sheetByName(sheets, /^по сотрудникам/))) m.emps = table(t.aoa).map(function(o){ return {
+        name:String(pick(o,/^сотрудник/)||"").trim(), group:String(pick(o,/^группа/)||"").trim(), plan:num(pick(o,/месячный план/)), fact:num(pick(o,/фактический сбор/)),
+        prev:num(pick(o,/факт предыдущего/)), cnt:num(pick(o,/количество платежей текущего/)), cntPrev:num(pick(o,/количество платежей предыдущего/)) }; }).filter(function(e){ return e.name; });
+      if((t = sheetByName(sheets, /^по дням/))) m.days = table(t.aoa).map(function(o){ return {
+        date:isoDate(pick(o,/^дата$/)), plan:num(pick(o,/план на день/)), fact:num(pick(o,/^фактический сбор/)), cum:num(pick(o,/накопительно/)),
+        prevFact:num(pick(o,/факт предыдущего/)), cnt:num(pick(o,/^количество платежей$/)), cntPrev:num(pick(o,/количество платежей предыдущего/)) }; }).filter(function(d){ return d.date; });
+      if((t = sheetByName(sheets, /обещания - группы/))) m.pGroups = table(t.aoa).map(function(o){ return {name:String(pick(o,/^группа/)||"").trim(), cnt:num(pick(o,/количество/)), sum:num(pick(o,/сумма/))}; }).filter(function(x){return x.name;});
+      if((t = sheetByName(sheets, /обещания - сотрудники/))) m.pEmps = table(t.aoa).map(function(o){ return {name:String(pick(o,/^сотрудник/)||"").trim(), group:String(pick(o,/^группа/)||"").trim(), cnt:num(pick(o,/количество/)), sum:num(pick(o,/сумма/))}; }).filter(function(x){return x.name;});
+      if((t = sheetByName(sheets, /обещания - дни/))) m.pDays = table(t.aoa).map(function(o){ return {date:isoDate(pick(o,/^дата/)), cnt:num(pick(o,/количество/)), sum:num(pick(o,/сумма/))}; }).filter(function(x){return x.date;});
+      if((t = sheetByName(sheets, /обещания - детализация/))) m.pDetails = table(t.aoa).map(function(o){ return {
+        group:String(pick(o,/группа/)||"").trim(), sum:num(pick(o,/^сумма$/)), created:String(pick(o,/дата создания/)||"").slice(0,16),
+        op:String(pick(o,/оператор/)||"").trim(), ext:pick(o,/внешний/), inn:pick(o,/внутренний/), debt:num(pick(o,/долг/)), status:String(pick(o,/рабочий статус/)||"").trim() }; });
+      if((t = sheetByName(sheets, /исходные данные/))){
+        var rows = table(t.aoa), byType={}, byStatus={}, byGroup={}, tot=0, n=0;
+        rows.forEach(function(o){
+          var per = String(pick(o,/^период/)||""), incl = String(pick(o,/общем итоге/)||"");
+          if(per && !/текущ/i.test(per)) return;
+          if(incl && !/^да/i.test(incl)) return;
+          var s = num(pick(o,/^сумма$/)); tot += s; n++;
+          var ty = String(pick(o,/^тип$/)||"—").trim()||"—", st = String(pick(o,/рабочий статус/)||"—").trim()||"—", gr = String(pick(o,/группа отчета/)||"—").trim()||"—";
+          (byType[ty]=byType[ty]||{n:0,s:0}); byType[ty].n++; byType[ty].s+=s;
+          (byStatus[st]=byStatus[st]||{n:0,s:0}); byStatus[st].n++; byStatus[st].s+=s;
+          (byGroup[gr]=byGroup[gr]||{n:0,s:0}); byGroup[gr].n++; byGroup[gr].s+=s;
+        });
+        function arr(o){ return Object.keys(o).map(function(k){ return {name:k, n:o[k].n, s:o[k].s}; }).sort(function(a,b){ return b.s-a.s; }); }
+        m.raw = {total:tot, n:n, byType:arr(byType), byStatus:arr(byStatus).slice(0,15), byGroup:arr(byGroup)};
+      }
+      return m;
+    }
+
+    function persist(){ safeSetItem(storageKey, JSON.stringify(state.model)); }
+    function setBadge(label, cls){ var b = el("sourceBadge"); if(b){ b.textContent = label; b.className = "badge "+cls; } }
+
+    function loadFile(file){
+      pulseBusy(true, "Читаю отчёт…", file.name);
+      readWorkbookAllSheetsRaw(file, function(err, sheets){
+        pulseBusy(false);
+        if(err){ pulseNotice("Не удалось прочитать файл: "+(err.message||err), true); return; }
+        var m = parseWorkbook(sheets);
+        if(!m.groups.length && !m.emps.length && !m.days.length){
+          pulseNotice("Не нашёл листы «По группам» / «По сотрудникам» / «По дням» — это не объединённый отчёт по сбору.", true); return;
+        }
+        m.fileName = file.name;
+        applyModel(m);
+      });
+    }
+    function applyModel(m){ state.model = m; state.empGroup = null; state.promGroup = null; persist(); render(); }
+
+    // ---------- графики ----------
+    function lineChart(opts){
+      // opts: {labels, series:[{name,color,values,dash}], height}
+      var W=900,H=opts.height||260,L=64,R=14,T=14,B=46, n=opts.labels.length;
+      var mx = 0; opts.series.forEach(function(s){ s.values.forEach(function(v){ if(v!=null && v>mx) mx=v; }); });
+      if(!mx) mx=1;
+      function X(i){ return n>1 ? L+(W-L-R)*i/(n-1) : L+(W-L-R)/2; }
+      function Y(v){ return T+(H-T-B)*(1-v/mx); }
+      var g='';
+      for(var k=0;k<=4;k++){ var yv = mx*k/4, y=Y(yv); g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'" stroke="currentColor" opacity=".12"/><text x="'+(L-8)+'" y="'+(y+4)+'" text-anchor="end" font-size="12" fill="currentColor" opacity=".7">'+fmtMoneyShort(yv)+'</text>'; }
+      var step = Math.max(1, Math.ceil(n/12));
+      opts.labels.forEach(function(lb,i){ if(i%step===0 || i===n-1) g+='<text x="'+X(i)+'" y="'+(H-B+18)+'" text-anchor="middle" font-size="12" fill="currentColor" opacity=".7">'+esc(lb)+'</text>'; });
+      opts.series.forEach(function(s){
+        var pts=[]; s.values.forEach(function(v,i){ if(v!=null) pts.push(X(i).toFixed(1)+","+Y(v).toFixed(1)); });
+        g+='<polyline fill="none" stroke="'+s.color+'" stroke-width="2.4" '+(s.dash?'stroke-dasharray="6 5" ':'')+'points="'+pts.join(" ")+'"/>';
+      });
+      return '<svg viewBox="0 0 '+W+' '+H+'" class="chart-svg" style="width:100%;height:'+H+'px;color:var(--text)">'+g+'</svg>';
+    }
+    function barChart(opts){
+      // opts: {labels, values, line (constant), color, height, valFmt}
+      var W=900,H=opts.height||220,L=64,R=14,T=14,B=46, n=opts.labels.length;
+      var mx = Math.max(opts.line||0, maxOf(opts.values.concat([0]))); if(!mx) mx=1;
+      function Y(v){ return T+(H-T-B)*(1-v/mx); }
+      var bw = (W-L-R)/Math.max(n,1), g='';
+      for(var k=0;k<=4;k++){ var yv=mx*k/4, y=Y(yv); g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'" stroke="currentColor" opacity=".12"/><text x="'+(L-8)+'" y="'+(y+4)+'" text-anchor="end" font-size="12" fill="currentColor" opacity=".7">'+(opts.axisFmt?opts.axisFmt(yv):fmtMoneyShort(yv))+'</text>'; }
+      var step = Math.max(1, Math.ceil(n/14));
+      opts.values.forEach(function(v,i){
+        var x = L+bw*i+bw*0.12, h=(H-T-B)*(v/mx);
+        g+='<rect x="'+x.toFixed(1)+'" y="'+(Y(v)).toFixed(1)+'" width="'+(bw*0.76).toFixed(1)+'" height="'+Math.max(h,0).toFixed(1)+'" rx="2" fill="'+opts.color+'"><title>'+esc(opts.labels[i])+': '+(opts.valFmt?opts.valFmt(v):fmtCompact(v))+'</title></rect>';
+        if(i%step===0 || i===n-1) g+='<text x="'+(L+bw*i+bw/2).toFixed(1)+'" y="'+(H-B+18)+'" text-anchor="middle" font-size="12" fill="currentColor" opacity=".7">'+esc(opts.labels[i])+'</text>';
+      });
+      if(opts.line){ var yl=Y(opts.line); g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yl+'" y2="'+yl+'" stroke="#e5484d" stroke-width="2" stroke-dasharray="6 5"/>'; }
+      return '<svg viewBox="0 0 '+W+' '+H+'" class="chart-svg" style="width:100%;height:'+H+'px;color:var(--text)">'+g+'</svg>';
+    }
+    function fmtMoneyShort(v){ var a=Math.abs(v); if(a>=1e6) return (v/1e6).toFixed(a>=1e7?0:1).replace(".",",")+" млн"; if(a>=1e3) return Math.round(v/1e3)+" тыс"; return String(Math.round(v)); }
+    function delta(cur, prev, money){
+      if(!prev) return "";
+      var d = cur-prev; if(!d) return "";
+      return ' <span class="delta '+(d>0?"up":"down")+'">'+(d>0?"▲ +":"▼ ")+(money?fmtCompact(d):fmtInt.format(Math.round(d)))+'</span>';
+    }
+    function planBar(p){
+      var w = Math.min(p,1.5)/1.5*100, col = p>=1 ? "var(--good)" : (p>=0.7 ? "#f0a941" : "#e5484d");
+      return '<div style="position:relative;height:9px;background:var(--surface-2);border-radius:999px;min-width:120px"><div style="height:100%;width:'+w.toFixed(1)+'%;background:'+col+';border-radius:999px"></div><div style="position:absolute;left:'+(1/1.5*100).toFixed(1)+'%;top:-2px;bottom:-2px;width:2px;background:currentColor;opacity:.45" title="100% плана"></div></div>';
+    }
+
+    function render(){
+      var m = state.model, body = el("bodyWrap"), empty = el("emptyState");
+      if(!m){ body.style.display="none"; empty.style.display="block"; setBadge("нет данных","empty"); return; }
+      body.style.display="block"; empty.style.display="none";
+      setBadge("загружено","live");
+      var hasPlan = m.groups.length>0;
+      var tPlan=0,tFact=0,tPrev=0,tCnt=0,tCntPrev=0;
+      m.groups.forEach(function(g){ tPlan+=g.plan; tFact+=g.fact; tPrev+=g.prev; tCnt+=g.cnt; tCntPrev+=g.cntPrev; });
+      var dFrom = m.days.length ? m.days[0].date : "", dTo = m.days.length ? m.days[m.days.length-1].date : "";
+      var pSum=0,pCnt=0; m.pGroups.forEach(function(g){ pSum+=g.sum; pCnt+=g.cnt; });
+      var html = '';
+      html += '<div class="module-subtitle" style="margin-bottom:12px">'+esc(m.fileName||"")+(dFrom?' · период по дням: '+ru(dFrom)+' – '+ru(dTo):'')+'</div>';
+      var tiles = [
+        {label:"Месячный план", value:fmtCompact(tPlan)+' <small>₽</small>', icon:"◎"},
+        {label:"Фактический сбор", value:fmtCompact(tFact)+' <small>₽</small>'+delta(tFact,tPrev,true), icon:"₽", iconCls:"gold", accent:true},
+        {label:"Выполнение плана", value:pct(tPlan?tFact/tPlan:null), icon:"✓", iconCls:(tFact>=tPlan?"good":"")},
+        {label:"Отклонение от плана", value:(tFact-tPlan>=0?"+":"")+fmtCompact(tFact-tPlan)+' <small>₽</small>', icon:"△"},
+        {label:"Платежей", value:fmtInt.format(tCnt)+delta(tCnt,tCntPrev,false), icon:"▤"},
+        {label:"Обещаний", value:fmtInt.format(pCnt)+' <small>'+fmtCompact(pSum)+' ₽</small>', icon:"✎"}
+      ];
+      html += '<div class="tiles">'+tiles.map(function(t){
+        return '<div class="tile'+(t.accent?" accent":"")+'"><div class="tile-icon'+(t.iconCls?" "+t.iconCls:"")+'">'+t.icon+'</div><div class="label">'+esc(t.label)+'</div><div class="value mono">'+t.value+'</div></div>';
+      }).join("")+'</div>';
+      if(m.groups.length){
+        html += '<section><div class="head"><h2>План / факт по группам</h2><span class="hint">полоса — доля месячного плана; метка — 100%</span></div><div class="table-wrap"><table><thead><tr><th>Группа</th><th class="amt">Месячный план</th><th class="amt">Факт</th><th class="amt">% плана</th><th style="min-width:140px"></th><th class="amt">Откл., ₽</th><th class="amt">Прошлый период</th><th class="amt">Динамика</th><th class="amt">Платежей</th></tr></thead><tbody>'+
+          m.groups.map(function(g){
+            var p = g.plan? g.fact/g.plan : null, dy = g.prev? (g.fact-g.prev)/g.prev : null;
+            return '<tr><td>'+esc(g.name)+'</td><td class="amt">'+fmtCompact(g.plan)+'</td><td class="amt">'+fmtCompact(g.fact)+'</td><td class="amt">'+pct(p)+'</td><td>'+(p!=null?planBar(p):'')+'</td><td class="amt">'+(g.fact-g.plan>=0?"+":"")+fmtCompact(g.fact-g.plan)+'</td><td class="amt">'+fmtCompact(g.prev)+'</td><td class="amt">'+(dy==null?'—':'<span class="delta '+(dy>=0?'up':'down')+'">'+(dy>=0?'▲ +':'▼ ')+pct(dy)+'</span>')+'</td><td class="amt">'+fmtInt.format(g.cnt)+'</td></tr>';
+          }).join("")+
+          '<tr style="font-weight:700"><td>Итого</td><td class="amt">'+fmtCompact(tPlan)+'</td><td class="amt">'+fmtCompact(tFact)+'</td><td class="amt">'+pct(tPlan?tFact/tPlan:null)+'</td><td>'+(tPlan?planBar(tFact/tPlan):'')+'</td><td class="amt">'+(tFact-tPlan>=0?"+":"")+fmtCompact(tFact-tPlan)+'</td><td class="amt">'+fmtCompact(tPrev)+'</td><td class="amt">'+(tPrev?'<span class="delta '+(tFact>=tPrev?'up':'down')+'">'+(tFact>=tPrev?'▲ +':'▼ ')+pct((tFact-tPrev)/tPrev)+'</span>':'—')+'</td><td class="amt">'+fmtInt.format(tCnt)+'</td></tr>'+
+          '</tbody></table></div></section>';
+      }
+      if(m.days.length){
+        var labels = m.days.map(function(d){ return ruShort(d.date); });
+        var cumPlan=[], cumPrev=[], cp=0, cpr=0, cumFact=[];
+        m.days.forEach(function(d){ cp+=d.plan; cpr+=d.prevFact; cumPlan.push(cp); cumPrev.push(cpr); cumFact.push(d.cum); });
+        var lastCum = cumFact[cumFact.length-1], lastPlan = cumPlan[cumPlan.length-1];
+        html += '<section><div class="head"><h2>Накопительный сбор по дням</h2><span class="hint">факт на конец периода: '+fmtCompact(lastCum)+' ₽ · план на ту же дату: '+fmtCompact(lastPlan)+' ₽</span></div>'+
+          '<div class="chart-legend"><span class="li"><span class="dot" style="background:var(--grad-a)"></span>факт</span><span class="li"><span class="dot" style="background:#e5484d"></span>план</span><span class="li"><span class="dot" style="background:#8b95a8"></span>прошлый период</span></div>'+
+          '<div class="chart-wrap">'+lineChart({labels:labels, series:[{name:"план",color:"#e5484d",values:cumPlan,dash:true},{name:"прошлый период",color:"#8b95a8",values:cumPrev,dash:true},{name:"факт",color:"#1aa9bd",values:cumFact}]})+'</div></section>';
+        var avgPlan = m.days.length ? m.days[0].plan : 0;
+        html += '<section><div class="head"><h2>Сбор по дням</h2><span class="hint">пунктир — дневной план ('+fmtCompact(avgPlan)+' ₽)</span></div><div class="chart-wrap">'+
+          barChart({labels:labels, values:m.days.map(function(d){return d.fact;}), line:avgPlan, color:"#1aa9bd"})+'</div>'+
+          '<div class="chart-wrap" style="margin-top:6px"><div class="hint" style="margin:4px 0">Количество платежей по дням</div>'+barChart({labels:labels, values:m.days.map(function(d){return d.cnt;}), color:"#8b6bff", height:170, valFmt:function(v){return fmtInt.format(v);}, axisFmt:function(v){return fmtInt.format(Math.round(v));}})+'</div></section>';
+      }
+      if(m.emps.length){
+        var groups = []; m.emps.forEach(function(e){ if(groups.indexOf(e.group)===-1) groups.push(e.group); });
+        var list = m.emps.filter(function(e){ return !state.empGroup || e.group===state.empGroup; }).map(function(e){ return Object.assign({pct: e.plan? e.fact/e.plan : -1, dyn: e.prev? (e.fact-e.prev)/e.prev : -999}, e); });
+        var sk = state.empSort, sd = state.empDir;
+        list.sort(function(a,b){ var x=a[sk], y=b[sk]; if(typeof x==="string") return sd*x.localeCompare(y,"ru"); return sd*(x-y); });
+        function th(key,label,cls){ return '<th class="'+(cls||"")+'" data-sort="'+key+'" style="cursor:pointer">'+label+(state.empSort===key?(state.empDir<0?" ▼":" ▲"):"")+'</th>'; }
+        html += '<section><div class="head"><h2>По сотрудникам</h2><span class="hint">нажмите на заголовок — сортировка</span></div>'+
+          '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><button type="button" class="btn'+(state.empGroup?' ghost':'')+'" data-egroup="" style="font-size:14px">Все группы</button>'+
+          groups.map(function(g){ return '<button type="button" class="btn'+(state.empGroup===g?'':' ghost')+'" data-egroup="'+esc(g)+'" style="font-size:14px">'+esc(g)+'</button>'; }).join("")+
+          '<button type="button" class="btn ghost" id="'+prefix+'empExport" style="font-size:14px;margin-left:auto">⭳ Скачать в Excel</button></div>'+
+          '<div class="table-wrap"><table><thead><tr>'+th("name","Сотрудник")+th("group","Группа")+th("plan","План","amt")+th("fact","Факт","amt")+th("pct","% плана","amt")+'<th style="min-width:130px"></th>'+th("dyn","Динамика","amt")+th("cnt","Платежей","amt")+'</tr></thead><tbody>'+
+          list.map(function(e){
+            return '<tr><td>'+esc(e.name)+'</td><td>'+esc(e.group)+'</td><td class="amt">'+(e.plan?fmtCompact(e.plan):'—')+'</td><td class="amt">'+fmtCompact(e.fact)+'</td><td class="amt">'+(e.plan?pct(e.pct):'—')+'</td><td>'+(e.plan?planBar(e.pct):'')+'</td><td class="amt">'+(e.prev?'<span class="delta '+(e.dyn>=0?'up':'down')+'">'+(e.dyn>=0?'▲ +':'▼ ')+pct(e.dyn,0)+'</span>':'—')+'</td><td class="amt">'+fmtInt.format(e.cnt)+'</td></tr>';
+          }).join("")+'</tbody></table></div></section>';
+      }
+      // обещания
+      if(m.pGroups.length || m.pDays.length || m.pEmps.length){
+        html += '<section><div class="head"><h2>Обещания оплаты</h2><span class="hint">'+fmtInt.format(pCnt)+' шт · '+fmtCompact(pSum)+' ₽ · среднее '+fmtCompact(pCnt?pSum/pCnt:0)+' ₽</span></div>';
+        if(m.pGroups.length) html += '<div class="table-wrap"><table><thead><tr><th>Группа</th><th class="amt">Обещаний</th><th class="amt">Сумма</th><th class="amt">Среднее</th></tr></thead><tbody>'+
+          m.pGroups.map(function(g){ return '<tr><td>'+esc(g.name)+'</td><td class="amt">'+fmtInt.format(g.cnt)+'</td><td class="amt">'+fmtCompact(g.sum)+'</td><td class="amt">'+(g.cnt?fmtCompact(g.sum/g.cnt):'—')+'</td></tr>'; }).join("")+'</tbody></table></div>';
+        if(m.pDays.length) html += '<div class="chart-wrap" style="margin-top:12px"><div class="hint" style="margin:4px 0">Сумма обещаний по дням</div>'+barChart({labels:m.pDays.map(function(d){return ruShort(d.date);}), values:m.pDays.map(function(d){return d.sum;}), color:"#f0a941", height:190})+'</div>';
+        if(m.pEmps.length){
+          var pe = m.pEmps.slice().sort(function(a,b){ return b.sum-a.sum; }); var mxs = pe.length? pe[0].sum||1 : 1;
+          html += '<div class="head" style="margin-top:14px"><h2 style="font-size:19px">Обещания по сотрудникам</h2></div><div class="barlist">'+pe.map(function(e){
+            return '<div class="row"><div class="name">'+esc(e.name)+' <span class="hint">· '+esc(e.group)+'</span></div><div class="num">'+fmtInt.format(e.cnt)+' шт · '+fmtCompact(e.sum)+' ₽</div><div class="track"><div class="fill" style="width:'+(e.sum/mxs*100).toFixed(1)+'%"></div></div></div>';
+          }).join("")+'</div>';
+        }
+        if(m.pDetails.length){
+          var det = m.pDetails, shown = state.showAllDetails ? det : det.slice(0,100);
+          html += '<div class="head" style="margin-top:16px"><h2 style="font-size:19px">Детализация обещаний ('+fmtInt.format(det.length)+')</h2><button type="button" class="btn ghost" id="'+prefix+'detExport" style="font-size:14px">⭳ Скачать в Excel</button></div>'+
+            '<div class="table-wrap"><table><thead><tr><th>Создано</th><th>Группа</th><th>Оператор</th><th class="amt">Сумма</th><th class="amt">Остаток долга</th><th>ID внешний</th><th>Рабочий статус</th></tr></thead><tbody>'+
+            shown.map(function(d){ return '<tr><td>'+esc(d.created)+'</td><td>'+esc(d.group)+'</td><td>'+esc(d.op)+'</td><td class="amt">'+fmtCompact(d.sum)+'</td><td class="amt">'+fmtCompact(d.debt)+'</td><td>'+esc(d.ext)+'</td><td>'+esc(d.status)+'</td></tr>'; }).join("")+'</tbody></table></div>'+
+            (det.length>shown.length ? '<button type="button" class="btn ghost" id="'+prefix+'detMore" style="margin-top:10px">Показать все '+fmtInt.format(det.length)+'</button>' : '');
+        }
+        html += '</section>';
+      }
+      if(m.raw){
+        function bl(items, mxn){ var mx = items.length? items[0].s||1 : 1; return '<div class="barlist">'+items.map(function(x){ return '<div class="row"><div class="name">'+esc(x.name)+'</div><div class="num">'+fmtInt.format(x.n)+' пл. · '+fmtCompact(x.s)+' ₽</div><div class="track"><div class="fill" style="width:'+(Math.max(x.s,0)/mx*100).toFixed(1)+'%"></div></div></div>'; }).join("")+'</div>'; }
+        html += '<section><div class="head"><h2>Исходные платежи</h2><span class="hint">'+fmtInt.format(m.raw.n)+' платежей · '+fmtCompact(m.raw.total)+' ₽ (текущий период, учитываются в итоге)</span></div><div class="grid2"><div><div class="hint" style="margin-bottom:8px">По типу</div>'+bl(m.raw.byType)+'</div><div><div class="hint" style="margin-bottom:8px">По рабочему статусу (топ-15)</div>'+bl(m.raw.byStatus)+'</div></div></section>';
+      }
+      if(m.general.length){
+        function gv(v){ if(typeof v==="number") return Math.abs(v)<10 && v!==Math.round(v) ? pct(v) : (Math.abs(v)>=1000? fmtCompact(v) : String(v).replace(".",",")); if(v instanceof Date) return ru(isoDate(v)); return String(v); }
+        html += '<section><div class="head"><h2>Сводка на отчётную дату'+(m.reportDate?' · '+ru(m.reportDate):'')+'</h2><span class="hint">лист «Общая информация» как в файле</span></div><div class="table-wrap"><table><tbody>'+
+          m.general.map(function(g){ return '<tr><td>'+esc(g.label)+'</td><td class="amt">'+esc(gv(g.value))+'</td></tr>'; }).join("")+'</tbody></table></div></section>';
+      }
+      body.innerHTML = html;
+      // wiring
+      Array.prototype.forEach.call(body.querySelectorAll("[data-egroup]"), function(b){ b.addEventListener("click", function(){ var g=b.getAttribute("data-egroup")||null; state.empGroup = (g&&state.empGroup===g)?null:g; render(); }); });
+      Array.prototype.forEach.call(body.querySelectorAll("[data-sort]"), function(h){ h.addEventListener("click", function(){ var k=h.getAttribute("data-sort"); if(state.empSort===k) state.empDir=-state.empDir; else { state.empSort=k; state.empDir = (k==="name"||k==="group")?1:-1; } render(); }); });
+      var ex = document.getElementById(prefix+"empExport");
+      if(ex) ex.addEventListener("click", function(){ exportRowsToXlsx(m.emps.filter(function(e){return !state.empGroup||e.group===state.empGroup;}).map(function(e){ return {"Сотрудник":e.name,"Группа":e.group,"Месячный план":e.plan,"Факт":e.fact,"% плана":e.plan?Math.round(e.fact/e.plan*1000)/10:"","Факт пред. периода":e.prev,"Платежей":e.cnt,"Платежей пред.":e.cntPrev}; }), "plan_po_sotrudnikam.xlsx"); });
+      var de = document.getElementById(prefix+"detExport");
+      if(de) de.addEventListener("click", function(){ exportRowsToXlsx(m.pDetails.map(function(d){ return {"Создано":d.created,"Группа":d.group,"Оператор":d.op,"Сумма":d.sum,"Остаток долга":d.debt,"ID внешний":d.ext,"ID внутренний":d.inn,"Рабочий статус":d.status}; }), "obeshchaniya.xlsx"); });
+      var dm = document.getElementById(prefix+"detMore");
+      if(dm) dm.addEventListener("click", function(){ state.showAllDetails = true; render(); });
+    }
+
+    el("fileInput").addEventListener("change", function(e){ var f = e.target.files && e.target.files[0]; if(f) loadFile(f); e.target.value=""; });
+    el("resetBtn").addEventListener("click", function(){ state.model=null; try{ localStorage.removeItem(storageKey); }catch(e){} render(); });
+    window.__planLoadSheets = function(sheets, name){ var m = parseWorkbook(sheets); m.fileName = name||"test"; applyModel(m); };
+    render();
+  }
+
   function createDistribModule(prefix, settingsKey, dataKey, label){
     var root = document.getElementById(prefix+"root");
     function el(id){ return document.getElementById(prefix+id); }
@@ -5700,6 +5980,7 @@
   var PORTFOLIO_KEEP_COLUMNS = ["Наименование портфеля","Портфель","Наименование цессии в КСК","Наименование цедента","Оператор взаимодействия","Статус ИП КСК","Основание окончания ИП","Вид судебного взыскания","Рабочий статус","Статус ОВ"];
   createGenericModule("po_", "pulse_portfolio_odv", {allowSecondary:false, label:"Портфель ОДВ", hideDateCharts:true, portfolioAnalytics:true, keepColumns:PORTFOLIO_KEEP_COLUMNS});
   createGenericModule("pw_", "pulse_portfolio_all", {allowSecondary:false, label:"Портфель весь", portfolioAnalytics:true, keepColumns:PORTFOLIO_KEEP_COLUMNS});
+  createPlanModule("pl_", "pulse_plan");
   createDistribModule("ds_", "pulse_distrib_settings", "pulse_distrib_data", "Распределение договоров");
   initOverview();
 
