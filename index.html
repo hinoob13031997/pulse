@@ -163,6 +163,10 @@
   .app-tab[data-cat="portfolio"]{ --tab-dot:#f0a941; }
   .app-tab[data-cat="journal"]{ --tab-dot:#22c3a6; }
   .app-tab[data-cat="distrib"]{ --tab-dot:#d1479c; }
+  .app-tab[data-cat="top"]{ --tab-dot:#e5603b; }
+  .app-tab[data-cat="top"].active{ background:linear-gradient(135deg,#b3401f,#e5603b); }
+  .tab-page.cat-top{ --grad-a:#e5603b; --grad-b:#f5a25d; --accent:#e5603b; --accent2:#f5a25d; --accent-soft:#e5603b1c; --accent-ink:#b3401f; --btn-a:#b3401f; --btn-b:#e5603b; }
+  :root[data-theme="dark"] .tab-page.cat-top{ --accent-ink:#ff9a78; }
   .app-tab[data-cat="plan"]{ --tab-dot:#4c8dff; }
   .app-tab[data-cat="plan"].active{ background:linear-gradient(135deg,#1f4fb0,#3b78e7); }
   .tab-page.cat-plan{ --grad-a:#2f6fe0; --grad-b:#5aa0ff; --accent:#2f6fe0; --accent2:#5aa0ff; --accent-soft:#2f6fe01c; --accent-ink:#1f4fb0; --btn-a:#1f4fb0; --btn-b:#3b78e7; }
@@ -178,6 +182,7 @@
     :root:not([data-theme="light"]) .tab-page.cat-portfolio{ --accent-ink:#ffb15c; }
     :root:not([data-theme="light"]) .tab-page.cat-journal{ --accent-ink:#4fd6c3; }
     :root:not([data-theme="light"]) .tab-page.cat-distrib{ --accent-ink:#f08cc6; }
+    :root:not([data-theme="light"]) .tab-page.cat-top{ --accent-ink:#ff9a78; }
     :root:not([data-theme="light"]) .tab-page.cat-plan{ --accent-ink:#8cb8ff; }
   }
   :root[data-theme="dark"] .tab-page.cat-portfolio{ --accent-ink:#ffb15c; }
@@ -606,6 +611,7 @@
   <button class="app-tab" data-page="page-portodv" data-cat="portfolio">Портфель ОДВ</button>
   <button class="app-tab" data-page="page-portall" data-cat="portfolio">Портфель весь</button>
   <button class="app-tab" data-page="page-plan" data-cat="plan">План и обещания</button>
+  <button class="app-tab" data-page="page-top" data-cat="top">Проработка ТОП</button>
   <button class="app-tab" data-page="page-distrib" data-cat="distrib">Распределение договоров</button>
 </nav>
 
@@ -1103,6 +1109,25 @@
     <div id="pl_filesWrap"></div>
     <div id="pl_emptyState" class="empty-state"><div class="es-icon">⭱</div>Загрузите объединённый отчёт по сбору и обещаниям — всё построится само.</div>
     <div id="pl_bodyWrap" style="display:none"></div>
+  </div>
+</div>
+
+<div id="page-top" class="tab-page cat-top">
+  <div id="tp_root">
+    <div class="module-head">
+      <div class="module-info">
+        <span class="module-title">Проработка портфеля ТОП</span>
+        <span class="badge empty" id="tp_sourceBadge">нет данных</span>
+      </div>
+      <div class="controls">
+        <label class="btn primary" for="tp_fileInput">⭱ Загрузить отчёт по ТОП</label>
+        <input type="file" id="tp_fileInput" accept=".xlsx,.xls" />
+        <button class="btn ghost" id="tp_resetBtn">✕ Очистить</button>
+      </div>
+    </div>
+    <div class="module-subtitle" style="margin-bottom:14px;">Загрузите отчёт по проработке портфеля ТОП (листы «Сверка_ID», «Детализация», «Не отработано», «Воронка TOP»). Дашборд покажет, какая часть портфеля и суммы долга отработана, как устроена отработка по размеру долга, результаты действий по месяцам и сотрудникам, неотработанные договоры по статусам и ответственным (со списком и выгрузкой в Excel) и договоры с обещаниями.</div>
+    <div id="tp_emptyState" class="empty-state"><div class="es-icon">⭱</div>Загрузите отчёт по портфелю ТОП — всё построится само.</div>
+    <div id="tp_bodyWrap" style="display:none"></div>
   </div>
 </div>
 
@@ -5519,6 +5544,191 @@
     render();
   }
 
+  // ===== «Проработка ТОП»: отчёт по портфелю ТОП (сверка ID, детализация действий, неотработанные) =====
+  function createTopModule(prefix, storageKey){
+    var root = document.getElementById(prefix+"root");
+    function el(id){ return document.getElementById(prefix+id); }
+    var state = { model:null, statusFilter:null, respFilter:null, showAll:false };
+    try{ var sv = JSON.parse(localStorage.getItem(storageKey)||"null"); if(sv && sv.contracts) state.model = sv; }catch(e){}
+    var MONTH_RU = ["январь","февраль","март","апрель","май","июнь","июль","август","сентябрь","октябрь","ноябрь","декабрь"];
+    function num(v){ if(v==null||v==="") return 0; if(typeof v==="number") return v; var n=parseFloat(String(v).replace(/\s| /g,"").replace(",",".")); return isFinite(n)?n:0; }
+    function dstr(v){
+      if(v instanceof Date && !isNaN(v)) return v.getFullYear()+"-"+(v.getMonth()<9?"0":"")+(v.getMonth()+1)+"-"+(v.getDate()<10?"0":"")+v.getDate();
+      var s=String(v==null?"":v).trim(), m;
+      if((m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s))) return m[1]+"-"+m[2]+"-"+m[3];
+      if((m=/^(\d{2})\.(\d{2})\.(\d{4})/.exec(s))) return m[3]+"-"+m[2]+"-"+m[1];
+      return "";
+    }
+    function ru(d){ var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(d||""); return m? m[3]+"."+m[2]+"."+m[1] : (d||""); }
+    function monthLbl(k){ return MONTH_RU[+k.slice(5,7)-1]+" "+k.slice(0,4); }
+    function pct(a,b,dig){ return b ? (a/b*100).toFixed(dig==null?1:dig).replace(".",",")+"%" : "—"; }
+    function big(v){ var a=Math.abs(v); if(a>=1e9) return (v/1e9).toFixed(2).replace(".",",")+" млрд ₽"; if(a>=1e6) return (v/1e6).toFixed(1).replace(".",",")+" млн ₽"; return fmtCompact(v)+" ₽"; }
+    function tipI(t){ return ' <span class="info-tip" title="'+esc(t)+'">i</span>'; }
+    function sheetBy(sheets, re){ return sheets.filter(function(s){ return re.test(String(s.name).toLowerCase()); })[0] || null; }
+    function tbl(aoa){
+      if(!aoa || aoa.length<2) return [];
+      var h = aoa[0].map(function(x){ return String(x==null?"":x).trim(); }), out=[];
+      for(var i=1;i<aoa.length;i++){ var r=aoa[i]; if(!r||r.every(function(c){return c===""||c==null;})) continue; var o={}; h.forEach(function(k,j){ if(k) o[k]=r[j]; }); out.push(o); }
+      return out;
+    }
+    function pick(o, re, not){ for(var k in o){ var kl=k.toLowerCase(); if(re.test(kl) && !(not&&not.test(kl))) return o[k]; } return undefined; }
+    var SEG = ["Отработка + комментарий","Только отработка","Только комментарий","Нет ни отработки, ни комментария"];
+    function segOf(v){ var s=String(v||"").toLowerCase(); if(/отработка \+ коммент/.test(s)) return 0; if(/только отработка/.test(s)) return 1; if(/только коммент/.test(s)) return 2; return 3; }
+
+    function parse(sheets){
+      var m = { ts:Date.now(), contracts:[], unworked:[], calls:null };
+      var s1 = sheetBy(sheets,/сверка/), s2 = sheetBy(sheets,/детализац/), s3 = sheetBy(sheets,/не отработан/);
+      if(s1) m.contracts = tbl(s1.aoa).map(function(o){
+        var seg = pick(o,/^сверка/);
+        var hasC = /^да/i.test(String(pick(o,/есть комментарий/)||"")), hasW = /^да/i.test(String(pick(o,/есть отработка/)||""));
+        return { id:String(pick(o,/id договора внутренний|^id/)||"").trim(), name:String(pick(o,/наименование|должник/)||"").trim(), debt:num(pick(o,/сумма долга/)),
+          seg: seg? segOf(seg) : (hasC&&hasW?0:(hasW?1:(hasC?2:3))), act:num(pick(o,/количество действий/)),
+          rc:/^да/i.test(String(pick(o,/^rc/)||""))?1:0, ptp:/^да/i.test(String(pick(o,/^ptp/)||""))?1:0, ptpKind:String(pick(o,/вид ptp/)||"").trim(),
+          def:/^да/i.test(String(pick(o,/^отложенное обещание/)||""))?1:0, defKind:String(pick(o,/вид отложенного/)||"").trim(), hasC:hasC?1:0, hasW:hasW?1:0 };
+      });
+      if(s3) m.unworked = tbl(s3.aoa).map(function(o){ return { id:String(pick(o,/id договора/)||"").trim(), name:String(pick(o,/наименование|должник/)||"").trim(), debt:num(pick(o,/сумма долга/)),
+        op:String(pick(o,/оператор/)||"").trim(), status:String(pick(o,/имя статуса|статус/)||"").trim()||"—", resp:String(pick(o,/ответственн/)||"").trim()||"—" }; });
+      if(s2){
+        var byMonth={}, byOp={}, byRes={}, ids={}, from="", to="", n=0;
+        tbl(s2.aoa).forEach(function(o){
+          var res = String(pick(o,/id результата|результат/)||"").trim() || "Пусто";
+          var d = dstr(pick(o,/дата сообщения/)); var id = String(pick(o,/id договора внутренний/)||"").trim();
+          var op = String(pick(o,/оператор взаимодействия/)||pick(o,/id оператора/)||"").trim() || "—";
+          var isCl = /^разговор состоялся клиент/i.test(res), isTh = /^разговор состоялся третье/i.test(res), isNo = /^контакт не установлен/i.test(res);
+          var isMs = /whatsapp|telegram|max/i.test(res) && !isNo, isLt = /^письмо/i.test(res);
+          var isP = /обещание оплаты|подтверждение действующего/i.test(res) && !/отложенное/i.test(res);
+          n++; if(d){ if(!from||d<from) from=d; if(!to||d>to) to=d; }
+          byRes[res] = (byRes[res]||0)+1;
+          function add(map,k){ var a = map[k] || (map[k]={n:0,no:0,ms:0,lt:0,cl:0,th:0,ptp:0,ids:{}}); a.n++; if(isNo)a.no++; if(isMs)a.ms++; if(isLt)a.lt++; if(isCl)a.cl++; if(isTh)a.th++; if(isP)a.ptp++; if(id) a.ids[id]=1; }
+          if(d) add(byMonth, d.slice(0,7)); add(byOp, op); if(id) ids[id]=1;
+        });
+        function fin(map){ return Object.keys(map).map(function(k){ var a=map[k]; return {k:k, n:a.n, no:a.no, ms:a.ms, lt:a.lt, cl:a.cl, th:a.th, ptp:a.ptp, ids:Object.keys(a.ids).length}; }); }
+        m.calls = { n:n, from:from, to:to, uniqueIds:Object.keys(ids).length, byMonth:fin(byMonth).sort(function(a,b){return a.k<b.k?-1:1;}), byOp:fin(byOp).sort(function(a,b){return b.n-a.n;}),
+          byRes:Object.keys(byRes).map(function(k){ return {k:k, n:byRes[k]}; }).sort(function(a,b){return b.n-a.n;}) };
+      }
+      return m;
+    }
+    function persist(){ try{ var js = JSON.stringify(state.model); if(js.length < 4500000) safeSetItem(storageKey, js); else localStorage.removeItem(storageKey); }catch(e){} }
+    function setBadge(label, cls){ var b = el("sourceBadge"); if(b){ b.textContent = label; b.className = "badge "+cls; } }
+
+    function load(file){
+      pulseBusy(true, "Читаю отчёт по ТОП…", file.name);
+      readWorkbookAllSheetsRaw(file, function(err, sheets){
+        pulseBusy(false);
+        if(err){ pulseNotice("Не удалось прочитать файл: "+(err.message||err), true); return; }
+        var m = parse(sheets);
+        if(!m.contracts.length && !m.unworked.length && !m.calls){ pulseNotice("Не нашёл листы «Сверка_ID», «Детализация», «Не отработано» — это не отчёт по проработке ТОП.", true); return; }
+        m.fileName = file.name; state.model = m; state.statusFilter = null; state.respFilter = null; state.showAll = false; persist(); render();
+      });
+    }
+
+    function bars(items, cls){
+      var mx = items.length ? Math.max.apply(null, items.map(function(x){ return x.v; })) || 1 : 1;
+      return '<div class="barlist">'+items.map(function(x){ return '<div class="row"><div class="name">'+esc(x.name)+'</div><div class="num">'+x.num+'</div><div class="track"><div class="fill" style="width:'+(x.v/mx*100).toFixed(1)+'%;'+(x.color?'background:'+x.color:'')+'"></div></div></div>'; }).join("")+'</div>';
+    }
+
+    function render(){
+      var m = state.model, body = el("bodyWrap"), empty = el("emptyState");
+      if(!m){ body.style.display="none"; empty.style.display="block"; setBadge("нет данных","empty"); return; }
+      body.style.display="block"; empty.style.display="none"; setBadge("загружено","live");
+      var C = m.contracts, U = m.unworked, K = m.calls;
+      var total = C.length, debt = 0, worked = 0, workedDebt = 0, segN=[0,0,0,0], segD=[0,0,0,0];
+      var ids = {}, workedIds = {}, rcIds = {}, ptpIds = {}, defIds = {}, dupIds = 0, emptyIds = 0, ptpDebt = 0, defDebt = 0;
+      C.forEach(function(c){
+        debt += c.debt; segN[c.seg]++; segD[c.seg]+=c.debt;
+        if(c.hasW){ worked++; workedDebt += c.debt; }
+        if(!c.id) emptyIds++; else { if(ids[c.id]) dupIds++; ids[c.id]=1; if(c.hasW) workedIds[c.id]=1; if(c.rc) rcIds[c.id]=1; if(c.ptp && !ptpIds[c.id]){ ptpIds[c.id]=1; ptpDebt+=c.debt; } if(c.def && !defIds[c.id]){ defIds[c.id]=1; defDebt+=c.debt; } }
+      });
+      var uniq = Object.keys(ids).length, uw = Object.keys(workedIds).length;
+      var html = '<details class="how" style="margin-bottom:12px"><summary style="cursor:pointer;font-weight:600">Как это считается</summary><div class="module-subtitle" style="margin-top:8px"><b>Источник — листы отчёта:</b> «Сверка_ID» (каждый договор ТОП: сумма долга, есть ли комментарий, есть ли отработка, число действий, RC/PTP), «Детализация» (каждое действие: результат, оператор, дата), «Не отработано» (договоры без действий, статус и ответственный). <b>База</b> — все строки «Сверки» без удаления дублей, как в отчёте (уникальные ID показаны отдельно). <b>Отработан</b> — по договору найдено хотя бы одно действие. <b>RC</b> — разговор с клиентом по договору; <b>PTP</b> — обещание оплаты. Тексты комментариев на странице не показываются и не выгружаются.</div></details>';
+      html += '<div class="module-subtitle" style="margin-bottom:12px">'+esc(m.fileName||"")+(K&&K.from?' · действия: '+ru(K.from)+' – '+ru(K.to):'')+'</div>';
+      var tiles = [
+        {tip:"Строки листа «Сверка_ID». Уникальных ID — без повторов: "+uniq, label:"Договоров ТОП", value:fmtInt.format(total), icon:"▤", accent:true},
+        {tip:"Сумма «Сумма долга + ГП Остаток» по всем строкам базы.", label:"Остаток долга", value:big(debt), icon:"₽", iconCls:"gold"},
+        {tip:"Договоры, по которым есть хотя бы одно действие.", label:"Отработано", value:fmtInt.format(worked)+' <small>'+pct(worked,total)+'</small>', icon:"✓", iconCls:"good"},
+        {tip:"Доля суммы долга по отработанным договорам.", label:"Долга отработано", value:pct(workedDebt,debt)+' <small>'+big(workedDebt)+'</small>', icon:"◔", iconCls:"good"},
+        {tip:"Договоры без единого действия.", label:"Не отработано", value:fmtInt.format(total-worked)+' <small>'+pct(total-worked,total)+'</small>', icon:"△"},
+        {tip:"Договоры (уникальные ID), по которым состоялся разговор с клиентом.", label:"Разговор с клиентом", value:fmtInt.format(Object.keys(rcIds).length)+' <small>ID</small>', icon:"◎"},
+        {tip:"Уникальные ID с обещанием оплаты (PTP) и с отложенным обещанием.", label:"Обещания", value:fmtInt.format(Object.keys(ptpIds).length)+' <small>PTP</small> '+fmtInt.format(Object.keys(defIds).length)+' <small>отлож.</small>', icon:"✎"}
+      ];
+      html += '<div class="tiles">'+tiles.map(function(t){ return '<div class="tile'+(t.accent?" accent":"")+'"><div class="tile-icon'+(t.iconCls?" "+t.iconCls:"")+'">'+t.icon+'</div><div class="label" title="'+esc(t.tip)+'">'+esc(t.label)+'</div><div class="value mono">'+t.value+'</div></div>'; }).join("")+'</div>';
+
+      if(total){
+        var segColors = ["#1aa9bd","#2fcf95","#f0a941","#c4cad6"];
+        html += '<section><div class="head"><h2>Отработка и комментарии'+tipI("Лист «Сверка_ID»: сопоставление наличия действий (отработки) и непустого комментария по договору. Доли — от всех строк базы и от суммы долга.")+'</h2><span class="hint">полоса — доля суммы долга</span></div>'+
+          '<div style="display:flex;height:16px;border-radius:999px;overflow:hidden;margin-bottom:12px">'+segD.map(function(d,i){ return '<div title="'+esc(SEG[i])+': '+pct(d,debt)+'" style="width:'+(debt?d/debt*100:0)+'%;background:'+segColors[i]+'"></div>'; }).join("")+'</div>'+
+          '<div class="table-wrap"><table><thead><tr><th>Сегмент</th><th class="amt">Договоров</th><th class="amt">% базы</th><th class="amt">Остаток долга</th><th class="amt">% суммы</th></tr></thead><tbody>'+
+          SEG.map(function(n,i){ return '<tr><td><span class="dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+segColors[i]+';margin-right:8px"></span>'+esc(n)+'</td><td class="amt">'+fmtInt.format(segN[i])+'</td><td class="amt">'+pct(segN[i],total)+'</td><td class="amt">'+big(segD[i])+'</td><td class="amt">'+pct(segD[i],debt)+'</td></tr>'; }).join("")+
+          '<tr style="font-weight:700"><td>Всего</td><td class="amt">'+fmtInt.format(total)+'</td><td class="amt">100%</td><td class="amt">'+big(debt)+'</td><td class="amt">100%</td></tr></tbody></table></div>'+
+          '<div class="hint" style="margin-top:8px">Уникальных ID: '+fmtInt.format(uniq)+' · отработано уникальных: '+fmtInt.format(uw)+' ('+pct(uw,uniq)+') · повторяющихся строк: '+fmtInt.format(dupIds)+(emptyIds?' · без ID: '+emptyIds:'')+'</div></section>';
+        // размер долга
+        var B = [{n:"до 1 млн",lo:0,hi:1e6},{n:"1–3 млн",lo:1e6,hi:3e6},{n:"3–5 млн",lo:3e6,hi:5e6},{n:"5–10 млн",lo:5e6,hi:1e7},{n:"10 млн и больше",lo:1e7,hi:1e99}].map(function(b){ b.c=0;b.w=0;b.d=0;b.wd=0; return b; });
+        C.forEach(function(c){ for(var i=0;i<B.length;i++){ if(c.debt>=B[i].lo && c.debt<B[i].hi){ B[i].c++; B[i].d+=c.debt; if(c.hasW){B[i].w++; B[i].wd+=c.debt;} break; } } });
+        html += '<section><div class="head"><h2>Проработка по размеру долга'+tipI("Договоры разбиты по остатку долга; для каждой корзины — сколько отработано. Видно, достаточно ли внимания уделяется самым крупным долгам.")+'</h2></div><div class="table-wrap"><table><thead><tr><th>Остаток долга</th><th class="amt">Договоров</th><th class="amt">Отработано</th><th class="amt">% отработки</th><th style="min-width:130px"></th><th class="amt">Сумма</th><th class="amt">% суммы отработано</th></tr></thead><tbody>'+
+          B.map(function(b){ var p=b.c? b.w/b.c : 0; return '<tr><td>'+b.n+'</td><td class="amt">'+fmtInt.format(b.c)+'</td><td class="amt">'+fmtInt.format(b.w)+'</td><td class="amt">'+pct(b.w,b.c)+'</td><td><div style="height:9px;background:var(--surface-2);border-radius:999px"><div style="height:100%;width:'+(p*100).toFixed(1)+'%;background:var(--grad-a);border-radius:999px"></div></div></td><td class="amt">'+big(b.d)+'</td><td class="amt">'+pct(b.wd,b.d)+'</td></tr>'; }).join("")+'</tbody></table></div></section>';
+      }
+      if(K){
+        var rcTot = K.byOp.reduce(function(a,o){ a.cl+=o.cl; a.th+=o.th; a.no+=o.no; a.ms+=o.ms; a.lt+=o.lt; a.ptp+=o.ptp; return a; }, {cl:0,th:0,no:0,ms:0,lt:0,ptp:0});
+        var calls = K.n - rcTot.ms - rcTot.lt, conv = rcTot.cl+rcTot.th;
+        html += '<section><div class="head"><h2>Действия по договорам'+tipI("Лист «Детализация»: каждая строка — одно действие (звонок, сообщение в мессенджер, письмо). Звонки = действия без мессенджеров и писем. Дозвон = звонки, где состоялся разговор (клиент или третье лицо).")+'</h2><span class="hint">'+fmtInt.format(K.n)+' действий по '+fmtInt.format(K.uniqueIds)+' договорам</span></div>'+
+          '<div class="tiles">'+[
+            {l:"Звонков",v:fmtInt.format(calls),i:"☎"},
+            {l:"Дозвон (разговор состоялся)",v:fmtInt.format(conv)+' <small>'+pct(conv,calls)+'</small>',i:"◎"},
+            {l:"С клиентом",v:fmtInt.format(rcTot.cl)+' <small>'+pct(rcTot.cl,calls)+'</small>',i:"✓",c:"good"},
+            {l:"С третьим лицом",v:fmtInt.format(rcTot.th),i:"☺"},
+            {l:"Мессенджеры / письма",v:fmtInt.format(rcTot.ms)+' / '+fmtInt.format(rcTot.lt),i:"✉"},
+            {l:"Действий на договор",v:K.uniqueIds? (K.n/K.uniqueIds).toFixed(1).replace(".",","):"—",i:"∑"}
+          ].map(function(t){ return '<div class="tile"><div class="tile-icon'+(t.c?" "+t.c:"")+'">'+t.i+'</div><div class="label">'+esc(t.l)+'</div><div class="value mono">'+t.v+'</div></div>'; }).join("")+'</div>'+
+          '<div class="head" style="margin-top:14px"><h2 style="font-size:19px">Результаты действий</h2></div>'+
+          bars(K.byRes.map(function(r){ return {name:r.k, v:r.n, num:fmtInt.format(r.n)+' · '+pct(r.n,K.n), color:/^разговор состоялся/i.test(r.k)?"linear-gradient(90deg,#2fcf95,#1aa9bd)":(/^контакт не/i.test(r.k)?"#c4cad6":null)}; }))+'</section>';
+        if(K.byMonth.length){
+          html += '<section><div class="head"><h2>По месяцам'+tipI("Действия из листа «Детализация» по календарным месяцам. Дозвон — разговор состоялся; PTP — обещание оплаты. «Договоров» — уникальные ID с действием в месяце.")+'</h2></div><div class="table-wrap"><table><thead><tr><th>Месяц</th><th class="amt">Действий</th><th class="amt">Звонков</th><th class="amt">Дозвон</th><th class="amt">% дозвона</th><th class="amt">PTP</th><th class="amt">Договоров</th></tr></thead><tbody>'+
+            K.byMonth.map(function(a){ var cl=a.n-a.ms-a.lt, cv=a.cl+a.th; return '<tr><td>'+esc(monthLbl(a.k))+'</td><td class="amt">'+fmtInt.format(a.n)+'</td><td class="amt">'+fmtInt.format(cl)+'</td><td class="amt">'+fmtInt.format(cv)+'</td><td class="amt">'+pct(cv,cl)+'</td><td class="amt">'+fmtInt.format(a.ptp)+'</td><td class="amt">'+fmtInt.format(a.ids)+'</td></tr>'; }).join("")+'</tbody></table></div></section>';
+        }
+        html += '<section><div class="head"><h2>По сотрудникам'+tipI("Оператор взаимодействия из листа «Детализация». Дозвон % = разговоры (клиент + третье лицо) ÷ звонки (без мессенджеров и писем). Договоров — уникальные ID, по которым у сотрудника есть действия.")+'</h2></div><div class="table-wrap"><table><thead><tr><th>Сотрудник</th><th class="amt">Действий</th><th class="amt">Звонков</th><th class="amt">С клиентом</th><th class="amt">С третьим</th><th class="amt">% дозвона</th><th class="amt">PTP</th><th class="amt">Договоров</th></tr></thead><tbody>'+
+          K.byOp.map(function(a){ var cl=a.n-a.ms-a.lt; return '<tr><td>'+esc(a.k)+'</td><td class="amt">'+fmtInt.format(a.n)+'</td><td class="amt">'+fmtInt.format(cl)+'</td><td class="amt">'+fmtInt.format(a.cl)+'</td><td class="amt">'+fmtInt.format(a.th)+'</td><td class="amt">'+pct(a.cl+a.th,cl)+'</td><td class="amt">'+fmtInt.format(a.ptp)+'</td><td class="amt">'+fmtInt.format(a.ids)+'</td></tr>'; }).join("")+'</tbody></table></div></section>';
+      }
+      if(U.length){
+        var st = {}, rs = {}, ud = 0;
+        U.forEach(function(u){ ud+=u.debt; var a=st[u.status]||(st[u.status]={n:0,d:0}); a.n++; a.d+=u.debt; var b=rs[u.resp]||(rs[u.resp]={n:0,d:0}); b.n++; b.d+=u.debt; });
+        function arr(o){ return Object.keys(o).map(function(k){ return {k:k,n:o[k].n,d:o[k].d}; }).sort(function(a,b){ return b.d-a.d; }); }
+        var stA = arr(st), rsA = arr(rs);
+        html += '<section><div class="head"><h2>Не отработано'+tipI("Лист «Не отработано»: договоры без действий. Нажмите на статус или ответственного — ниже появится список договоров (его можно скачать в Excel). Комментарии в список не выводятся.")+'</h2><span class="hint">'+fmtInt.format(U.length)+' договоров · '+big(ud)+'</span></div>'+
+          '<div><div class="hint" style="margin-bottom:6px">По ответственному</div><div class="table-wrap"><table><thead><tr><th>Ответственный</th><th class="amt">Договоров</th><th class="amt">Остаток долга</th><th class="amt">% суммы</th></tr></thead><tbody>'+
+          rsA.map(function(a){ return '<tr data-rs="'+esc(a.k)+'" style="cursor:pointer'+(state.respFilter===a.k?';font-weight:700':'')+'"><td>'+esc(a.k)+'</td><td class="amt">'+fmtInt.format(a.n)+'</td><td class="amt">'+big(a.d)+'</td><td class="amt">'+pct(a.d,ud)+'</td></tr>'; }).join("")+'</tbody></table></div></div>'+
+          '<div style="margin-top:10px"><div class="hint" style="margin-bottom:6px">По статусу договора</div><div class="table-wrap" style="overflow-x:auto"><table><thead><tr><th>Статус</th><th class="amt">Договоров</th><th class="amt">Остаток долга</th><th class="amt">% суммы</th></tr></thead><tbody>'+
+          stA.map(function(a){ return '<tr data-st="'+esc(a.k)+'" style="cursor:pointer'+(state.statusFilter===a.k?';font-weight:700':'')+'"><td>'+esc(a.k)+'</td><td class="amt">'+fmtInt.format(a.n)+'</td><td class="amt">'+big(a.d)+'</td><td class="amt">'+pct(a.d,ud)+'</td></tr>'; }).join("")+'</tbody></table></div></div>';
+        var list = U.filter(function(u){ return (!state.statusFilter||u.status===state.statusFilter) && (!state.respFilter||u.resp===state.respFilter); }).sort(function(a,b){ return b.debt-a.debt; });
+        var ttl = (state.statusFilter||state.respFilter) ? ('Список: '+[state.statusFilter,state.respFilter].filter(Boolean).join(" · ")) : 'Крупнейшие неотработанные договоры';
+        var shown = state.showAll ? list : list.slice(0,50);
+        html += '<div class="head" style="margin-top:16px"><h2 style="font-size:19px">'+esc(ttl)+' <span class="hint">('+fmtInt.format(list.length)+')</span></h2><div style="display:flex;gap:8px">'+((state.statusFilter||state.respFilter)?'<button type="button" class="btn ghost" id="'+prefix+'clrF" style="font-size:14px">✕ Сбросить</button>':'')+'<button type="button" class="btn ghost" id="'+prefix+'exp" style="font-size:14px">⭳ Скачать в Excel</button></div></div>'+
+          '<div class="table-wrap"><table><thead><tr><th>ID договора</th><th>Должник</th><th class="amt">Остаток долга</th><th>Статус</th><th>Ответственный</th><th>Оператор</th></tr></thead><tbody>'+
+          shown.map(function(u){ return '<tr><td>'+esc(u.id)+'</td><td>'+esc(u.name)+'</td><td class="amt">'+fmtCompact(u.debt)+'</td><td>'+esc(u.status)+'</td><td>'+esc(u.resp)+'</td><td>'+esc(u.op||"—")+'</td></tr>'; }).join("")+'</tbody></table></div>'+
+          (list.length>shown.length?'<button type="button" class="btn ghost" id="'+prefix+'more" style="margin-top:10px">Показать все '+fmtInt.format(list.length)+'</button>':'')+'</section>';
+      }
+      var pr = C.filter(function(c){ return c.ptp || c.def; }).sort(function(a,b){ return b.debt-a.debt; });
+      if(pr.length){
+        html += '<section><div class="head"><h2>Обещания по договорам'+tipI("Договоры из «Сверки_ID», где есть обещание оплаты (PTP) или отложенное обещание. Вид — клиент или третье лицо.")+'</h2><span class="hint">PTP: '+Object.keys(ptpIds).length+' ID · '+big(ptpDebt)+' · отложенные: '+Object.keys(defIds).length+' ID · '+big(defDebt)+'</span></div><div class="table-wrap"><table><thead><tr><th>ID договора</th><th>Должник</th><th class="amt">Остаток долга</th><th>Обещание</th><th class="amt">Действий</th></tr></thead><tbody>'+
+          pr.map(function(c){ return '<tr><td>'+esc(c.id)+'</td><td>'+esc(c.name)+'</td><td class="amt">'+fmtCompact(c.debt)+'</td><td>'+(c.ptp?'PTP'+(c.ptpKind?' ('+esc(c.ptpKind)+')':''):'')+(c.ptp&&c.def?' + ':'')+(c.def?'отложенное'+(c.defKind?' ('+esc(c.defKind)+')':''):'')+'</td><td class="amt">'+fmtInt.format(c.act)+'</td></tr>'; }).join("")+'</tbody></table></div></section>';
+      }
+      body.innerHTML = html;
+      Array.prototype.forEach.call(body.querySelectorAll("[data-st]"), function(r){ r.addEventListener("click", function(){ var v=r.getAttribute("data-st"); state.statusFilter = state.statusFilter===v?null:v; state.showAll=false; render(); }); });
+      Array.prototype.forEach.call(body.querySelectorAll("[data-rs]"), function(r){ r.addEventListener("click", function(){ var v=r.getAttribute("data-rs"); state.respFilter = state.respFilter===v?null:v; state.showAll=false; render(); }); });
+      var more = document.getElementById(prefix+"more"); if(more) more.addEventListener("click", function(){ state.showAll = true; render(); });
+      var clr = document.getElementById(prefix+"clrF"); if(clr) clr.addEventListener("click", function(){ state.statusFilter=null; state.respFilter=null; state.showAll=false; render(); });
+      var ex = document.getElementById(prefix+"exp");
+      if(ex) ex.addEventListener("click", function(){
+        var l = state.model.unworked.filter(function(u){ return (!state.statusFilter||u.status===state.statusFilter) && (!state.respFilter||u.resp===state.respFilter); }).sort(function(a,b){ return b.debt-a.debt; });
+        exportRowsToXlsx(l.map(function(u){ return {"ID договора":u.id,"Должник":u.name,"Остаток долга":u.debt,"Статус":u.status,"Ответственный":u.resp,"Оператор":u.op}; }), "top_ne_otrabotano.xlsx");
+      });
+    }
+
+    el("fileInput").addEventListener("change", function(e){ var f = e.target.files && e.target.files[0]; e.target.value=""; if(f) load(f); });
+    el("resetBtn").addEventListener("click", function(){ state.model=null; try{ localStorage.removeItem(storageKey); }catch(e){} render(); });
+    window.__topLoadSheets = function(sheets, name){ var m = parse(sheets); m.fileName=name||"test"; state.model=m; render(); };
+    render();
+  }
+
   function createDistribModule(prefix, settingsKey, dataKey, label){
     var root = document.getElementById(prefix+"root");
     function el(id){ return document.getElementById(prefix+id); }
@@ -6255,6 +6465,7 @@
   createGenericModule("po_", "pulse_portfolio_odv", {allowSecondary:false, label:"Портфель ОДВ", hideDateCharts:true, portfolioAnalytics:true, keepColumns:PORTFOLIO_KEEP_COLUMNS});
   createGenericModule("pw_", "pulse_portfolio_all", {allowSecondary:false, label:"Портфель весь", portfolioAnalytics:true, keepColumns:PORTFOLIO_KEEP_COLUMNS});
   createPlanModule("pl_", "pulse_plan");
+  createTopModule("tp_", "pulse_top");
   createDistribModule("ds_", "pulse_distrib_settings", "pulse_distrib_data", "Распределение договоров");
   initOverview();
 
