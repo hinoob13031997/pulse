@@ -1093,12 +1093,14 @@
         <span class="badge empty" id="pl_sourceBadge">нет данных</span>
       </div>
       <div class="controls">
-        <label class="btn primary" for="pl_fileInput">⭱ Загрузить объединённый отчёт</label>
-        <input type="file" id="pl_fileInput" accept=".xlsx,.xls" />
-        <button class="btn ghost" id="pl_resetBtn">✕ Очистить</button>
+        <label class="btn primary" for="pl_fileInput">⭱ Загрузить файлы</label>
+        <input type="file" id="pl_fileInput" accept=".xlsx,.xls" multiple />
+        <button class="btn" id="pl_tabAllBtn" title="Взять платежи, уже загруженные на вкладке «Все платежи»">⇄ Платежи с вкладки «Все платежи»</button>
+        <button class="btn ghost" id="pl_resetBtn">✕ Очистить всё</button>
       </div>
     </div>
-    <div class="module-subtitle" style="margin-bottom:14px;">Загрузите «Объединённый отчёт по сбору и обещаниям» (книга с листами «По группам», «По дням», «Обещания …», «Исходные данные»). Дашборд покажет выполнение плана по группам и сотрудникам, накопительный сбор по дням в сравнении с планом и прошлым периодом, обещания оплаты и разбивку исходных платежей.</div>
+    <div class="module-subtitle" style="margin-bottom:14px;">Загрузите один или несколько файлов сразу — тип каждого определяется сам: готовый «Объединённый отчёт по сбору и обещаниям» (листы «По группам», «По дням», «Обещания …», «Исходные данные»), либо отдельные выгрузки: <b>платежи</b> (колонки сумма, дата, оператор) и <b>обещания</b> (колонки сумма, дата создания, оператор). Платежи можно также взять с вкладки «Все платежи». Файлы за разные месяцы раскладываются по месяцам по дате платежа. Дашборд покажет выполнение плана по группам и сотрудникам, накопительный сбор по дням в сравнении с планом и прошлым периодом, обещания оплаты и разбивку исходных платежей.</div>
+    <div id="pl_filesWrap"></div>
     <div id="pl_emptyState" class="empty-state"><div class="es-icon">⭱</div>Загрузите объединённый отчёт по сбору и обещаниям — всё построится само.</div>
     <div id="pl_bodyWrap" style="display:none"></div>
   </div>
@@ -4997,6 +4999,8 @@
     function el(id){ return document.getElementById(prefix+id); }
     var state = { model:null, empGroup:null, empSort:"pct", empDir:-1, promGroup:null, showAllDetails:false };
     try{ var saved = JSON.parse(localStorage.getItem(storageKey)||"null"); if(saved && saved.groups) state.model = saved; }catch(e){}
+    state.files = [];
+    try{ var sf = JSON.parse(localStorage.getItem(storageKey+"_files")||"null"); if(Array.isArray(sf)) state.files = sf; }catch(e){}
 
     function num(v){ if(v==null||v==="") return 0; if(typeof v==="number") return v; var n = parseFloat(String(v).replace(/\s| /g,"").replace(",",".")); return isFinite(n)?n:0; }
     function pad(n){ return (n<10?"0":"")+n; }
@@ -5139,10 +5143,20 @@
       var workToDate = 0; dates.forEach(function(d){ if(d<=asOf && work[d]) workToDate++; });
       var share = W ? workToDate/W : 0, planToDate = total*share;
       var fileDays = {}; if(useFile) (m.days||[]).forEach(function(d){ fileDays[d.date.slice(8,10)] = d; });
-      var prevFact = 0, prevCnt = 0, hasPrev = useFile && (m.days||[]).length>0;
+      var prevFact = 0, prevCnt = 0, hasPrev = useFile && (m.days||[]).length>0, prevG = null, prevGc = null;
+      // Прошлый месяц считаем из самих платежей, если они загружены и за него (иначе — из колонок файла).
+      var py = +mk.slice(0,4), pmn = +mk.slice(5,7)-1; if(pmn===0){ py--; pmn=12; }
+      var prevMk = py+"-"+pad(pmn), asDom = asOf.slice(8,10), pd = {}, pHas = false, pgf = {}, pgc = {};
+      (m.agg||[]).forEach(function(a){
+        if(a.per!==0 || a.d.slice(0,7)!==prevMk) return;
+        var dom = a.d.slice(8,10);
+        if(a.f1){ pHas = true; var o = pd[dom]||(pd[dom]={prevFact:0,cntPrev:0}); o.prevFact+=a.s; o.cntPrev+=a.n; }
+        if(a.f2 && dom<=asDom){ pgf[a.g]=(pgf[a.g]||0)+a.s; pgc[a.g]=(pgc[a.g]||0)+a.n; }
+      });
+      if(pHas){ fileDays = pd; hasPrev = true; prevG = pgf; prevGc = pgc; prevFact = 0; prevCnt = 0; }
       if(hasPrev) dates.forEach(function(d){ if(d<=asOf){ var f = fileDays[d.slice(8,10)]; if(f){ prevFact+=f.prevFact; prevCnt+=f.cntPrev; } } });
       return { mk:mk, dates:dates, work:work, W:W, workToDate:workToDate, asOf:asOf, total:total, totalSrc:totalSrc, planDay:planDay, planToDate:planToDate, share:share,
-        names:names, gPlan:gPlan, gPlanSum:gPlanSum, dayFact:dayFact, dayCnt:dayCnt, gFact:gFact, gCnt:gCnt, fact:tFact, cnt:tCnt, prevFact:prevFact, prevCnt:prevCnt, hasPrev:hasPrev, useFile:useFile, fileDays:fileDays };
+        names:names, gPlan:gPlan, gPlanSum:gPlanSum, dayFact:dayFact, dayCnt:dayCnt, gFact:gFact, gCnt:gCnt, fact:tFact, cnt:tCnt, prevFact:prevFact, prevCnt:prevCnt, hasPrev:hasPrev, useFile:useFile, fileDays:fileDays, prevG:prevG, prevGc:prevGc, prevMk:prevMk };
     }
     function effective(m){
       if(!m.agg || !m.agg.length) return m;
@@ -5154,7 +5168,7 @@
       var fileG = {}; (m.groups||[]).forEach(function(g){ fileG[g.name]=g; });
       e.groups = c.names.map(function(n){
         var f = c.useFile ? fileG[n] : null, p = c.gPlan[n]||0;
-        return { name:n, plan:p, planDate:p*c.share, fact:c.gFact[n]||0, prev: f?f.prev:0, cnt:c.gCnt[n]||0, cntPrev: f?f.cntPrev:0 };
+        return { name:n, plan:p, planDate:p*c.share, fact:c.gFact[n]||0, prev: c.prevG? (c.prevG[n]||0) : (f?f.prev:0), cnt:c.gCnt[n]||0, cntPrev: c.prevGc? (c.prevGc[n]||0) : (f?f.cntPrev:0) };
       }).filter(function(g){ return g.plan || g.fact || g.cnt; });
       var sumG = 0, cntG = 0; e.groups.forEach(function(g){ sumG+=g.fact; cntG+=g.cnt; });
       if(Math.abs(c.fact-sumG)>1) e.groups.push({ name:"Не распределено по группам", plan:0, planDate:0, fact:c.fact-sumG, prev:0, cnt:c.cnt-cntG, cntPrev:0, unalloc:true });
@@ -5193,6 +5207,11 @@
       function mon(v){ return fmtMoney.format(Math.round(v*100)/100).replace(/\u00a0/g," ")+" ₽"; }
       function sgn(v,f){ return v==null?"—":(v>0?"+":"")+f(v); }
       return '<section><div class="head"><h2>Выполнение плана сбора — '+esc(monthLbl(c.mk))+tipI("Как на скриншоте отчёта. Месячный план — введённый вручную. План на отчётную дату = месячный план × (рабочих дней с 1-го по отчётную дату ÷ рабочих дней месяца). Факт — сумма платежей по дате платежа с 1-го числа по отчётную дату. Факт от месячного плана = факт ÷ месячный план. Отклонение = факт − план на отчётную дату. Аналогичный период пред. месяца — из колонки «Факт предыдущего периода» файла (только если загружен отчёт за этот же месяц).")+'</h2><span class="hint">отчётная дата: '+ru(c.asOf)+'</span></div><div class="table-wrap"><table><tbody>'+
+        row("Отчётная дата", ru(c.asOf), true, "Последняя дата платежей в данных (или дата, введённая вручную в блоке «Планы и календарь»).")+
+        row("Календарных дней в месяце", String(c.dates.length))+
+        row("Дней в отчётном периоде", String(+c.asOf.slice(8,10)), false, "Календарные дни с 1-го числа по отчётную дату. Если отчётная дата — конец месяца, совпадает с календарными днями в месяце.")+
+        row("Рабочих дней в месяце", String(c.W), false, "Без суббот, воскресений и указанных нерабочих дат.")+
+        row("Рабочих дней в отчётном периоде", String(c.workToDate))+
         row("Месячный план", mon(c.total), true)+
         row("План на отчётную дату", mon(c.planToDate))+
         row("Фактический сбор текущего периода", mon(c.fact), true)+
@@ -5220,21 +5239,143 @@
       Array.prototype.forEach.call(body.querySelectorAll("[data-pmonth]"), function(b){ b.addEventListener("click", function(){ settings.month = b.getAttribute("data-pmonth"); saveSettings(); render(); }); });
     }
 
-    function persist(){ safeSetItem(storageKey, JSON.stringify(state.model)); }
+    function persist(){
+      if(state.model) safeSetItem(storageKey, JSON.stringify(state.model)); else { try{ localStorage.removeItem(storageKey); }catch(e){} }
+      safeSetItem(storageKey+"_files", JSON.stringify(state.files));
+    }
     function setBadge(label, cls){ var b = el("sourceBadge"); if(b){ b.textContent = label; b.className = "badge "+cls; } }
 
-    function loadFile(file){
-      pulseBusy(true, "Читаю отчёт…", file.name);
-      readWorkbookAllSheetsRaw(file, function(err, sheets){
-        pulseBusy(false);
-        if(err){ pulseNotice("Не удалось прочитать файл: "+(err.message||err), true); return; }
-        var m = parseWorkbook(sheets);
-        if(!m.groups.length && !m.emps.length && !m.days.length){
-          pulseNotice("Не нашёл листы «По группам» / «По сотрудникам» / «По дням» — это не объединённый отчёт по сбору.", true); return;
-        }
-        m.fileName = file.name;
-        applyModel(m);
+    // ---------- отдельные выгрузки: платежи и обещания ----------
+    function groupOfOperator(op){
+      var res = "";
+      OPERATOR_GROUPS.forEach(function(g){ if(res || g.all) return; if((g.names||[]).some(function(n){ return opNameMatches(op, n); })) res = g.label; });
+      return res;
+    }
+    function emptyModel(){ return { ts:Date.now(), general:[], groups:[], emps:[], days:[], pGroups:[], pEmps:[], pDays:[], pDetails:[], raw:null, title:"", reportDate:"", agg:[], fileMonth:null, fileName:"" }; }
+    function hdrOf(aoa){ return (aoa[0]||[]).map(function(h){ return String(h==null?"":h).trim().toLowerCase(); }); }
+    function hasH(h, re){ return h.some(function(x){ return re.test(x); }); }
+    function classifySheets(sheets){
+      if(sheetByName(sheets, /^по группам/) || sheetByName(sheets, /исходные данные/) || sheetByName(sheets, /^по дням/)) return {kind:"report"};
+      for(var i=0;i<sheets.length;i++){
+        var a = sheets[i].aoa; if(!a || a.length<2) continue;
+        var h = hdrOf(a);
+        if(hasH(h,/дата создания/) && hasH(h,/сумм/)) return {kind:"promises", aoa:a};
+        if(hasH(h,/сумм/) && hasH(h,/дат/) && (hasH(h,/оператор/) || hasH(h,/фио/))) return {kind:"payments", aoa:a};
+      }
+      return {kind:null};
+    }
+    function parsePaymentsFile(aoa, name){
+      var recs = payRowsFromAoa(aoa), map = {}, from="", to="";
+      recs.forEach(function(r){
+        var d = isoDate(r.date) || ""; if(!d) return;
+        var g = groupOfOperator(r.operator);
+        var k = d+"|"+g+"|"+r.operator;
+        var a = map[k] || (map[k] = {d:d, g:g, op:r.operator, s:0, n:0});
+        a.s += r.amount; a.n++;
+        if(!from || d<from) from=d; if(!to || d>to) to=d;
       });
+      var agg = Object.keys(map).map(function(k){ var a=map[k]; a.s=Math.round(a.s*100)/100; return a; });
+      return { id:name, name:name, kind:"payments", rows:recs.length, from:from, to:to, agg:agg };
+    }
+    function parsePromisesFile(aoa, name){
+      var h = hdrOf(aoa), idx = {};
+      function find(key, re, not){ for(var i=0;i<h.length;i++){ if(re.test(h[i]) && !(not && not.test(h[i]))){ idx[key]=i; return; } } }
+      find("sum",/^сумма$/); if(idx.sum==null) find("sum",/сумм/,/долг|остат/);
+      find("created",/дата создания/); find("op",/оператор/); find("group",/группа/); find("ext",/внешн/); find("inn",/внутренн/); find("debt",/долг/); find("status",/рабочий статус|статус/);
+      var det = [], from="", to="";
+      for(var r=1;r<aoa.length;r++){
+        var row = aoa[r]; if(!row) continue;
+        var sum = idx.sum!=null ? num(row[idx.sum]) : 0; if(!sum) continue;
+        var cv = idx.created!=null ? row[idx.created] : "", d = isoDate(cv); if(!d) continue;
+        var op = idx.op!=null ? String(row[idx.op]||"").trim() : "";
+        var g = (idx.group!=null && String(row[idx.group]||"").trim()) || groupOfOperator(op) || "Без группы";
+        det.push({ group:g, sum:sum, created:(cv instanceof Date ? d : String(cv).slice(0,16)), d:d, op:op, ext:idx.ext!=null?row[idx.ext]:"", inn:idx.inn!=null?row[idx.inn]:"", debt:idx.debt!=null?num(row[idx.debt]):0, status:idx.status!=null?String(row[idx.status]||"").trim():"" });
+        if(!from || d<from) from=d; if(!to || d>to) to=d;
+      }
+      return { id:name, name:name, kind:"promises", rows:det.length, from:from, to:to, det:det.slice(0,6000) };
+    }
+    function upsertFile(f){ state.files = state.files.filter(function(x){ return x.id!==f.id; }); state.files.push(f); }
+    function composeModel(){
+      var base = state.model, payF = state.files.filter(function(f){ return f.kind==="payments"; }), prF = state.files.filter(function(f){ return f.kind==="promises"; });
+      if(!base && !payF.length && !prF.length) return null;
+      var m = Object.assign(emptyModel(), base||{});
+      if(payF.length){
+        var covered = {}, add = [];
+        payF.forEach(function(f){ f.agg.forEach(function(a){ covered[a.d.slice(0,7)] = 1; add.push({per:0, d:a.d, g:a.g, op:a.op, f1:1, f2:a.g?1:0, s:a.s, n:a.n}); }); });
+        m.agg = (m.agg||[]).filter(function(a){ return !(a.per===0 && covered[a.d.slice(0,7)]); }).concat(add);
+        if(!m.fileMonth){ var ms = Object.keys(covered).sort(); m.fileMonth = ms[ms.length-1]; m.noReport = true; }
+      }
+      if(prF.length){
+        var det = []; prF.forEach(function(f){ det = det.concat(f.det); });
+        det.sort(function(a,b){ return a.d<b.d?-1:(a.d>b.d?1:0); });
+        var gm = {}, dm = {};
+        det.forEach(function(x){ var g=gm[x.group]||(gm[x.group]={name:x.group,cnt:0,sum:0}); g.cnt++; g.sum+=x.sum; var d=dm[x.d]||(dm[x.d]={date:x.d,cnt:0,sum:0}); d.cnt++; d.sum+=x.sum; });
+        m.pGroups = Object.keys(gm).map(function(k){ return gm[k]; });
+        m.pDays = Object.keys(dm).sort().map(function(k){ return dm[k]; });
+        m.pDetails = det.map(function(x){ return {group:x.group, sum:x.sum, created:x.created, op:x.op, ext:x.ext, inn:x.inn, debt:x.debt, status:x.status}; });
+      }
+      return m;
+    }
+    function loadFiles(list){
+      var files = Array.prototype.slice.call(list||[]); if(!files.length) return;
+      var done = [], bad = [], idx = 0;
+      pulseBusy(true, "Читаю файлы…", "0 из "+files.length);
+      (function next(){
+        if(idx>=files.length){
+          pulseBusy(false); state.empGroup=null; persist(); render();
+          if(done.length) pulseNotice("Загружено: "+done.join("; ")+(bad.length?" · не распознано: "+bad.join(", "):""), !done.length);
+          else pulseNotice("Не удалось распознать файлы: "+bad.join(", ")+". Нужен объединённый отчёт либо выгрузка платежей (сумма, дата, оператор) / обещаний (сумма, дата создания, оператор).", true);
+          return;
+        }
+        var file = files[idx++];
+        pulseBusy(true, "Читаю файлы…", idx+" из "+files.length+" · "+file.name);
+        readWorkbookAllSheetsRaw(file, function(err, sheets){
+          if(err){ bad.push(file.name); next(); return; }
+          try{
+            var c = classifySheets(sheets);
+            if(c.kind==="report"){
+              var m = parseWorkbook(sheets);
+              if(m.groups.length || m.days.length || (m.agg&&m.agg.length)){ m.fileName = file.name; state.model = m; done.push(file.name+" — отчёт"); } else bad.push(file.name);
+            } else if(c.kind==="payments"){ var pf = parsePaymentsFile(c.aoa, file.name); if(pf.rows){ upsertFile(pf); done.push(file.name+" — платежи ("+fmtInt.format(pf.rows)+")"); } else bad.push(file.name); }
+            else if(c.kind==="promises"){ var pr = parsePromisesFile(c.aoa, file.name); if(pr.rows){ upsertFile(pr); done.push(file.name+" — обещания ("+fmtInt.format(pr.rows)+")"); } else bad.push(file.name); }
+            else bad.push(file.name);
+          }catch(e){ bad.push(file.name); }
+          setTimeout(next, 20);
+        });
+      })();
+    }
+    function takeFromTab(prefixKey, label){
+      var mod = MODULE_REGISTRY[prefixKey]; var recs = mod && mod.getRows ? mod.getRows() : [];
+      if(!recs || !recs.length){ pulseNotice("На вкладке «"+label+"» нет загруженных платежей.", true); return; }
+      var map = {}, from="", to="";
+      recs.forEach(function(r){
+        var d = isoDate(r.date); if(!d) return;
+        var g = groupOfOperator(r.operator), k = d+"|"+g+"|"+r.operator;
+        var a = map[k] || (map[k] = {d:d, g:g, op:r.operator||"", s:0, n:0}); a.s += num(r.amount); a.n++;
+        if(!from || d<from) from=d; if(!to || d>to) to=d;
+      });
+      var agg = Object.keys(map).map(function(k){ var a=map[k]; a.s=Math.round(a.s*100)/100; return a; });
+      upsertFile({ id:"tab:"+prefixKey, name:"Вкладка «"+label+"»", kind:"payments", rows:recs.length, from:from, to:to, agg:agg, tab:true });
+      persist(); render(); pulseNotice("Платежи с вкладки «"+label+"» взяты: "+fmtInt.format(recs.length)+" строк.", false);
+    }
+    function renderFiles(){
+      var w = el("filesWrap"); if(!w) return;
+      var items = [];
+      if(state.model) items.push({kind:"report", name:state.model.fileName||"отчёт", info:"объединённый отчёт", id:"__report"});
+      state.files.forEach(function(f){ items.push({kind:f.kind, name:f.name, id:f.id, info:(f.kind==="payments"?"платежи":"обещания")+" · "+fmtInt.format(f.rows)+" строк · "+(f.from?ru(f.from)+" – "+ru(f.to):"")}); });
+      if(!items.length){ w.innerHTML=""; return; }
+      var warn = "";
+      var pf = state.files.filter(function(f){ return f.kind==="payments"; }).sort(function(a,b){ return a.from<b.from?-1:1; });
+      for(var i=1;i<pf.length;i++) if(pf[i].from<=pf[i-1].to) warn += '<div class="hint" style="color:#c9772b;margin-top:6px">Периоды файлов «'+esc(pf[i-1].name)+'» и «'+esc(pf[i].name)+'» пересекаются — платежи в пересечении могут посчитаться дважды. Удалите лишний файл.</div>';
+      w.innerHTML = '<section style="margin-bottom:14px"><div class="head"><h2>Загруженные источники'+tipI("Каждый файл определяется автоматически. Платежи из отдельных выгрузок (и с вкладки «Все платежи») заменяют платежи из объединённого отчёта за те месяцы, которые они покрывают; обещания из отдельных выгрузок заменяют обещания отчёта. План, прошлый период и сводка берутся из отчёта, если он загружен, а прошлый месяц считается из платежей, если они загружены и за него.")+'</h2></div>'+
+        '<div style="display:flex;flex-direction:column;gap:6px">'+items.map(function(it){
+          return '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="badge '+(it.kind==="report"?"live":"empty")+'">'+(it.kind==="report"?"отчёт":(it.kind==="payments"?"платежи":"обещания"))+'</span><b>'+esc(it.name)+'</b><span class="hint">'+esc(it.info)+'</span><button type="button" class="btn ghost" data-delfile="'+esc(it.id)+'" style="padding:2px 9px;font-size:13px" title="Убрать файл">✕</button></div>';
+        }).join("")+'</div>'+warn+'</section>';
+      Array.prototype.forEach.call(w.querySelectorAll("[data-delfile]"), function(b){ b.addEventListener("click", function(){
+        var id = b.getAttribute("data-delfile");
+        if(id==="__report") state.model = null; else state.files = state.files.filter(function(f){ return f.id!==id; });
+        persist(); render();
+      }); });
     }
     function applyModel(m){ state.model = m; state.empGroup = null; state.promGroup = null; persist(); render(); }
 
@@ -5284,7 +5425,9 @@
     }
 
     function render(){
-      var m = state.model, body = el("bodyWrap"), empty = el("emptyState");
+      var body = el("bodyWrap"), empty = el("emptyState");
+      renderFiles();
+      var m = composeModel();
       if(!m){ body.style.display="none"; empty.style.display="block"; setBadge("нет данных","empty"); return; }
       m = effective(m);
       body.style.display="block"; empty.style.display="none";
@@ -5367,9 +5510,11 @@
       if(dm) dm.addEventListener("click", function(){ state.showAllDetails = true; render(); });
     }
 
-    el("fileInput").addEventListener("change", function(e){ var f = e.target.files && e.target.files[0]; if(f) loadFile(f); e.target.value=""; });
-    el("resetBtn").addEventListener("click", function(){ state.model=null; try{ localStorage.removeItem(storageKey); }catch(e){} render(); });
+    el("fileInput").addEventListener("change", function(e){ var fl = Array.prototype.slice.call(e.target.files||[]); e.target.value=""; if(fl.length) loadFiles(fl); });
+    el("tabAllBtn").addEventListener("click", function(){ takeFromTab("all_", "Все платежи"); });
+    el("resetBtn").addEventListener("click", function(){ state.model=null; state.files=[]; persist(); render(); });
     window.__planLoadSheets = function(sheets, name){ var m = parseWorkbook(sheets); m.fileName = name||"test"; applyModel(m); };
+    window.__planLoadAny = function(sheets, name){ var c = classifySheets(sheets), r = c.kind; if(c.kind==="report"){ var m = parseWorkbook(sheets); m.fileName=name; state.model=m; } else if(c.kind==="payments") upsertFile(parsePaymentsFile(c.aoa,name)); else if(c.kind==="promises") upsertFile(parsePromisesFile(c.aoa,name)); persist(); render(); return r; };
     render();
   }
 
