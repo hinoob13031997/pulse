@@ -2193,7 +2193,7 @@
     var notReachedRe = /контакт не установлен/i;
     var positiveRe = /обещание оплаты|подтверждение действующего обещания/i;
     function classify(g, opVal){ return g.all ? true : (g.names||[]).some(function(n){ return opNameMatches(opVal, n); }); }
-    function buildBlock(rowsSubset){
+    function buildBlock(rowsSubset, rng){
       var groups = OPERATOR_GROUPS.map(function(g){
         var subset = rowsSubset.filter(function(r){ return classify(g, r[opCol]); });
         var total = subset.length;
@@ -2207,14 +2207,14 @@
       var ptpAll = rowsSubset.filter(function(r){ return positiveRe.test(String(r[outcomeCol]||"")); }).length;
       groups.push({ name:"Общий итог", isTotal:true, calls:totalAll, total:totalAll,
         rc:rcAll, rcPct: totalAll?rcAll/totalAll:0, ptp:ptpAll, ptpPct: totalAll?ptpAll/totalAll:0, extras:[] });
-      return { groups:groups, extraLabels:[] };
+      return { groups:groups, extraLabels:[], range:rng||null };
     }
     // Split into current/previous by date, the same way the "Период к периоду" sections do:
     // a rolling window (up to 30 days) ending on the file's latest date, vs. the equivalent
     // window right before it. No usable date column (or no parseable dates) → everything goes
     // into "current" as one block; setFunnel() already rolls a previous upload's "current" into
     // "previous" automatically when a new upload has no previous period of its own.
-    var current = rows, previous = null;
+    var current = rows, previous = null, curRange = null, prevRange = null;
     if(dateCol){
       var dates = rows.map(function(r){ return normalizeDate(r[dateCol]); }).filter(function(d){ return /^\d{4}-\d{2}-\d{2}$/.test(d); });
       if(dates.length){
@@ -2231,10 +2231,11 @@
         function inRange(d,a,b){ return d>=a && d<=b; }
         current = rows.filter(function(r){ return inRange(normalizeDate(r[dateCol]), curStartStr, curEndStr); });
         var prevRows = rows.filter(function(r){ return inRange(normalizeDate(r[dateCol]), prevStartStr, prevEndStr); });
+        curRange = {from:curStartStr, to:curEndStr}; prevRange = {from:prevStartStr, to:prevEndStr};
         previous = prevRows.length ? prevRows : null;
       }
     }
-    return { current: buildBlock(current), previous: previous ? buildBlock(previous) : null };
+    return { current: buildBlock(current, curRange), previous: previous ? buildBlock(previous, prevRange) : null };
   }
   function aoaFromPasteText(text){
     var lines = text.split(/\r\n|\r|\n/).filter(function(l){ return l.length; });
@@ -3293,13 +3294,25 @@
       persist();
       render();
     }
+    function funnelRangeText(b){
+      if(!b || !b.range) return "";
+      function ru(d){ var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d||""); return m ? m[3]+"."+m[2]+"."+m[1] : d; }
+      return " · "+ru(b.range.from)+" – "+ru(b.range.to);
+    }
     function setFunnel(funnel, sourceLabel){
       // If the uploaded file only has one period block (your export tool may only let you
       // pull one period at a time), roll the previously loaded "current" into "previous"
       // automatically — so uploading this month, then next month later, gives you the
       // comparison on its own, with no need to hand-merge two exports into one file first.
       if(!funnel.previous && state.funnel && state.funnel.current){
-        funnel.previous = state.funnel.current;
+        var oldCur = state.funnel.current;
+        // Порядок загрузки не важен: если новый файл по датам СТАРШЕ уже загруженного,
+        // он становится «предыдущим», а загруженный раньше остаётся «текущим».
+        if(funnel.current && funnel.current.range && oldCur.range && funnel.current.range.to < oldCur.range.to){
+          funnel = {current: oldCur, previous: funnel.current};
+        } else {
+          funnel.previous = oldCur;
+        }
       }
       state.funnel = funnel;
       state.funnelSource = sourceLabel||"";
@@ -3406,8 +3419,8 @@
       }
       var html = '<section><div class="head"><h2>Воронка обращений <span class="info-tip" title="Сводка звонков (не строки журнала): RC — дозвон/контакт установлен, PTP — обещание оплаты (положительный результат). Загружается отдельным файлом «Воронка» и не увеличивает число записей журнала.">i</span></h2>'+
         (state.funnelSource?'<span class="hint">'+esc(state.funnelSource)+'</span>':'')+'</div>'+
-        periodBlock(state.funnel.current, state.funnel.previous, "Текущий период") +
-        (state.funnel.previous ? periodBlock(state.funnel.previous, null, "Предыдущий период") : '') +
+        periodBlock(state.funnel.current, state.funnel.previous, "Текущий период"+funnelRangeText(state.funnel.current)) +
+        (state.funnel.previous ? periodBlock(state.funnel.previous, null, "Предыдущий период"+funnelRangeText(state.funnel.previous)) : '') +
         '</section>';
 
       // History log: every upload is kept as its own dated snapshot (nothing is overwritten),
