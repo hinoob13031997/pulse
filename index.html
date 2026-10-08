@@ -3478,7 +3478,21 @@
         if(amountCol) byDate[d].sum += normalizeAmount(r[amountCol]);
       });
       var dates = Object.keys(byDate).sort();
-      if(!dates.length || dates.length > 2500){ svg.innerHTML=""; return; }
+      if(!dates.length){ svg.innerHTML=""; return; }
+      // Длинный период (годы) по дням не читается — тогда группируем по месяцам (последние 48).
+      var monthly = false;
+      if(dates.length > 150){
+        monthly = true;
+        var byMonth = {};
+        dates.forEach(function(d){
+          var k = d.slice(0,7);
+          if(!byMonth[k]) byMonth[k] = {count:0, sum:0};
+          byMonth[k].count += byDate[d].count; byMonth[k].sum += byDate[d].sum;
+        });
+        byDate = byMonth;
+        dates = Object.keys(byDate).sort();
+        if(dates.length > 48) dates = dates.slice(-48);
+      }
       // Wide enough per bar that dates stay legible; the chart-wrap scrolls horizontally when it grows.
       var W = Math.min(4000, Math.max(560, dates.length*(amountCol?92:60))), H = 250;
       var padL=96, padR=28, padT=32, padB=56;
@@ -3506,7 +3520,7 @@
         bars += '<rect class="chart-bar" fill="url(#'+prefix+'barGrad)" x="'+x(i)+'" y="'+yTop+'" width="'+bw+'" height="'+Math.max(1,h)+'" rx="3"><title>'+d+": "+tip+'</title></rect>';
         var showTick = i%step===0 || i===dates.length-1;
         if(showTick){
-          labels += '<text class="chart-axis-label" x="'+(x(i)+bw/2)+'" y="'+(H-10)+'" text-anchor="end" transform="rotate(-40 '+(x(i)+bw/2)+' '+(H-10)+')">'+d.slice(5).replace("-",".")+'</text>';
+          labels += '<text class="chart-axis-label" x="'+(x(i)+bw/2)+'" y="'+(H-40)+'" text-anchor="end" transform="rotate(-40 '+(x(i)+bw/2)+' '+(H-40)+')">'+(monthly ? d.slice(5)+"."+d.slice(2,4) : d.slice(5).replace("-","."))+'</text>';
           var lblTxt = amountCol ? fmtCompact(v) : fmtInt.format(v);
           valueLabels += '<text class="chart-bar-value" x="'+(x(i)+bw/2)+'" y="'+(yTop-6)+'" text-anchor="middle">'+lblTxt+'</text>';
         }
@@ -3756,7 +3770,7 @@
           '<div class="pc-block"><div class="pc-label">Текущий период</div><div class="pc-value">'+fmtInt.format(pc.curCount)+' зап.'+(pc.curSum!=null?' · '+fmtCompact(pc.curSum)+' ₽':'')+'</div><div class="pc-range">'+pc.periodDays+' дн. · '+pc.curStartStr+' – '+pc.curEndStr+'</div></div>'+
           '<span class="pc-delta '+clsC+'">'+arrC+' '+(dCount>=0?"+":"")+fmtInt.format(dCount)+' зап.</span>'+deltaSumHtml;
       }
-      return '<section><div class="head"><h2>Период к периоду</h2><span class="hint">по колонке «'+esc(dateCol)+'», окно '+pc.periodDays+' дн.</span></div><div class="period-compare">'+body+'</div></section>';
+      return '<section><div class="head"><h2>Период к периоду</h2><span class="hint">по колонке «'+esc(dateCol)+'», окно '+pc.periodDays+' дн.</span></div><p style="margin:0 0 10px;color:var(--text-dim);font-size:14.5px;line-height:1.5">Сравнение двух соседних отрезков по '+pc.periodDays+' дней: последнего (заканчивается самой поздней датой в колонке) и предыдущего. Для каждого показано, сколько записей и на какую сумму в нём оказалось, и на сколько стало больше или меньше (▲ рост, ▼ снижение).</p><div class="period-compare">'+body+'</div></section>';
     }
 
     function render(){
@@ -3884,7 +3898,7 @@
       if(dateCol) html += periodCompareHtml(dateCol, amountCol);
 
       if(dateCol){
-        html += '<section><div class="head"><h2>Динамика по дням'+(amountCol?" ("+esc(amountCol)+")":" (кол-во записей)")+'</h2><span class="hint">по колонке «'+esc(dateCol)+'»</span></div>'+
+        html += '<section><div class="head"><h2>Динамика по дням'+(amountCol?" ("+esc(amountCol)+")":" (кол-во записей)")+'</h2><span class="hint">по колонке «'+esc(dateCol)+'»; если период длиннее ~5 месяцев — столбцы показывают месяцы</span></div>'+
           '<div class="chart-wrap"><svg id="'+prefix+'trendSvg" class="chart-svg" style="height:250px"></svg></div></section>';
       }
 
