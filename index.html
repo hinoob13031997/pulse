@@ -3200,7 +3200,7 @@
     var root = document.getElementById(prefix+"root");
     function el(id){ return document.getElementById(prefix+id); }
 
-    var state = { headers:[], rows:[], colInfo:{}, activeTabCol:null, sortKey:null, sortDir:1, funnel:null, funnelSource:"", funnelHistory:[], rowsHistory:[], filters:{outcomes:[], operators:[]}, filteredRows:[], outcomePanelOpen:false, operatorPanelOpen:false, colFilter:null, ageFilter:null };
+    var state = { headers:[], rows:[], colInfo:{}, activeTabCol:null, sortKey:null, sortDir:1, funnel:null, funnelSource:"", funnelHistory:[], rowsHistory:[], filters:{outcomes:[], operators:[]}, filteredRows:[], outcomePanelOpen:false, operatorPanelOpen:false, colFilter:null, ageFilter:null, monthFilter:null };
     // When opts.showCallBreakdown is on (Журнал), records are filtered by the selected call
     // results AND/OR selected employees before every other number on the tab is computed — lets
     // you isolate e.g. "дозвон + обещание оплаты" or one employee's calls and see tiles/chart/
@@ -4025,6 +4025,31 @@
           return bucketAge(days)===afLabel;
         });
       }
+      // Журнал: разбивка по календарным месяцам (по колонке с датой) — сводка + фильтр по месяцу.
+      var monthList = [];
+      var MONTH_RU = ["январь","февраль","март","апрель","май","июнь","июль","август","сентябрь","октябрь","ноябрь","декабрь"];
+      if(useBreakdown && dateCol){
+        var mAgg = {};
+        state.filteredRows.forEach(function(r){
+          var d = normalizeDate(r[dateCol]);
+          if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) return;
+          var k = d.slice(0,7);
+          var a = mAgg[k] || (mAgg[k] = {key:k, n:0, rc:0, ptp:0, days:{}});
+          a.n++; a.days[d]=1;
+          if(outcomeCol){
+            var ov = String(r[outcomeCol]||"");
+            if(!/контакт не установлен/i.test(ov)) a.rc++;
+            if(/обещание оплаты|подтверждение действующего обещания/i.test(ov)) a.ptp++;
+          }
+        });
+        monthList = Object.keys(mAgg).sort().map(function(k){ return mAgg[k]; });
+        if(monthList.length<2) monthList = [];
+        if(state.monthFilter && !mAgg[state.monthFilter]) state.monthFilter = null;
+        if(state.monthFilter){
+          var mf = state.monthFilter;
+          state.filteredRows = state.filteredRows.filter(function(r){ return normalizeDate(r[dateCol]).slice(0,7)===mf; });
+        }
+      }
       var rows = state.filteredRows;
       // A column explicitly requested via opts.keepColumns is meant to be a breakdown tab
       // regardless of how many distinct values it has (the generic "categorical" heuristic
@@ -4069,6 +4094,19 @@
         var iconHtml = t.icon ? '<div class="tile-icon'+(t.iconCls?" "+t.iconCls:"")+'">'+t.icon+'</div>' : "";
         return '<div class="tile'+(t.accent?" accent":"")+'">'+iconHtml+'<div class="label">'+esc(t.label)+'</div><div class="value mono">'+t.value+'</div></div>';
       }).join("")+'</div>';
+
+      if(monthList.length){
+        function monthLbl(k){ return MONTH_RU[+k.slice(5,7)-1]+" "+k.slice(0,4); }
+        function pc(a,b){ return b ? (a/b*100).toFixed(1).replace(".",",")+"%" : "—"; }
+        html += '<section><div class="head"><h2>По месяцам <span class="info-tip" title="Данные разделены по календарным месяцам (по колонке с датой). Нажмите на месяц, чтобы весь журнал показывал только его.">i</span></h2><span class="hint">по колонке «'+esc(dateCol)+'»</span></div>'+
+          '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><button type="button" class="btn'+(state.monthFilter?' ghost':'')+'" data-month="" style="font-size:14px">Все месяцы</button>'+
+          monthList.map(function(a){ return '<button type="button" class="btn'+(state.monthFilter===a.key?'':' ghost')+'" data-month="'+a.key+'" style="font-size:14px">'+esc(monthLbl(a.key))+'</button>'; }).join("")+'</div>'+
+          '<div class="table-wrap"><table><thead><tr><th>Месяц</th><th class="amt">Дней с данными</th><th class="amt">Звонки</th>'+(outcomeCol?'<th class="amt">RC, шт</th><th class="amt">RC, %</th><th class="amt">PTP, шт</th><th class="amt">PTP, %</th>':'')+'</tr></thead><tbody>'+
+          monthList.map(function(a){
+            return '<tr data-month="'+a.key+'" style="cursor:pointer'+(state.monthFilter===a.key?';font-weight:700':'')+'"><td>'+esc(monthLbl(a.key))+'</td><td class="amt">'+Object.keys(a.days).length+'</td><td class="amt">'+fmtInt.format(a.n)+'</td>'+
+              (outcomeCol?'<td class="amt">'+fmtInt.format(a.rc)+'</td><td class="amt">'+pc(a.rc,a.n)+'</td><td class="amt">'+fmtInt.format(a.ptp)+'</td><td class="amt">'+pc(a.ptp,a.n)+'</td>':'')+'</tr>';
+          }).join("")+'</tbody></table></div></section>';
+      }
 
       // Результат звонка / Сотрудник — one compact filter row right under the tiles: pick a
       // result, an employee, or both, and everything below (tiles, chart, breakdowns, table)
@@ -4176,6 +4214,13 @@
         '<div class="table-note" id="'+prefix+'tableNote2"></div></section>';
 
       bodyEl.innerHTML = html;
+      Array.prototype.forEach.call(bodyEl.querySelectorAll("[data-month]"), function(b){
+        b.addEventListener("click", function(){
+          var k = b.getAttribute("data-month") || null;
+          state.monthFilter = (k && state.monthFilter===k) ? null : k;
+          render();
+        });
+      });
 
       if(dateCol && !opts.portfolioAnalytics) renderTrend(document.getElementById(prefix+"trendSvg"), dateCol, amountCol);
       if(pcols && pcols.pay) wirePayBox(pcols.pay, amountCol);
