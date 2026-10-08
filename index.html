@@ -1120,12 +1120,12 @@
         <span class="badge empty" id="tp_sourceBadge">нет данных</span>
       </div>
       <div class="controls">
-        <label class="btn primary" for="tp_fileInput">⭱ Загрузить отчёт по ТОП</label>
-        <input type="file" id="tp_fileInput" accept=".xlsx,.xls" />
+        <label class="btn primary" for="tp_fileInput">⭱ Загрузить файлы (ТОП + звонки)</label>
+        <input type="file" id="tp_fileInput" accept=".xlsx,.xls" multiple />
         <button class="btn ghost" id="tp_resetBtn">✕ Очистить</button>
       </div>
     </div>
-    <div class="module-subtitle" style="margin-bottom:14px;">Загрузите отчёт по проработке портфеля ТОП (листы «Сверка_ID», «Детализация», «Не отработано», «Воронка TOP»). Дашборд покажет, какая часть портфеля и суммы долга отработана, как устроена отработка по размеру долга, результаты действий по месяцам и сотрудникам, неотработанные договоры по статусам и ответственным (со списком и выгрузкой в Excel) и договоры с обещаниями.</div>
+    <div class="module-subtitle" style="margin-bottom:14px;">Загрузите два файла: выгрузку портфеля ТОП и файл звонков — дашборд сам сопоставит их по «ID договора внутренний» и посчитает проработку (можно и готовый отчёт по ТОП). Дашборд покажет, какая часть портфеля и суммы долга отработана, как устроена отработка по размеру долга, результаты действий по месяцам и сотрудникам, неотработанные договоры по статусам и ответственным (со списком и выгрузкой в Excel) и договоры с обещаниями.</div>
     <div id="tp_emptyState" class="empty-state"><div class="es-icon">⭱</div>Загрузите отчёт по портфелю ТОП — всё построится само.</div>
     <div id="tp_bodyWrap" style="display:none"></div>
   </div>
@@ -5549,7 +5549,8 @@
     var root = document.getElementById(prefix+"root");
     function el(id){ return document.getElementById(prefix+id); }
     var state = { model:null, statusFilter:null, respFilter:null, showAll:false };
-    try{ var sv = JSON.parse(localStorage.getItem(storageKey)||"null"); if(sv && sv.contracts) state.model = sv; }catch(e){}
+    state.src = null;
+    try{ var sv = JSON.parse(localStorage.getItem(storageKey)||"null"); if(sv && sv.src && sv.src.top){ state.src = sv.src; } }catch(e){}
     var MONTH_RU = ["январь","февраль","март","апрель","май","июнь","июль","август","сентябрь","октябрь","ноябрь","декабрь"];
     function num(v){ if(v==null||v==="") return 0; if(typeof v==="number") return v; var n=parseFloat(String(v).replace(/\s| /g,"").replace(",",".")); return isFinite(n)?n:0; }
     function dstr(v){
@@ -5573,53 +5574,157 @@
     }
     function pick(o, re, not){ for(var k in o){ var kl=k.toLowerCase(); if(re.test(kl) && !(not&&not.test(kl))) return o[k]; } return undefined; }
     var SEG = ["Отработка + комментарий","Только отработка","Только комментарий","Нет ни отработки, ни комментария"];
-    function segOf(v){ var s=String(v||"").toLowerCase(); if(/отработка \+ коммент/.test(s)) return 0; if(/только отработка/.test(s)) return 1; if(/только коммент/.test(s)) return 2; return 3; }
+    function normId(v){ var s = String(v==null?"":v).trim(); if(/^\d+\.0+$/.test(s)) s = s.replace(/\.0+$/,""); return s; }
+    function debtNum(v){ if(v==null||v==="") return 0; if(typeof v==="number") return v; var n = parseFloat(String(v).replace(/[^\d,.\-]/g,"").replace(",",".")); return isFinite(n)?n:0; }
+    var KNOWN_RES = ["WhatsApp/Max/Telegram","Контакт не установлен: Не отвечает","Контакт не установлен: Занято","Контакт не установлен: Недоступен","Контакт не установлен: Сброс","Контакт не установлен: АО (Автоответчик)","Контакт не установлен: Не существует","Контакт не установлен: Робот"];
+    var RX = { cl:/^разговор состоялся клиент/i, th:/^разговор состоялся третье/i, no:/^контакт не установлен/i, ms:/^whatsapp|^telegram|^max\b/i, lt:/^письмо/i, ptp:/обещание оплаты/i, def:/отложенн[а-яё]* обещание/i };
+    function resGroup(r){ if(!r||/^пусто$/i.test(r)) return 6; if(RX.ms.test(r)) return 0; if(RX.no.test(r)) return 1; if(RX.cl.test(r)) return 2; if(RX.th.test(r)) return 3; if(RX.lt.test(r)) return 4; return 5; }
+    function resRank(r){ var i = KNOWN_RES.indexOf(r); return resGroup(r)*100000 + (i>=0 ? i : 5000); }
 
-    function parse(sheets){
-      var m = { ts:Date.now(), contracts:[], unworked:[], calls:null };
-      var s1 = sheetBy(sheets,/сверка/), s2 = sheetBy(sheets,/детализац/), s3 = sheetBy(sheets,/не отработан/);
-      if(s1) m.contracts = tbl(s1.aoa).map(function(o){
-        var seg = pick(o,/^сверка/);
-        var hasC = /^да/i.test(String(pick(o,/есть комментарий/)||"")), hasW = /^да/i.test(String(pick(o,/есть отработка/)||""));
-        return { id:String(pick(o,/id договора внутренний|^id/)||"").trim(), name:String(pick(o,/наименование|должник/)||"").trim(), debt:num(pick(o,/сумма долга/)),
-          seg: seg? segOf(seg) : (hasC&&hasW?0:(hasW?1:(hasC?2:3))), act:num(pick(o,/количество действий/)),
-          rc:/^да/i.test(String(pick(o,/^rc/)||""))?1:0, ptp:/^да/i.test(String(pick(o,/^ptp/)||""))?1:0, ptpKind:String(pick(o,/вид ptp/)||"").trim(),
-          def:/^да/i.test(String(pick(o,/^отложенное обещание/)||""))?1:0, defKind:String(pick(o,/вид отложенного/)||"").trim(), hasC:hasC?1:0, hasW:hasW?1:0 };
-      });
-      if(s3) m.unworked = tbl(s3.aoa).map(function(o){ return { id:String(pick(o,/id договора/)||"").trim(), name:String(pick(o,/наименование|должник/)||"").trim(), debt:num(pick(o,/сумма долга/)),
-        op:String(pick(o,/оператор/)||"").trim(), status:String(pick(o,/имя статуса|статус/)||"").trim()||"—", resp:String(pick(o,/ответственн/)||"").trim()||"—" }; });
-      if(s2){
-        var byMonth={}, byOp={}, byRes={}, ids={}, from="", to="", n=0;
-        tbl(s2.aoa).forEach(function(o){
-          var res = String(pick(o,/id результата|результат/)||"").trim() || "Пусто";
-          var d = dstr(pick(o,/дата сообщения/)); var id = String(pick(o,/id договора внутренний/)||"").trim();
-          var op = String(pick(o,/оператор взаимодействия/)||pick(o,/id оператора/)||"").trim() || "—";
-          var isCl = /^разговор состоялся клиент/i.test(res), isTh = /^разговор состоялся третье/i.test(res), isNo = /^контакт не установлен/i.test(res);
-          var isMs = /whatsapp|telegram|max/i.test(res) && !isNo, isLt = /^письмо/i.test(res);
-          var isP = /обещание оплаты|подтверждение действующего/i.test(res) && !/отложенное/i.test(res);
-          n++; if(d){ if(!from||d<from) from=d; if(!to||d>to) to=d; }
-          byRes[res] = (byRes[res]||0)+1;
-          function add(map,k){ var a = map[k] || (map[k]={n:0,no:0,ms:0,lt:0,cl:0,th:0,ptp:0,ids:{}}); a.n++; if(isNo)a.no++; if(isMs)a.ms++; if(isLt)a.lt++; if(isCl)a.cl++; if(isTh)a.th++; if(isP)a.ptp++; if(id) a.ids[id]=1; }
-          if(d) add(byMonth, d.slice(0,7)); add(byOp, op); if(id) ids[id]=1;
-        });
-        function fin(map){ return Object.keys(map).map(function(k){ var a=map[k]; return {k:k, n:a.n, no:a.no, ms:a.ms, lt:a.lt, cl:a.cl, th:a.th, ptp:a.ptp, ids:Object.keys(a.ids).length}; }); }
-        m.calls = { n:n, from:from, to:to, uniqueIds:Object.keys(ids).length, byMonth:fin(byMonth).sort(function(a,b){return a.k<b.k?-1:1;}), byOp:fin(byOp).sort(function(a,b){return b.n-a.n;}),
-          byRes:Object.keys(byRes).map(function(k){ return {k:k, n:byRes[k]}; }).sort(function(a,b){return b.n-a.n;}) };
+    // ---------- чтение файлов ----------
+    function headersOf(aoa){ return (aoa[0]||[]).map(function(h){ return String(h==null?"":h).trim().toLowerCase(); }); }
+    function hasHd(h, re){ return h.some(function(x){ return re.test(x); }); }
+    function classify(sheets){
+      var rep = sheetBy(sheets,/сверка/) && sheetBy(sheets,/детализац/);
+      if(rep) return {kind:"report"};
+      for(var i=0;i<sheets.length;i++){
+        var a = sheets[i].aoa; if(!a || a.length<2) continue; var h = headersOf(a);
+        if(hasHd(h,/id результата/) && hasHd(h,/id договора внутренний/)) return {kind:"calls", aoa:a};
+        if(hasHd(h,/id договора внутренний/) && hasHd(h,/сумма долга/)) return {kind:"top", aoa:a};
       }
-      return m;
+      return {kind:null};
     }
-    function persist(){ try{ var js = JSON.stringify(state.model); if(js.length < 4500000) safeSetItem(storageKey, js); else localStorage.removeItem(storageKey); }catch(e){} }
-    function setBadge(label, cls){ var b = el("sourceBadge"); if(b){ b.textContent = label; b.className = "badge "+cls; } }
+    function parseTop(aoa, name){
+      var h = headersOf(aoa), idx = {};
+      function f(key, re){ for(var i=0;i<h.length;i++) if(re.test(h[i])){ idx[key]=i; return; } }
+      f("id",/^id договора внутренний/); f("debt",/сумма долга/); f("status",/имя статуса|^статус/); f("resp",/ответственн/); f("op",/оператор/);
+      f("com",/коммент/); f("name",/наименование \/|^фио|должник/);
+      // заголовки «ФИО» и «Комментарии» в выгрузке могут быть затёрты (там стоит текст ячейки) — берём по положению
+      var known = {}; Object.keys(idx).forEach(function(k){ known[idx[k]] = 1; });
+      [/тип лица/,/цесси/,/id договора внешний/].forEach(function(re){ for(var i=0;i<h.length;i++) if(re.test(h[i])) known[i]=1; });
+      var unk = []; for(var i=0;i<h.length;i++) if(!known[i]) unk.push(i);
+      if(idx.name==null && unk.length) idx.name = unk[0];
+      if(idx.com==null && unk.length>1) idx.com = unk[unk.length-1];
+      var rows = [];
+      for(var r=1;r<aoa.length;r++){
+        var row = aoa[r]; if(!row) continue;
+        var id = normId(row[idx.id]), debt = debtNum(row[idx.debt]), nm = idx.name!=null ? String(row[idx.name]||"").trim() : "";
+        if(!id && !debt && !nm) continue;
+        var cm = idx.com!=null ? String(row[idx.com]==null?"":row[idx.com]).trim() : "";
+        rows.push({ id:id, name:nm, debt:debt, hasC:cm?1:0, status:idx.status!=null?String(row[idx.status]||"").trim():"", resp:idx.resp!=null?String(row[idx.resp]||"").trim():"", op:idx.op!=null?String(row[idx.op]||"").trim():"" });
+      }
+      return { name:name, rows:rows };
+    }
+    function parseCalls(aoa, name){
+      var h = headersOf(aoa), idx = {};
+      function f(key, re){ for(var i=0;i<h.length;i++) if(re.test(h[i])){ idx[key]=i; return; } }
+      f("id",/^id договора внутренний/); f("res",/id результата/); f("date",/дата сообщения/); f("op",/оператор взаимодействия/); if(idx.op==null) f("op",/оператор/);
+      var resT = [], resM = {}, opT = [], opM = {}, ev = [];
+      for(var r=1;r<aoa.length;r++){
+        var row = aoa[r]; if(!row) continue;
+        var id = normId(row[idx.id]); if(!id) continue;
+        var res = String(row[idx.res]==null?"":row[idx.res]).trim(), op = String(row[idx.op]==null?"":row[idx.op]).trim();
+        if(resM[res]==null){ resM[res]=resT.length; resT.push(res); } if(opM[op]==null){ opM[op]=opT.length; opT.push(op); }
+        ev.push([id, resM[res], dstr(row[idx.date]), opM[op]]);
+      }
+      return { name:name, res:resT, ops:opT, ev:ev };
+    }
+    function fromReport(sheets, name){
+      var top = [], s1 = sheetBy(sheets,/сверка/), s3 = sheetBy(sheets,/не отработан/), s2 = sheetBy(sheets,/детализац/), un = {};
+      if(s3) tbl(s3.aoa).forEach(function(o){ un[normId(pick(o,/id договора/))] = { status:String(pick(o,/имя статуса|статус/)||"").trim(), resp:String(pick(o,/ответственн/)||"").trim(), op:String(pick(o,/оператор/)||"").trim() }; });
+      tbl(s1.aoa).forEach(function(o){ var id = normId(pick(o,/id договора внутренний|^id/)), u = un[id]||{};
+        top.push({ id:id, name:String(pick(o,/наименование|должник/)||"").trim(), debt:debtNum(pick(o,/сумма долга/)), hasC:/^да/i.test(String(pick(o,/есть комментарий/)||""))?1:0, status:u.status||"", resp:u.resp||"", op:u.op||"" }); });
+      var rows = tbl(s2.aoa), aoa = [["ID договора внутренний","ID Результата","Дата сообщения","Оператор взаимодействия"]];
+      rows.forEach(function(o){ aoa.push([pick(o,/id договора внутренний/), pick(o,/id результата/), pick(o,/дата сообщения/), pick(o,/оператор взаимодействия/)]); });
+      return { top:{name:name, rows:top}, calls:parseCalls(aoa, name) };
+    }
 
-    function load(file){
-      pulseBusy(true, "Читаю отчёт по ТОП…", file.name);
-      readWorkbookAllSheetsRaw(file, function(err, sheets){
-        pulseBusy(false);
-        if(err){ pulseNotice("Не удалось прочитать файл: "+(err.message||err), true); return; }
-        var m = parse(sheets);
-        if(!m.contracts.length && !m.unworked.length && !m.calls){ pulseNotice("Не нашёл листы «Сверка_ID», «Детализация», «Не отработано» — это не отчёт по проработке ТОП.", true); return; }
-        m.fileName = file.name; state.model = m; state.statusFilter = null; state.respFilter = null; state.showAll = false; persist(); render();
+    // ---------- расчёт по логике отчёта ----------
+    function compute(src){
+      if(!src || !src.top) return null;
+      var rows = src.top.rows, topIds = {}, debtById = {};
+      rows.forEach(function(r){ if(r.id){ topIds[r.id]=1; if(debtById[r.id]==null) debtById[r.id]=r.debt; } });
+      var byId = {}, calls = null;
+      if(src.calls){
+        var C = src.calls, resT = C.res, opT = C.ops;
+        var cnt = {}, byMonth = {}, byOp = {}, evIds = {}, n = 0, from = "", to = "";
+        var ms=0, lt=0, cl=0, th=0, ptpE=0, defE=0;
+        var prom = { cp:{e:0,ids:{}}, tp:{e:0,ids:{}}, cd:{e:0,ids:{}}, td:{e:0,ids:{}} };
+        C.ev.forEach(function(e){
+          var id = e[0]; if(!topIds[id]) return;
+          var res = resT[e[1]], d = e[2], op = opT[e[3]] || "—";
+          var isCl = RX.cl.test(res), isTh = RX.th.test(res), isNo = RX.no.test(res), isMs = RX.ms.test(res) && !isNo, isLt = RX.lt.test(res);
+          var isPtp = RX.ptp.test(res) && !RX.def.test(res), isDef = RX.def.test(res);
+          n++; cnt[res||"Пусто"] = (cnt[res||"Пусто"]||0)+1; evIds[id]=1;
+          if(isMs) ms++; if(isLt) lt++; if(isCl) cl++; if(isTh) th++; if(isPtp) ptpE++; if(isDef) defE++;
+          var b = byId[id] || (byId[id] = {n:0, cl:0, ptpC:0, ptpT:0, defC:0, defT:0}); b.n++; if(isCl) b.cl++;
+          if(isPtp){ if(isCl){ b.ptpC++; prom.cp.e++; prom.cp.ids[id]=1; } else if(isTh){ b.ptpT++; prom.tp.e++; prom.tp.ids[id]=1; } }
+          if(isDef){ if(isCl){ b.defC++; prom.cd.e++; prom.cd.ids[id]=1; } else if(isTh){ b.defT++; prom.td.e++; prom.td.ids[id]=1; } }
+          if(d){ if(!from||d<from) from=d; if(!to||d>to) to=d; }
+          function add(map,k){ var a = map[k] || (map[k]={n:0,no:0,ms:0,lt:0,cl:0,th:0,ptp:0,ids:{}}); a.n++; if(isNo)a.no++; if(isMs)a.ms++; if(isLt)a.lt++; if(isCl)a.cl++; if(isTh)a.th++; if(isPtp)a.ptp++; a.ids[id]=1; }
+          if(d) add(byMonth, d.slice(0,7)); add(byOp, op);
+        });
+        function fin(map){ return Object.keys(map).map(function(k){ var a=map[k]; return {k:k,n:a.n,no:a.no,ms:a.ms,lt:a.lt,cl:a.cl,th:a.th,ptp:a.ptp,ids:Object.keys(a.ids).length}; }); }
+        function sumDebt(ids){ var s=0; Object.keys(ids).forEach(function(i){ s+=debtById[i]||0; }); return s; }
+        function union(a,b){ var o={}; Object.keys(a).forEach(function(k){o[k]=1;}); Object.keys(b).forEach(function(k){o[k]=1;}); return o; }
+        var ptpIds = union(prom.cp.ids, prom.tp.ids), defIds = union(prom.cd.ids, prom.td.ids);
+        var resList = Object.keys(cnt).sort(function(a,b){ return resRank(a)-resRank(b) || a.localeCompare(b,"ru"); }).map(function(k){ return {k:k, n:cnt[k]}; });
+        calls = { n:n, from:from, to:to, uniqueIds:Object.keys(evIds).length,
+          byMonth:fin(byMonth).sort(function(a,b){return a.k<b.k?-1:1;}), byOp:fin(byOp).sort(function(a,b){return b.n-a.n;}),
+          byRes:resList.slice().sort(function(a,b){return b.n-a.n;}), funnel:resList,
+          metrics:{ total:n, ms:ms, lt:lt, zvonki:n-ms-lt, rc:cl, th:th, ptp:ptpE, def:defE,
+            ptpIds:Object.keys(ptpIds).length, ptpDebt:sumDebt(ptpIds), defIds:Object.keys(defIds).length, defDebt:sumDebt(defIds) },
+          prom:[
+            {name:"Клиент: Обещание оплаты", e:prom.cp.e, ids:Object.keys(prom.cp.ids).length, debt:sumDebt(prom.cp.ids)},
+            {name:"Третье лицо: Обещание оплаты", e:prom.tp.e, ids:Object.keys(prom.tp.ids).length, debt:sumDebt(prom.tp.ids)},
+            {name:"PTP общий итог", e:prom.cp.e+prom.tp.e, ids:Object.keys(ptpIds).length, debt:sumDebt(ptpIds), total:true},
+            {name:"Клиент: Отложенное обещание", e:prom.cd.e, ids:Object.keys(prom.cd.ids).length, debt:sumDebt(prom.cd.ids)},
+            {name:"Третье лицо: Отложенное обещание", e:prom.td.e, ids:Object.keys(prom.td.ids).length, debt:sumDebt(prom.td.ids)},
+            {name:"Отложенное обещание общий итог", e:prom.cd.e+prom.td.e, ids:Object.keys(defIds).length, debt:sumDebt(defIds), total:true}
+          ] };
+      }
+      var contracts = [], unworked = [];
+      rows.forEach(function(r){
+        var b = r.id ? byId[r.id] : null, hasW = b ? 1 : 0, hasC = r.hasC;
+        var seg = hasW&&hasC ? 0 : (hasW ? 1 : (hasC ? 2 : 3));
+        var pk = b && (b.ptpC||b.ptpT) ? (b.ptpC&&b.ptpT ? "Клиент + третье лицо" : (b.ptpC?"Клиент":"Третье лицо")) : "";
+        var dk = b && (b.defC||b.defT) ? (b.defC&&b.defT ? "Клиент + третье лицо" : (b.defC?"Клиент":"Третье лицо")) : "";
+        contracts.push({ id:r.id, name:r.name, debt:r.debt, seg:seg, act:b?b.n:0, rc:b&&b.cl?1:0, ptp:pk?1:0, ptpKind:pk, def:dk?1:0, defKind:dk, hasC:hasC, hasW:hasW });
+        if(!hasW) unworked.push({ id:r.id, name:r.name, debt:r.debt, op:r.op, status:r.status||"—", resp:r.resp||"—" });
       });
+      return { ts:Date.now(), contracts:contracts, unworked:unworked, calls:calls, hasCalls:!!src.calls,
+        fileName: src.top.name + (src.calls ? " + "+src.calls.name : "") };
+    }
+    function persist(){
+      try{ var js = JSON.stringify({src:state.src}); if(js.length < 4800000) safeSetItem(storageKey, js); else { localStorage.removeItem(storageKey); pulseNotice("Файлы слишком большие, чтобы запомнить их между сессиями — после перезагрузки страницы их нужно загрузить заново.", false); } }catch(e){}
+    }
+    function setBadge(label, cls){ var b = el("sourceBadge"); if(b){ b.textContent = label; b.className = "badge "+cls; } }
+    function refresh(){ state.model = compute(state.src); state.statusFilter = null; state.respFilter = null; state.showAll = false; persist(); render(); }
+
+    function loadFiles(list){
+      var files = Array.prototype.slice.call(list||[]); if(!files.length) return;
+      var idx = 0, done = [], bad = [];
+      pulseBusy(true, "Читаю файлы…", "0 из "+files.length);
+      (function next(){
+        if(idx>=files.length){
+          pulseBusy(false);
+          if(done.length){ refresh(); pulseNotice("Загружено: "+done.join("; ")+(bad.length?" · не распознано: "+bad.join(", "):"")+(state.src && state.src.top && !state.src.calls ? " · файла звонков пока нет — отработка будет нулевой":""), false); }
+          else pulseNotice("Не удалось распознать: "+bad.join(", ")+". Нужны файл ТОП (ID договора внутренний, сумма долга, комментарии) и файл звонков (ID результата, ID договора внутренний), либо готовый отчёт со листами «Сверка_ID» и «Детализация».", true);
+          return;
+        }
+        var file = files[idx++]; pulseBusy(true, "Читаю файлы…", idx+" из "+files.length+" · "+file.name);
+        readWorkbookAllSheetsRaw(file, function(err, sheets){
+          if(err){ bad.push(file.name); next(); return; }
+          try{
+            var c = classify(sheets); state.src = state.src || {};
+            if(c.kind==="report"){ var r = fromReport(sheets, file.name); state.src = { top:r.top, calls:r.calls }; done.push(file.name+" — готовый отчёт"); }
+            else if(c.kind==="top"){ var t = parseTop(c.aoa, file.name); if(t.rows.length){ state.src.top = t; done.push(file.name+" — файл ТОП ("+fmtInt.format(t.rows.length)+" строк)"); } else bad.push(file.name); }
+            else if(c.kind==="calls"){ var k = parseCalls(c.aoa, file.name); if(k.ev.length){ state.src.calls = k; done.push(file.name+" — звонки ("+fmtInt.format(k.ev.length)+")"); } else bad.push(file.name); }
+            else bad.push(file.name);
+          }catch(e){ bad.push(file.name); }
+          setTimeout(next, 20);
+        });
+      })();
     }
 
     function bars(items, cls){
@@ -5640,7 +5745,7 @@
         if(!c.id) emptyIds++; else { if(ids[c.id]) dupIds++; ids[c.id]=1; if(c.hasW) workedIds[c.id]=1; if(c.rc) rcIds[c.id]=1; if(c.ptp && !ptpIds[c.id]){ ptpIds[c.id]=1; ptpDebt+=c.debt; } if(c.def && !defIds[c.id]){ defIds[c.id]=1; defDebt+=c.debt; } }
       });
       var uniq = Object.keys(ids).length, uw = Object.keys(workedIds).length;
-      var html = '<details class="how" style="margin-bottom:12px"><summary style="cursor:pointer;font-weight:600">Как это считается</summary><div class="module-subtitle" style="margin-top:8px"><b>Источник — листы отчёта:</b> «Сверка_ID» (каждый договор ТОП: сумма долга, есть ли комментарий, есть ли отработка, число действий, RC/PTP), «Детализация» (каждое действие: результат, оператор, дата), «Не отработано» (договоры без действий, статус и ответственный). <b>База</b> — все строки «Сверки» без удаления дублей, как в отчёте (уникальные ID показаны отдельно). <b>Отработан</b> — по договору найдено хотя бы одно действие. <b>RC</b> — разговор с клиентом по договору; <b>PTP</b> — обещание оплаты. Тексты комментариев на странице не показываются и не выгружаются.</div></details>';
+      var html = '<details class="how" style="margin-bottom:12px"><summary style="cursor:pointer;font-weight:600">Как это считается</summary><div class="module-subtitle" style="margin-top:8px"><b>Загрузка:</b> два файла — выгрузка ТОП (ID договора внутренний, сумма долга + ГП остаток, комментарии, статус, ответственный) и файл звонков (ID результата, дата, оператор, ID договора внутренний); порядок и количество загрузок не важны, можно заменить один файл, не трогая другой. Действия сопоставляются с ТОП по «ID договора внутренний», учитываются только найденные ID. Можно загрузить и готовый отчёт со листами «Сверка_ID» и «Детализация». <b>База</b> — все строки файла ТОП с данными, даже если ID повторяется; уникальные ID — отдельно, для контроля. <b>Отработан</b> — по ID найдено хотя бы одно действие. <b>Комментарий</b> — непустая ячейка комментариев. <b>RC</b> — события «Разговор состоялся Клиент», <b>PTP</b> — «Обещание оплаты» (клиент и третье лицо), <b>отложенные</b> — «Отложенное обещание»; суммы обещаний считаются по уникальным ID без задвоения. Тексты комментариев на странице не показываются и не выгружаются.</div></details>';
       html += '<div class="module-subtitle" style="margin-bottom:12px">'+esc(m.fileName||"")+(K&&K.from?' · действия: '+ru(K.from)+' – '+ru(K.to):'')+'</div>';
       var tiles = [
         {tip:"Строки листа «Сверка_ID». Уникальных ID — без повторов: "+uniq, label:"Договоров ТОП", value:fmtInt.format(total), icon:"▤", accent:true},
@@ -5681,6 +5786,14 @@
           ].map(function(t){ return '<div class="tile"><div class="tile-icon'+(t.c?" "+t.c:"")+'">'+t.i+'</div><div class="label">'+esc(t.l)+'</div><div class="value mono">'+t.v+'</div></div>'; }).join("")+'</div>'+
           '<div class="head" style="margin-top:14px"><h2 style="font-size:19px">Результаты действий</h2></div>'+
           bars(K.byRes.map(function(r){ return {name:r.k, v:r.n, num:fmtInt.format(r.n)+' · '+pct(r.n,K.n), color:/^разговор состоялся/i.test(r.k)?"linear-gradient(90deg,#2fcf95,#1aa9bd)":(/^контакт не/i.test(r.k)?"#c4cad6":null)}; }))+'</section>';
+        var M = K.metrics;
+        function d2(x){ return (x*100).toFixed(1).replace(".",",")+"%"; }
+        var fr = K.funnel.map(function(r){ return '<td class="amt">'+fmtInt.format(r.n)+'</td>'; }).join("");
+        var tail = '<td class="amt">'+fmtInt.format(M.zvonki)+'</td><td class="amt">'+fmtInt.format(M.total)+'</td><td class="amt">'+fmtInt.format(M.rc)+'</td><td class="amt">'+(M.zvonki?d2(M.rc/M.zvonki):"—")+'</td><td class="amt">'+fmtInt.format(M.ptp)+'</td><td class="amt">'+(M.rc?d2(M.ptp/M.rc):"—")+'</td><td class="amt">'+fmtCompact(M.ptpDebt)+'</td><td class="amt">'+fmtInt.format(M.def)+'</td><td class="amt">'+(M.rc?d2(M.def/M.rc):"—")+'</td><td class="amt">'+fmtCompact(M.defDebt)+'</td>';
+        html += '<section><div class="head"><h2>Воронка по группе ТОП'+tipI("Все результаты действий отдельными колонками. Звонки = общий итог − WhatsApp/Max/Telegram − письма. RC шт = события «Разговор состоялся Клиент». RC % = RC ÷ звонки. PTP шт = события «Обещание оплаты» (клиент и третье лицо). PTP % = PTP ÷ RC. Суммы остатка долга по PTP и отложенным обещаниям — по уникальным ID, без задвоения.")+'</h2><span class="hint">таблица прокручивается вправо</span></div><div class="table-wrap" style="overflow-x:auto"><table><thead><tr><th>Группа</th>'+K.funnel.map(function(r){ return '<th class="amt">'+esc(r.k||"Пусто")+'</th>'; }).join("")+'<th class="amt">Звонки</th><th class="amt">Общий итог</th><th class="amt">RC шт</th><th class="amt">RC %</th><th class="amt">PTP шт</th><th class="amt">PTP %</th><th class="amt">PTP сумма остатка долга, ₽</th><th class="amt">Отлож. обещ. шт</th><th class="amt">Отлож. обещ. %</th><th class="amt">Отлож. обещ. сумма остатка долга, ₽</th></tr></thead><tbody>'+
+          '<tr><td>Группа взыскания ТОП</td>'+fr+tail+'</tr><tr style="font-weight:700"><td>Общий итог</td>'+fr+tail+'</tr></tbody></table></div></section>';
+        html += '<section><div class="head"><h2>Обещания'+tipI("События — количество строк действий; уникальные ID — договоры без повторов; сумма остатка долга считается один раз на ID.")+'</h2></div><div class="table-wrap"><table><thead><tr><th>Вид</th><th class="amt">Событий</th><th class="amt">Уникальных ID</th><th class="amt">Сумма остатка долга</th><th class="amt">% суммы портфеля</th></tr></thead><tbody>'+
+          K.prom.map(function(p){ return '<tr'+(p.total?' style="font-weight:700"':'')+'><td>'+esc(p.name)+'</td><td class="amt">'+fmtInt.format(p.e)+'</td><td class="amt">'+fmtInt.format(p.ids)+'</td><td class="amt">'+fmtCompact(p.debt)+' ₽</td><td class="amt">'+pct(p.debt,debt,3)+'</td></tr>'; }).join("")+'</tbody></table></div></section>';
         if(K.byMonth.length){
           html += '<section><div class="head"><h2>По месяцам'+tipI("Действия из листа «Детализация» по календарным месяцам. Дозвон — разговор состоялся; PTP — обещание оплаты. «Договоров» — уникальные ID с действием в месяце.")+'</h2></div><div class="table-wrap"><table><thead><tr><th>Месяц</th><th class="amt">Действий</th><th class="amt">Звонков</th><th class="amt">Дозвон</th><th class="amt">% дозвона</th><th class="amt">PTP</th><th class="amt">Договоров</th></tr></thead><tbody>'+
             K.byMonth.map(function(a){ var cl=a.n-a.ms-a.lt, cv=a.cl+a.th; return '<tr><td>'+esc(monthLbl(a.k))+'</td><td class="amt">'+fmtInt.format(a.n)+'</td><td class="amt">'+fmtInt.format(cl)+'</td><td class="amt">'+fmtInt.format(cv)+'</td><td class="amt">'+pct(cv,cl)+'</td><td class="amt">'+fmtInt.format(a.ptp)+'</td><td class="amt">'+fmtInt.format(a.ids)+'</td></tr>'; }).join("")+'</tbody></table></div></section>';
@@ -5723,9 +5836,10 @@
       });
     }
 
-    el("fileInput").addEventListener("change", function(e){ var f = e.target.files && e.target.files[0]; e.target.value=""; if(f) load(f); });
-    el("resetBtn").addEventListener("click", function(){ state.model=null; try{ localStorage.removeItem(storageKey); }catch(e){} render(); });
-    window.__topLoadSheets = function(sheets, name){ var m = parse(sheets); m.fileName=name||"test"; state.model=m; render(); };
+    el("fileInput").addEventListener("change", function(e){ var fl = Array.prototype.slice.call(e.target.files||[]); e.target.value=""; if(fl.length) loadFiles(fl); });
+    el("resetBtn").addEventListener("click", function(){ state.src=null; state.model=null; try{ localStorage.removeItem(storageKey); }catch(e){} render(); });
+    window.__topLoadAny = function(sheets, name){ var c = classify(sheets); state.src = state.src||{}; if(c.kind==="report"){ var r=fromReport(sheets,name); state.src={top:r.top,calls:r.calls}; } else if(c.kind==="top") state.src.top=parseTop(c.aoa,name); else if(c.kind==="calls") state.src.calls=parseCalls(c.aoa,name); refresh(); return c.kind; };
+    state.model = compute(state.src);
     render();
   }
 
