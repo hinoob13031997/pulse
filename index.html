@@ -93,6 +93,10 @@
   .ana-bar i{ display:block; height:100%; border-radius:6px; background:linear-gradient(90deg,var(--grad-a),var(--grad-b)); }
   .ana-note{ margin:0 0 10px; color:var(--text-dim); font-size:14.5px; line-height:1.5; }
   .ana-scroll{ overflow-x:auto; }
+  .ana-table tr.ana-click{ cursor:pointer; }
+  .ana-table tr.ana-click:hover td{ background:var(--surface-2); }
+  .ana-table tr.ana-sel td{ background:var(--surface-2); font-weight:700; }
+  .ana-table tr.ana-click:focus-visible{ outline:2px solid var(--accent-ink); outline-offset:-2px; }
   .mono{ font-family:"JetBrains Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums; }
   h1,h2,h3{ font-weight:700; margin:0; text-wrap:balance; }
   svg text{ fill:var(--text-dim); }
@@ -3270,7 +3274,7 @@
       var ageCol = pickInitiationDateColumn(state.headers, state.colInfo);
       var realOpCol = pickRealOperatorColumn(state.headers);
       var kept = state.headers.filter(function(h){
-        return matchesKeepList(h) || idRe.test(h) ||
+        return matchesKeepList(h) || idRe.test(h) || (opts.portfolioAnalytics && /портфел/i.test(h)) ||
           h===amountCol || h===dateCol || h===ageCol || h===realOpCol;
       });
       var keptSet = {}; kept.forEach(function(h){ keptSet[h]=true; });
@@ -3505,60 +3509,112 @@
       }
       return {map:map, totCnt:totCnt, totSum:totSum};
     }
-    function cedentHtml(col, amountCol){
-      var hasAmt = !!amountCol;
-      var G = anaGroup(state.rows, function(r){ var v = r[col]; v = (v==null||String(v).trim()==="") ? "— не указан —" : String(v).trim(); return v; }, amountCol);
-      var keys = Object.keys(G.map).sort(function(a,b){ return hasAmt ? G.map[b].sum-G.map[a].sum : G.map[b].cnt-G.map[a].cnt; });
-      var TOP = 30, shown = keys.slice(0, TOP), rest = keys.slice(TOP);
-      var maxV = shown.length ? (hasAmt ? G.map[shown[0]].sum : G.map[shown[0]].cnt) : 0;
-      var h = shown.map(function(k){ var g=G.map[k]; return anaBarRow(k, g.cnt, g.sum, G.totCnt, G.totSum, maxV, hasAmt); }).join("");
-      if(rest.length){
-        var rc=0, rs=0; rest.forEach(function(k){ rc+=G.map[k].cnt; rs+=G.map[k].sum; });
-        h += anaBarRow("Прочие цеденты ("+rest.length+")", rc, rs, G.totCnt, G.totSum, maxV, hasAmt);
-      }
-      return '<section><div class="head"><h2>Долг по цедентам</h2><span class="hint">по колонке «'+esc(col)+'»'+(hasAmt?' · сумма из «'+esc(amountCol)+'»':'')+' · '+keys.length+' цедентов</span></div>'+
-        '<p class="ana-note">Кто из цедентов даёт основную часть портфеля: сколько договоров, на какую сумму и какую долю от всего портфеля. Сверху самые крупные.</p>'+
-        anaTable("Цедент", h, G.totCnt, G.totSum, hasAmt)+'</section>';
-    }
     var PAY_BUCKETS = [
       {label:"Платил за последние 30 дней", max:30}, {label:"31–90 дней назад", max:90}, {label:"91–180 дней назад", max:180},
       {label:"181–365 дней назад", max:365}, {label:"Больше года назад", max:Infinity}, {label:"Платежа нет (дата пустая)", max:null}
     ];
+    function payBucketOf(r, col, now){
+      var v = r[col];
+      if(v==null || v==="") return PAY_BUCKETS.length-1;
+      var t;
+      if(v instanceof Date) t = v.getTime();
+      else { var d = normalizeDate(v); if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) return PAY_BUCKETS.length-1; t = new Date(d+"T00:00:00").getTime(); }
+      var days = Math.floor((now - t)/86400000);
+      for(var i=0;i<PAY_BUCKETS.length-2;i++){ if(days <= PAY_BUCKETS[i].max) return i; }
+      return PAY_BUCKETS.length-2;
+    }
+    // колонки списка: номер договора / ФИО, название портфеля, затем остальные
+    function payListColumns(){
+      var h = state.headers;
+      var ids = h.filter(function(x){ return /договор|фио|клиент|заёмщик|заемщик/i.test(x); });
+      var pf = h.filter(function(x){ return /портфел/i.test(x) && ids.indexOf(x)<0; });
+      pf.sort(function(a,b){ return (/наименование|назван/i.test(b)?1:0) - (/наименование|назван/i.test(a)?1:0); });
+      var used = {}; ids.concat(pf).forEach(function(x){ used[x]=1; });
+      return {cols: ids.concat(pf).concat(h.filter(function(x){ return !used[x]; })), hasPortfolio: pf.length>0};
+    }
     function payAgeHtml(col, amountCol){
       var hasAmt = !!amountCol, now = Date.now();
-      var G = anaGroup(state.rows, function(r){
-        var v = r[col];
-        if(v==null || v==="") return PAY_BUCKETS.length-1;
-        var t;
-        if(v instanceof Date) t = v.getTime();
-        else { var d = normalizeDate(v); if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) return PAY_BUCKETS.length-1; t = new Date(d+"T00:00:00").getTime(); }
-        var days = Math.floor((now - t)/86400000);
-        for(var i=0;i<PAY_BUCKETS.length-1;i++){ if(days <= PAY_BUCKETS[i].max) return i; }
-        return PAY_BUCKETS.length-2;
-      }, amountCol);
+      var G = anaGroup(state.rows, function(r){ return payBucketOf(r, col, now); }, amountCol);
       var maxV = 0; Object.keys(G.map).forEach(function(k){ var m = hasAmt?G.map[k].sum:G.map[k].cnt; if(m>maxV) maxV=m; });
-      var h = PAY_BUCKETS.map(function(b,i){ var g = G.map[i] || {cnt:0,sum:0}; return anaBarRow(b.label, g.cnt, g.sum, G.totCnt, G.totSum, maxV, hasAmt); }).join("");
-      return '<section><div class="head"><h2>Давность последнего платежа</h2><span class="hint">по колонке «'+esc(col)+'», считая от сегодняшнего дня</span></div>'+
-        '<p class="ana-note">Как давно по договорам был последний платёж. Чем дольше нет платежей, тем меньше шансов на взыскание: начинать работу логично с верхних строк.</p>'+
-        anaTable("Когда был последний платёж", h, G.totCnt, G.totSum, hasAmt)+'</section>';
-    }
-    function statusSumHtml(cols, active, amountCol){
-      var hasAmt = !!amountCol, col = active;
-      var G = anaGroup(state.rows, function(r){ var v = r[col]; v = (v==null||String(v).trim()==="") ? "— не указан —" : String(v).trim(); return v; }, amountCol);
-      var keys = Object.keys(G.map).sort(function(a,b){ return hasAmt ? G.map[b].sum-G.map[a].sum : G.map[b].cnt-G.map[a].cnt; });
-      var TOP = 30, shown = keys.slice(0, TOP), rest = keys.slice(TOP);
-      var maxV = shown.length ? (hasAmt ? G.map[shown[0]].sum : G.map[shown[0]].cnt) : 0;
-      var h = shown.map(function(k){ var g=G.map[k]; return anaBarRow(k, g.cnt, g.sum, G.totCnt, G.totSum, maxV, hasAmt); }).join("");
-      if(rest.length){
-        var rc=0, rs=0; rest.forEach(function(k){ rc+=G.map[k].cnt; rs+=G.map[k].sum; });
-        h += anaBarRow("Прочие значения ("+rest.length+")", rc, rs, G.totCnt, G.totSum, maxV, hasAmt);
+      var sel = state.payBucket;
+      var h = PAY_BUCKETS.map(function(b,i){
+        var g = G.map[i] || {cnt:0,sum:0};
+        var row = anaBarRow(b.label, g.cnt, g.sum, G.totCnt, G.totSum, maxV, hasAmt);
+        return row.replace('<tr>','<tr class="ana-click'+(sel===i?' ana-sel':'')+'" data-b="'+i+'" tabindex="0" role="button" aria-pressed="'+(sel===i?"true":"false")+'">');
+      }).join("");
+      var out = '<div class="head"><h2>Давность последнего платежа</h2><span class="hint">по колонке «'+esc(col)+'», считая от сегодняшнего дня</span></div>'+
+        '<p class="ana-note">Как давно по договорам был последний платёж. <b>Нажмите на строку</b> — ниже появится список договоров этой группы, его можно скачать в Excel.</p>'+
+        anaTable("Когда был последний платёж", h, G.totCnt, G.totSum, hasAmt);
+      if(sel!=null && sel>=0 && sel<PAY_BUCKETS.length){
+        var lc = payListColumns();
+        var list = state.rows.filter(function(r){ return payBucketOf(r, col, now)===sel; });
+        if(hasAmt) list.sort(function(a,b){ return normalizeAmount(b[amountCol]) - normalizeAmount(a[amountCol]); });
+        var SHOW = 200, shown = list.slice(0, SHOW);
+        function cell(r, c){
+          var v = r[c];
+          if(v==null || v==="") return "";
+          if(v instanceof Date) return normalizeDate(v);
+          if(c===amountCol) return fmtMoney.format(normalizeAmount(v));
+          return String(v);
+        }
+        out += '<div class="head" style="margin-top:22px"><h2>Список: '+esc(PAY_BUCKETS[sel].label)+'</h2>'+
+          '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="hint">'+fmtInt.format(list.length)+' договоров'+(list.length>SHOW?' · на экране первые '+SHOW+' по сумме':'')+'</span>'+
+          '<button type="button" class="btn primary" id="'+prefix+'payExport">⭳ Скачать список в Excel</button></div></div>';
+        if(!lc.hasPortfolio) out += '<p class="ana-note">Колонка с названием портфеля в загруженном файле не найдена. Если она есть в файле, загрузите его заново — теперь такая колонка сохраняется.</p>';
+        if(!list.length) out += '<p class="ana-note">В этой группе нет договоров.</p>';
+        else out += '<div class="ana-scroll" style="max-height:520px;overflow:auto"><table class="ana-table"><thead><tr>'+lc.cols.map(function(c){ return '<th'+(c===amountCol?' class="num"':'')+'>'+esc(c)+'</th>'; }).join("")+'</tr></thead><tbody>'+
+          shown.map(function(r){ return '<tr>'+lc.cols.map(function(c){ return '<td'+(c===amountCol?' class="num"':'')+'>'+esc(cell(r,c))+'</td>'; }).join("")+'</tr>'; }).join("")+'</tbody></table></div>';
       }
-      var tabs = cols.length>1 ? '<div class="tabs" id="'+prefix+'statusSumTabs" style="margin-bottom:12px">'+cols.map(function(c){
-        return '<button type="button" class="tab'+(c===col?" active":"")+'" data-col="'+esc(c)+'">'+esc(c)+'</button>'; }).join("")+'</div>' : '';
-      return '<div class="head"><h2>Статусы и сумма</h2><span class="hint">'+keys.length+' значений в «'+esc(col)+'»</span></div>'+
-        '<p class="ana-note">Сколько договоров и денег находится в каждом статусе. Переключайте колонку статуса кнопками ниже.</p>'+tabs+
-        anaTable("Статус", h, G.totCnt, G.totSum, hasAmt);
+      return out;
     }
+    function wirePayBox(col, amountCol){
+      var box = document.getElementById(prefix+"payBox"); if(!box) return;
+      function pick(tr){
+        var b = tr.getAttribute("data-b"); if(b==null) return;
+        b = Number(b);
+        state.payBucket = (state.payBucket===b) ? null : b;
+        box.innerHTML = payAgeHtml(col, amountCol);
+      }
+      box.addEventListener("click", function(e){
+        var ex = e.target.closest ? e.target.closest("#"+prefix+"payExport") : null;
+        if(ex){ exportPayList(col, amountCol); return; }
+        var tr = e.target.closest ? e.target.closest("tr[data-b]") : null; if(tr) pick(tr);
+      });
+      box.addEventListener("keydown", function(e){
+        if(e.key!=="Enter" && e.key!==" ") return;
+        var tr = e.target.closest ? e.target.closest("tr[data-b]") : null;
+        if(tr){ e.preventDefault(); pick(tr); }
+      });
+    }
+    function exportPayList(col, amountCol){
+      var sel = state.payBucket; if(sel==null) return;
+      var now = Date.now(), lc = payListColumns();
+      var list = state.rows.filter(function(r){ return payBucketOf(r, col, now)===sel; });
+      if(!list.length){ alert("В этой группе нет договоров."); return; }
+      if(amountCol) list.sort(function(a,b){ return normalizeAmount(b[amountCol]) - normalizeAmount(a[amountCol]); });
+      var LIMIT = 1048575, cut = list.length > LIMIT;
+      if(cut) list = list.slice(0, LIMIT);
+      pulseBusy(true, "Готовим файл Excel…", fmtInt.format(list.length)+" договоров — группа «"+PAY_BUCKETS[sel].label+"»");
+      setTimeout(function(){
+        try{
+          var data = list.map(function(r){
+            var o = {};
+            lc.cols.forEach(function(c){
+              var v = r[c];
+              if(v instanceof Date) o[c] = normalizeDate(v);
+              else if(c===amountCol) o[c] = normalizeAmount(v);
+              else o[c] = v==null ? "" : v;
+            });
+            return o;
+          });
+          var name = "Давность платежа — "+PAY_BUCKETS[sel].label.replace(/[\\\/:*?"<>|]/g,"")+".xlsx";
+          exportRowsToXlsx(data, name);
+          if(cut) pulseNotice("В Excel помещается не больше 1 048 575 строк — в файл попали первые "+fmtInt.format(LIMIT)+" по сумме.", true);
+        }catch(e){ alert("Не удалось подготовить файл Excel: "+(e&&e.message||e)); }
+        setTimeout(function(){ pulseBusy(false); }, 600);
+      }, 80);
+    }
+
     function pickPortfolioCols(){
       var h = state.headers, ci = state.colInfo;
       var cedent = h.filter(function(x){ return /цедент/i.test(x); })[0] || null;
@@ -3566,15 +3622,6 @@
       var statuses = h.filter(function(x){ return /статус/i.test(x) && ci[x] && ci[x].type!=="date" && ci[x].type!=="numeric" && ci[x].uniq>1 && ci[x].uniq<=400; });
       return {cedent:cedent, pay:pay, statuses:statuses};
     }
-    function wirePortfolioStatus(amountCol, pc){
-      var box = document.getElementById(prefix+"statusSumBox"); if(!box) return;
-      box.addEventListener("click", function(e){
-        var b = e.target.closest ? e.target.closest("button[data-col]") : null; if(!b) return;
-        state.statusSumCol = b.getAttribute("data-col");
-        box.innerHTML = statusSumHtml(pc.statuses, state.statusSumCol, amountCol);
-      });
-    }
-
     function renderTrend(svg, dateCol, amountCol){
       var byDate = {};
       (state.filteredRows||state.rows).forEach(function(r){
@@ -4002,17 +4049,12 @@
         }
       }
 
-      if(dateCol) html += periodCompareHtml(dateCol, amountCol);
+      if(dateCol && !opts.portfolioAnalytics) html += periodCompareHtml(dateCol, amountCol);
 
       var pcols = null;
       if(opts.portfolioAnalytics){
         pcols = pickPortfolioCols();
-        if(pcols.cedent) html += cedentHtml(pcols.cedent, amountCol);
-        if(pcols.pay) html += payAgeHtml(pcols.pay, amountCol);
-        if(pcols.statuses.length){
-          if(!state.statusSumCol || pcols.statuses.indexOf(state.statusSumCol)<0) state.statusSumCol = pcols.statuses[0];
-          html += '<section id="'+prefix+'statusSumBox">'+statusSumHtml(pcols.statuses, state.statusSumCol, amountCol)+'</section>';
-        }
+        if(pcols.pay) html += '<section id="'+prefix+'payBox">'+payAgeHtml(pcols.pay, amountCol)+'</section>';
       }
       if(dateCol && !opts.portfolioAnalytics){
         html += '<section><div class="head"><h2>Динамика по дням'+(amountCol?" ("+esc(amountCol)+")":" (кол-во записей)")+'</h2><span class="hint">по колонке «'+esc(dateCol)+'»; если период длиннее ~5 месяцев — столбцы показывают месяцы</span></div>'+
@@ -4080,7 +4122,7 @@
       bodyEl.innerHTML = html;
 
       if(dateCol && !opts.portfolioAnalytics) renderTrend(document.getElementById(prefix+"trendSvg"), dateCol, amountCol);
-      if(pcols && pcols.statuses.length) wirePortfolioStatus(amountCol, pcols);
+      if(pcols && pcols.pay) wirePayBox(pcols.pay, amountCol);
       if(outcomeCol && dateCol) renderOutcomeTrend(dateCol, outcomeCol);
       if(statusCol) renderStatusDonut(statusCol);
       if(ageCol) renderAging(ageCol);
@@ -4311,7 +4353,7 @@
               }, 60);
             }, 60);
           }, {
-            keep: (opts.keepColumns && opts.keepColumns.length) ? {names:opts.keepColumns, idRe:"договор|клиент|заёмщик|заемщик|фио|\\bid\\b", moneyRe:"сумм|долг|плат[её]ж|остаток|взыскан", extraRe:"возбужд|открыт|начал|id\\s*операт"} : null,
+            keep: (opts.keepColumns && opts.keepColumns.length) ? {names:opts.keepColumns, idRe:"договор|клиент|заёмщик|заемщик|фио|\\bid\\b", moneyRe:"сумм|долг|плат[её]ж|остаток|взыскан", extraRe:"возбужд|открыт|начал|id\\s*операт|портфел"} : null,
             onProgress: function(n){
               var now = Date.now(); if(now - (runGenericUpload._t||0) < 400) return; runGenericUpload._t = now;
               pulseBusy(true, "Идёт загрузка: «"+file.name+"»", "шаг 1 из 3 — читаем файл, прочитано строк: "+fmtInt.format(n));
@@ -5554,7 +5596,7 @@
   // Портфель может приходить с сотнями тысяч строк — лишние колонки умножают на каждую строку
   // (память, поиск, экспорт), поэтому оставляем только те, что реально нужны для разбивок и
   // расчётов; всё остальное отбрасывается сразу после загрузки файла.
-  var PORTFOLIO_KEEP_COLUMNS = ["Наименование цедента","Оператор взаимодействия","Статус ИП КСК","Основание окончания ИП","Вид судебного взыскания","Рабочий статус","Статус ОВ"];
+  var PORTFOLIO_KEEP_COLUMNS = ["Наименование портфеля","Портфель","Наименование цедента","Оператор взаимодействия","Статус ИП КСК","Основание окончания ИП","Вид судебного взыскания","Рабочий статус","Статус ОВ"];
   createGenericModule("po_", "pulse_portfolio_odv", {allowSecondary:false, label:"Портфель ОДВ", hideDateCharts:true, portfolioAnalytics:true, keepColumns:PORTFOLIO_KEEP_COLUMNS});
   createGenericModule("pw_", "pulse_portfolio_all", {allowSecondary:false, label:"Портфель весь", portfolioAnalytics:true, keepColumns:PORTFOLIO_KEEP_COLUMNS});
   createDistribModule("ds_", "pulse_distrib_settings", "pulse_distrib_data", "Распределение договоров");
