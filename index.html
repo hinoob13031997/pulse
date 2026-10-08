@@ -83,6 +83,16 @@
   ::-webkit-scrollbar-thumb:hover{ background:var(--text-faint); background-clip:padding-box; }
   *{ scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
   ::placeholder{ color:var(--text-faint); opacity:1; }
+  .ana-table{ width:100%; border-collapse:collapse; font-size:14.5px; }
+  .ana-table th{ text-align:left; font-weight:700; color:var(--text-dim); font-size:13px; padding:8px 10px; border-bottom:1px solid var(--border); white-space:nowrap; }
+  .ana-table th.num, .ana-table td.num{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .ana-table td{ padding:8px 10px; border-bottom:1px solid var(--border-soft,var(--border)); vertical-align:middle; }
+  .ana-table tr.ana-total td{ font-weight:700; border-top:2px solid var(--border); border-bottom:none; }
+  .ana-table td.nm{ max-width:340px; overflow-wrap:anywhere; }
+  .ana-bar{ display:block; min-width:90px; height:10px; border-radius:6px; background:var(--surface-2); overflow:hidden; }
+  .ana-bar i{ display:block; height:100%; border-radius:6px; background:linear-gradient(90deg,var(--grad-a),var(--grad-b)); }
+  .ana-note{ margin:0 0 10px; color:var(--text-dim); font-size:14.5px; line-height:1.5; }
+  .ana-scroll{ overflow-x:auto; }
   .mono{ font-family:"JetBrains Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums; }
   h1,h2,h3{ font-weight:700; margin:0; text-wrap:balance; }
   svg text{ fill:var(--text-dim); }
@@ -3468,6 +3478,103 @@
         '<button type="button" class="btn ghost hist-clear" data-hist="rows" style="font-size:14px">Очистить историю</button></div></div>'+rows+'</section>';
     }
 
+    // ---- Аналитика портфеля: цеденты, давность последнего платежа, статусы × сумма ----
+    function anaPct(v){ return (v*100).toFixed(1).replace(".",",")+"%"; }
+    function anaBarRow(name, cnt, sum, totCnt, totSum, maxV, hasAmt){
+      var main = hasAmt ? sum : cnt;
+      var w = maxV>0 ? Math.max(1, Math.round(main/maxV*100)) : 0;
+      return '<tr><td class="nm">'+esc(name)+'</td><td class="num">'+fmtInt.format(cnt)+'</td>'+
+        (hasAmt?'<td class="num" title="'+fmtMoney.format(Math.round(sum))+' ₽">'+fmtCompact(sum)+' ₽</td>':'')+
+        '<td class="num">'+anaPct(hasAmt ? (totSum>0?sum/totSum:0) : (totCnt>0?cnt/totCnt:0))+'</td>'+
+        '<td><span class="ana-bar"><i style="width:'+w+'%"></i></span></td></tr>';
+    }
+    function anaTable(firstLabel, rowsHtml, totCnt, totSum, hasAmt){
+      return '<div class="ana-scroll"><table class="ana-table"><thead><tr><th>'+esc(firstLabel)+'</th><th class="num">Договоров</th>'+
+        (hasAmt?'<th class="num">Сумма</th>':'')+'<th class="num">Доля'+(hasAmt?' суммы':'')+'</th><th></th></tr></thead><tbody>'+rowsHtml+
+        '<tr class="ana-total"><td>Итого</td><td class="num">'+fmtInt.format(totCnt)+'</td>'+(hasAmt?'<td class="num" title="'+fmtMoney.format(Math.round(totSum))+' ₽">'+fmtCompact(totSum)+' ₽</td>':'')+'<td class="num">100%</td><td></td></tr>'+
+        '</tbody></table></div>';
+    }
+    // группировка: ключ → {cnt,sum}
+    function anaGroup(rows, keyFn, amountCol){
+      var map = {}, totCnt = 0, totSum = 0;
+      for(var i=0;i<rows.length;i++){
+        var r = rows[i], k = keyFn(r);
+        var g = map[k]; if(!g){ g = map[k] = {cnt:0, sum:0}; }
+        g.cnt++; totCnt++;
+        if(amountCol){ var a = normalizeAmount(r[amountCol]); g.sum += a; totSum += a; }
+      }
+      return {map:map, totCnt:totCnt, totSum:totSum};
+    }
+    function cedentHtml(col, amountCol){
+      var hasAmt = !!amountCol;
+      var G = anaGroup(state.rows, function(r){ var v = r[col]; v = (v==null||String(v).trim()==="") ? "— не указан —" : String(v).trim(); return v; }, amountCol);
+      var keys = Object.keys(G.map).sort(function(a,b){ return hasAmt ? G.map[b].sum-G.map[a].sum : G.map[b].cnt-G.map[a].cnt; });
+      var TOP = 30, shown = keys.slice(0, TOP), rest = keys.slice(TOP);
+      var maxV = shown.length ? (hasAmt ? G.map[shown[0]].sum : G.map[shown[0]].cnt) : 0;
+      var h = shown.map(function(k){ var g=G.map[k]; return anaBarRow(k, g.cnt, g.sum, G.totCnt, G.totSum, maxV, hasAmt); }).join("");
+      if(rest.length){
+        var rc=0, rs=0; rest.forEach(function(k){ rc+=G.map[k].cnt; rs+=G.map[k].sum; });
+        h += anaBarRow("Прочие цеденты ("+rest.length+")", rc, rs, G.totCnt, G.totSum, maxV, hasAmt);
+      }
+      return '<section><div class="head"><h2>Долг по цедентам</h2><span class="hint">по колонке «'+esc(col)+'»'+(hasAmt?' · сумма из «'+esc(amountCol)+'»':'')+' · '+keys.length+' цедентов</span></div>'+
+        '<p class="ana-note">Кто из цедентов даёт основную часть портфеля: сколько договоров, на какую сумму и какую долю от всего портфеля. Сверху самые крупные.</p>'+
+        anaTable("Цедент", h, G.totCnt, G.totSum, hasAmt)+'</section>';
+    }
+    var PAY_BUCKETS = [
+      {label:"Платил за последние 30 дней", max:30}, {label:"31–90 дней назад", max:90}, {label:"91–180 дней назад", max:180},
+      {label:"181–365 дней назад", max:365}, {label:"Больше года назад", max:Infinity}, {label:"Платежа нет (дата пустая)", max:null}
+    ];
+    function payAgeHtml(col, amountCol){
+      var hasAmt = !!amountCol, now = Date.now();
+      var G = anaGroup(state.rows, function(r){
+        var v = r[col];
+        if(v==null || v==="") return PAY_BUCKETS.length-1;
+        var t;
+        if(v instanceof Date) t = v.getTime();
+        else { var d = normalizeDate(v); if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) return PAY_BUCKETS.length-1; t = new Date(d+"T00:00:00").getTime(); }
+        var days = Math.floor((now - t)/86400000);
+        for(var i=0;i<PAY_BUCKETS.length-1;i++){ if(days <= PAY_BUCKETS[i].max) return i; }
+        return PAY_BUCKETS.length-2;
+      }, amountCol);
+      var maxV = 0; Object.keys(G.map).forEach(function(k){ var m = hasAmt?G.map[k].sum:G.map[k].cnt; if(m>maxV) maxV=m; });
+      var h = PAY_BUCKETS.map(function(b,i){ var g = G.map[i] || {cnt:0,sum:0}; return anaBarRow(b.label, g.cnt, g.sum, G.totCnt, G.totSum, maxV, hasAmt); }).join("");
+      return '<section><div class="head"><h2>Давность последнего платежа</h2><span class="hint">по колонке «'+esc(col)+'», считая от сегодняшнего дня</span></div>'+
+        '<p class="ana-note">Как давно по договорам был последний платёж. Чем дольше нет платежей, тем меньше шансов на взыскание: начинать работу логично с верхних строк.</p>'+
+        anaTable("Когда был последний платёж", h, G.totCnt, G.totSum, hasAmt)+'</section>';
+    }
+    function statusSumHtml(cols, active, amountCol){
+      var hasAmt = !!amountCol, col = active;
+      var G = anaGroup(state.rows, function(r){ var v = r[col]; v = (v==null||String(v).trim()==="") ? "— не указан —" : String(v).trim(); return v; }, amountCol);
+      var keys = Object.keys(G.map).sort(function(a,b){ return hasAmt ? G.map[b].sum-G.map[a].sum : G.map[b].cnt-G.map[a].cnt; });
+      var TOP = 30, shown = keys.slice(0, TOP), rest = keys.slice(TOP);
+      var maxV = shown.length ? (hasAmt ? G.map[shown[0]].sum : G.map[shown[0]].cnt) : 0;
+      var h = shown.map(function(k){ var g=G.map[k]; return anaBarRow(k, g.cnt, g.sum, G.totCnt, G.totSum, maxV, hasAmt); }).join("");
+      if(rest.length){
+        var rc=0, rs=0; rest.forEach(function(k){ rc+=G.map[k].cnt; rs+=G.map[k].sum; });
+        h += anaBarRow("Прочие значения ("+rest.length+")", rc, rs, G.totCnt, G.totSum, maxV, hasAmt);
+      }
+      var tabs = cols.length>1 ? '<div class="tabs" id="'+prefix+'statusSumTabs" style="margin-bottom:12px">'+cols.map(function(c){
+        return '<button type="button" class="tab'+(c===col?" active":"")+'" data-col="'+esc(c)+'">'+esc(c)+'</button>'; }).join("")+'</div>' : '';
+      return '<div class="head"><h2>Статусы и сумма</h2><span class="hint">'+keys.length+' значений в «'+esc(col)+'»</span></div>'+
+        '<p class="ana-note">Сколько договоров и денег находится в каждом статусе. Переключайте колонку статуса кнопками ниже.</p>'+tabs+
+        anaTable("Статус", h, G.totCnt, G.totSum, hasAmt);
+    }
+    function pickPortfolioCols(){
+      var h = state.headers, ci = state.colInfo;
+      var cedent = h.filter(function(x){ return /цедент/i.test(x); })[0] || null;
+      var pay = h.filter(function(x){ return ci[x] && ci[x].type==="date" && /плат[её]ж/i.test(x); })[0] || null;
+      var statuses = h.filter(function(x){ return /статус/i.test(x) && ci[x] && ci[x].type!=="date" && ci[x].type!=="numeric" && ci[x].uniq>1 && ci[x].uniq<=400; });
+      return {cedent:cedent, pay:pay, statuses:statuses};
+    }
+    function wirePortfolioStatus(amountCol, pc){
+      var box = document.getElementById(prefix+"statusSumBox"); if(!box) return;
+      box.addEventListener("click", function(e){
+        var b = e.target.closest ? e.target.closest("button[data-col]") : null; if(!b) return;
+        state.statusSumCol = b.getAttribute("data-col");
+        box.innerHTML = statusSumHtml(pc.statuses, state.statusSumCol, amountCol);
+      });
+    }
+
     function renderTrend(svg, dateCol, amountCol){
       var byDate = {};
       (state.filteredRows||state.rows).forEach(function(r){
@@ -3897,7 +4004,17 @@
 
       if(dateCol) html += periodCompareHtml(dateCol, amountCol);
 
-      if(dateCol){
+      var pcols = null;
+      if(opts.portfolioAnalytics){
+        pcols = pickPortfolioCols();
+        if(pcols.cedent) html += cedentHtml(pcols.cedent, amountCol);
+        if(pcols.pay) html += payAgeHtml(pcols.pay, amountCol);
+        if(pcols.statuses.length){
+          if(!state.statusSumCol || pcols.statuses.indexOf(state.statusSumCol)<0) state.statusSumCol = pcols.statuses[0];
+          html += '<section id="'+prefix+'statusSumBox">'+statusSumHtml(pcols.statuses, state.statusSumCol, amountCol)+'</section>';
+        }
+      }
+      if(dateCol && !opts.portfolioAnalytics){
         html += '<section><div class="head"><h2>Динамика по дням'+(amountCol?" ("+esc(amountCol)+")":" (кол-во записей)")+'</h2><span class="hint">по колонке «'+esc(dateCol)+'»; если период длиннее ~5 месяцев — столбцы показывают месяцы</span></div>'+
           '<div class="chart-wrap"><svg id="'+prefix+'trendSvg" class="chart-svg" style="height:250px"></svg></div></section>';
       }
@@ -3962,7 +4079,8 @@
 
       bodyEl.innerHTML = html;
 
-      if(dateCol) renderTrend(document.getElementById(prefix+"trendSvg"), dateCol, amountCol);
+      if(dateCol && !opts.portfolioAnalytics) renderTrend(document.getElementById(prefix+"trendSvg"), dateCol, amountCol);
+      if(pcols && pcols.statuses.length) wirePortfolioStatus(amountCol, pcols);
       if(outcomeCol && dateCol) renderOutcomeTrend(dateCol, outcomeCol);
       if(statusCol) renderStatusDonut(statusCol);
       if(ageCol) renderAging(ageCol);
@@ -5437,8 +5555,8 @@
   // (память, поиск, экспорт), поэтому оставляем только те, что реально нужны для разбивок и
   // расчётов; всё остальное отбрасывается сразу после загрузки файла.
   var PORTFOLIO_KEEP_COLUMNS = ["Наименование цедента","Оператор взаимодействия","Статус ИП КСК","Основание окончания ИП","Вид судебного взыскания","Рабочий статус","Статус ОВ"];
-  createGenericModule("po_", "pulse_portfolio_odv", {allowSecondary:false, label:"Портфель ОДВ", hideDateCharts:true, keepColumns:PORTFOLIO_KEEP_COLUMNS});
-  createGenericModule("pw_", "pulse_portfolio_all", {allowSecondary:false, label:"Портфель весь", keepColumns:PORTFOLIO_KEEP_COLUMNS});
+  createGenericModule("po_", "pulse_portfolio_odv", {allowSecondary:false, label:"Портфель ОДВ", hideDateCharts:true, portfolioAnalytics:true, keepColumns:PORTFOLIO_KEEP_COLUMNS});
+  createGenericModule("pw_", "pulse_portfolio_all", {allowSecondary:false, label:"Портфель весь", portfolioAnalytics:true, keepColumns:PORTFOLIO_KEEP_COLUMNS});
   createDistribModule("ds_", "pulse_distrib_settings", "pulse_distrib_data", "Распределение договоров");
   initOverview();
 
