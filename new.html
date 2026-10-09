@@ -5520,7 +5520,7 @@
       var h = hdrOf(aoa), idx = {};
       function find(key, re, not){ for(var i=0;i<h.length;i++){ if(re.test(h[i]) && !(not && not.test(h[i]))){ idx[key]=i; return; } } }
       find("sum",/^сумма$/); if(idx.sum==null) find("sum",/сумм/,/долг|остат/);
-      find("created",/дата создания/); find("op",/оператор/); find("group",/группа/); find("ext",/внешн/); find("inn",/внутренн/); find("debt",/долг/); find("status",/рабочий статус|статус/);
+      find("created",/дата создания/); find("op",/оператор/); find("group",/группа/); find("ext",/внешн/); find("inn",/внутренн/); find("debt",/долг/); find("status",/рабочий статус/); if(idx.status==null) find("status",/статус/);
       var det = [], from="", to="";
       for(var r=1;r<aoa.length;r++){
         var row = aoa[r]; if(!row) continue;
@@ -5769,7 +5769,7 @@
           var detl = m.pDetails, shown = state.showAllDetails ? detl : detl.slice(0,30);
           inner += '<div class="head more-list"><h2 style="font-size:16px">Список обещаний ('+fmtInt.format(detl.length)+')</h2><button type="button" class="btn ghost" id="'+prefix+'detExport" style="font-size:14px">⭳ Скачать в Excel</button></div>'+
             '<div class="table-wrap"><table><thead><tr><th>Создано</th><th>Группа</th><th>Оператор</th><th class="amt">Сумма</th><th class="amt">Остаток долга</th><th>ID внешний</th><th>Рабочий статус</th></tr></thead><tbody>'+
-            shown.map(function(d){ return '<tr><td>'+esc(d.created)+'</td><td>'+esc(d.group)+'</td><td>'+esc(d.op)+'</td><td class="amt">'+fmtCompact(d.sum)+'</td><td class="amt">'+fmtCompact(d.debt)+'</td><td>'+esc(d.ext)+'</td><td>'+esc(d.status)+'</td></tr>'; }).join("")+'</tbody></table></div>'+
+            shown.map(function(d){ return '<tr><td>'+esc(d.created)+'</td><td>'+esc(d.group)+'</td><td>'+esc(d.op)+'</td><td class="amt">'+fmtCompact(d.sum)+'</td><td class="amt">'+(d.debt?fmtCompact(d.debt):'—')+'</td><td>'+esc(d.ext)+'</td><td>'+esc(d.status)+'</td></tr>'; }).join("")+'</tbody></table></div>'+
             (detl.length>shown.length ? '<button type="button" class="btn ghost" id="'+prefix+'detMore" style="margin-top:10px">Показать все '+fmtInt.format(detl.length)+'</button>' : '');
         }
         return inner;
