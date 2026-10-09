@@ -5520,13 +5520,13 @@
       var h = hdrOf(aoa), idx = {};
       function find(key, re, not){ for(var i=0;i<h.length;i++){ if(re.test(h[i]) && !(not && not.test(h[i]))){ idx[key]=i; return; } } }
       find("sum",/^сумма$/); if(idx.sum==null) find("sum",/сумм/,/долг|остат/);
-      find("created",/дата создания/); find("op",/оператор/); find("group",/группа/); find("ext",/внешн/); find("inn",/внутренн/); find("debt",/долг/); find("status",/рабочий статус/); if(idx.status==null) find("status",/статус/);
+      find("created",/дата создания/); find("op",/оператор/); find("group",/группа/); find("ext",/внешн/); find("inn",/внутренн/); find("debt",/долг/); find("status",/рабочий статус/); if(idx.status==null) find("status",/статус/); find("uid",/^id\s*пользовател/);
       var det = [], from="", to="";
       for(var r=1;r<aoa.length;r++){
         var row = aoa[r]; if(!row) continue;
         var sum = idx.sum!=null ? num(row[idx.sum]) : 0; if(!sum) continue;
         var cv = idx.created!=null ? row[idx.created] : "", d = isoDate(cv); if(!d) continue;
-        var op = idx.op!=null ? String(row[idx.op]||"").trim() : "";
+        var op = (idx.uid!=null && String(row[idx.uid]||"").trim()) || (idx.op!=null ? String(row[idx.op]||"").trim() : "");
         var g = (idx.group!=null && String(row[idx.group]||"").trim()) || groupOfOperator(op) || "Без группы";
         det.push({ group:g, sum:sum, created:(cv instanceof Date ? d : String(cv).slice(0,16)), d:d, op:op, ext:idx.ext!=null?row[idx.ext]:"", inn:idx.inn!=null?row[idx.inn]:"", debt:idx.debt!=null?num(row[idx.debt]):0, status:idx.status!=null?String(row[idx.status]||"").trim():"" });
         if(!from || d<from) from=d; if(!to || d>to) to=d;
