@@ -591,9 +591,10 @@
     --good:#3ddc97; --good-soft:#3ddc9722; --bad:#ff6b7a; --bad-soft:#ff6b7a22; --warn:#f5b84b; --warn-soft:#f5b84b22;
     --gold:#f2c14e; --accent:#f2c14e; --accent-ink:#f2c14e; --grad-a:#f2c14e; --grad-b:#4f8cff;
     --btn-a:#2f5fd0; --btn-b:#4f8cff;
+    --name:#a9b9ee; --num:#ffd978;
     color-scheme:dark; color:var(--text);
     background:radial-gradient(900px 420px at 85% -10%, #3b5bdb33, transparent 60%), radial-gradient(700px 360px at -5% 105%, #f2c14e18, transparent 60%), linear-gradient(165deg,#0b1430,#0a1124);
-    border:1px solid var(--border); border-radius:22px; padding:18px; margin-top:6px;
+    border:1px solid var(--border); border-radius:20px; padding:14px; margin-top:6px;
     box-shadow:0 18px 50px #0a122855;
   }
   .dash .d-meta{ font-size:13.5px; color:var(--text-dim); margin:2px 2px 12px; display:flex; flex-wrap:wrap; gap:6px 14px; align-items:center; }
@@ -603,29 +604,31 @@
   .dash .btn:hover{ border-color:var(--gold); }
   .dash .hint{ color:var(--text-dim); }
   .dash a, .dash .info-tip{ color:var(--text-dim); }
-  .kpis{ display:grid; grid-template-columns:repeat(auto-fit,minmax(185px,1fr)); gap:14px; margin-bottom:14px; }
-  .dgrid{ display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:14px; margin-bottom:14px; }
+  .kpis{ display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; margin-bottom:10px; }
+  .kpis .dcard{ grid-column:auto; }
+  @media (max-width:1000px){ .kpis{ grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); } }
+  .dgrid{ display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:10px; margin-bottom:10px; }
   .dcard{
     grid-column:span 12; min-width:0; position:relative;
-    background:linear-gradient(160deg,var(--surface-raised),var(--surface)); border:1px solid var(--border); border-radius:16px; padding:15px 17px 16px;
+    background:linear-gradient(160deg,var(--surface-raised),var(--surface)); border:1px solid var(--border); border-radius:14px; padding:11px 14px 13px;
     box-shadow:0 10px 28px #050a1c66, inset 0 1px 0 #ffffff12;
   }
   .dcard.s4{ grid-column:span 4; } .dcard.s5{ grid-column:span 5; } .dcard.s6{ grid-column:span 6; } .dcard.s7{ grid-column:span 7; } .dcard.s8{ grid-column:span 8; }
   @media (max-width:1100px){ .dcard.s4,.dcard.s5{ grid-column:span 6; } .dcard.s7,.dcard.s8{ grid-column:span 12; } }
   @media (max-width:700px){ .dcard.s4,.dcard.s5,.dcard.s6{ grid-column:span 12; } .dash{ padding:12px; border-radius:16px; } }
-  .dc-head{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
-  .dc-head h3{ margin:0; font-size:15px; font-weight:700; letter-spacing:.02em; }
-  .dc-head .hint{ font-size:12.5px; }
-  .dcard.kpi{ padding:14px 16px 12px; overflow:hidden; display:flex; flex-direction:column; gap:2px; }
+  .dc-head{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+  .dc-head h3{ margin:0; font-size:15.5px; font-weight:700; letter-spacing:.02em; }
+  .dc-head .hint{ font-size:13px; color:var(--name); }
+  .dcard.kpi{ padding:10px 12px 9px; overflow:hidden; display:flex; flex-direction:column; gap:2px; }
   .kpi .k-top{ display:flex; align-items:center; gap:10px; }
-  .kpi .k-ico{ width:32px; height:32px; border-radius:10px; display:grid; place-items:center; font-size:16px; flex:0 0 auto; }
+  .kpi .k-ico{ width:28px; height:28px; border-radius:9px; display:grid; place-items:center; font-size:14px; flex:0 0 auto; }
   .kpi .k-label{ font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text-dim); line-height:1.25; }
-  .kpi .k-val{ font-size:26px; font-weight:800; letter-spacing:-.02em; margin-top:8px; overflow-wrap:anywhere; line-height:1.15; }
+  .kpi .k-val{ font-size:24px; font-weight:800; letter-spacing:-.02em; margin-top:6px; overflow-wrap:anywhere; line-height:1.15; }
   .kpi .k-val small{ font-size:13px; font-weight:600; color:var(--text-dim); letter-spacing:0; }
   .kpi.bad .k-val{ color:var(--bad); }
-  .kpi .k-sub{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:12.5px; color:var(--text-dim); margin-top:4px; }
-  .kpi .cmp-bar{ margin-top:10px; }
-  .kpi .k-spark{ display:block; width:calc(100% + 12px); height:42px; margin:10px -6px -4px; }
+  .kpi .k-sub{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; font-size:13px; color:var(--num); margin-top:3px; }
+  .kpi .cmp-bar{ margin-top:8px; }
+  .kpi .k-spark{ display:block; width:calc(100% + 12px); height:30px; margin:6px -4px -3px; }
   .dash .delta{ display:inline-flex; align-items:center; gap:3px; font-size:12px; font-weight:700; padding:2px 8px; border-radius:999px; font-family:"JetBrains Mono",monospace; white-space:nowrap; }
   .dash .delta.up{ color:var(--good); background:var(--good-soft); }
   .dash .delta.down{ color:var(--bad); background:var(--bad-soft); }
@@ -666,6 +669,57 @@
   details.more > .more-body > section{ border:0; box-shadow:none; background:transparent; padding:0; margin:0; }
   .more-list{ margin-top:12px; }
   .d-more{ margin-top:4px; }
+
+  /* ---- читаемость: крупнее шрифты, названия и цифры разными цветами ---- */
+  .dash .hint{ color:var(--name); }
+  .dash .gauge-wrap{ gap:12px; }
+  .dash .gauge-wrap .donut-svg, .dash .dcard .donut-svg{ width:140px; height:140px; }
+  .dash .kv{ gap:7px; min-width:140px; }
+  .dash .kv > div{ font-size:15px; padding-bottom:5px; }
+  .dash .kv dt{ color:var(--name); } .dash .kv dd{ color:var(--num); font-size:15.5px; }
+  .dash .mini3 b{ color:var(--num); } .dash .mini3 span{ color:var(--name); }
+  .dash .dcard .donut-row{ gap:10px; }
+  .dash .dcard .legend{ width:100%; min-width:0; flex:1 1 100%; gap:7px; }
+  .dash .dcard .legend .li{ font-size:14.5px; align-items:flex-start; gap:8px; }
+  .dash .dcard .legend .sw{ margin-top:5px; width:11px; height:11px; }
+  .dash .dcard .legend .ln{ white-space:normal; overflow:visible; text-overflow:clip; color:var(--name); line-height:1.3; }
+  .dash .dcard .legend .lv{ color:var(--num); font-size:14px; font-weight:600; }
+  .dash .cmp-list{ gap:11px; }
+  .dash .cmp-name{ color:var(--name); font-size:15px; }
+  .dash .cmp-pct{ color:var(--num); font-size:16px; }
+  .dash .cmp-sub{ font-size:13.5px; color:var(--text-dim); margin-top:4px; }
+  .dash .cmp-sub b{ color:var(--num); font-weight:600; }
+  .dash .barlist{ gap:8px; }
+  .dash .barlist .name{ color:var(--name); font-size:14.5px; }
+  .dash .barlist .num{ color:var(--num); font-size:14px; }
+  .dash .chart-legend{ font-size:13px; color:var(--name); }
+  .dash .chart-svg{ min-width:0 !important; height:auto !important; }
+  .dash .col-svg text{ font-family:"JetBrains Mono",monospace; }
+
+  /* ---- таблицы: плотные, названия и цифры разными цветами ---- */
+  .dash table{ width:100%; font-size:13.5px; }
+  .dash table th, .dash table td{ padding:6px 9px; }
+  .dash table th{ color:var(--text-faint); font-size:11.5px; letter-spacing:.06em; }
+  .dash table td{ color:var(--name); border-bottom:1px solid var(--border-soft); }
+  .dash table td.amt{ color:var(--num); font-family:"JetBrains Mono",monospace; font-weight:600; }
+  .dash table tr:last-child td{ border-bottom:0; }
+  .dash table .id{ color:var(--text-faint); font-family:"JetBrains Mono",monospace; }
+  .dash table tr.total td{ font-weight:700; }
+  .dash table tr.total td:first-child{ color:var(--text); }
+  .kvgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:7px; }
+  .kvgrid > div{ background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:6px 10px; min-width:0; }
+  .kvgrid span{ display:block; font-size:12.5px; color:var(--name); line-height:1.25; overflow-wrap:anywhere; }
+  .kvgrid b{ display:block; font-family:"JetBrains Mono",monospace; font-size:16px; color:var(--num); margin-top:2px; }
+  .kvgrid-title{ font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-faint); margin:10px 0 6px; }
+  .kvgrid-title:first-child{ margin-top:0; }
+
+  /* свёрнутые блоки — рядом друг с другом, раскрытый занимает всю ширину */
+  .d-more{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr)); gap:10px; align-items:start; margin-top:2px; }
+  .d-more details.more{ margin:0; }
+  .d-more details.more[open]{ grid-column:1/-1; }
+  .dash details.more > summary{ padding:10px 14px; font-size:14.5px; }
+  .dash details.more > summary .hint{ font-size:12.5px; }
+  .dash details.more > .more-body{ padding:2px 14px 12px; }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -5146,21 +5200,22 @@
       off += len;
     });
     return '<svg class="donut-svg" width="160" height="160" viewBox="0 0 160 160" role="img" aria-label="'+esc(topTxt+" "+(botTxt||""))+'"><circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="var(--surface-2)" stroke-width="17"/>'+segs+
-      '<text x="80" y="82" text-anchor="middle" font-size="15" font-weight="800" fill="var(--text)" font-family="JetBrains Mono, monospace">'+esc(topTxt)+'</text>'+
+      '<text x="80" y="82" text-anchor="middle" font-size="16" font-weight="800" fill="var(--text)" font-family="JetBrains Mono, monospace">'+esc(topTxt)+'</text>'+
       (botTxt?'<text x="80" y="102" text-anchor="middle" font-size="12" fill="var(--text-dim)" font-family="JetBrains Mono, monospace">'+esc(botTxt)+'</text>':'')+'</svg>';
   }
   function donutLegend(parts, fmt){
     var tot = parts.reduce(function(a,x){ return a+x.v; },0) || 1;
     return '<div class="legend">'+parts.map(function(x){ return '<div class="li"><span class="sw" style="background:'+x.color+'"></span><span class="ln" title="'+esc(x.name)+'">'+esc(x.name)+'</span><span class="lv">'+(fmt?fmt(x.v):String(x.v))+' · '+(x.v/tot*100).toFixed(1).replace(".",",")+'%</span></div>'; }).join("")+'</div>';
   }
-  // items: [{label, v, v2?, sub?, tip?}]; v — основной (золото), v2 — второй (синий) столбец рядом
+  // items: [{label, v, v2?, sub?, tip?}]; v — основной (золото), v2 — второй (синий) столбец рядом.
+  // opts.W — ширина холста ≈ ширине карточки в пикселях, чтобы шрифт на экране не уменьшался.
   function colChartSvg(items, o){
     o = o || {};
-    var id='cc'+(++_dashUid), W=520, H=o.height||210, L=6, R=6, T=24, B=o.sub?50:38, n=Math.max(items.length,1);
+    var id='cc'+(++_dashUid), W=o.W||340, H=o.height||210, L=4, R=4, T=26, B=o.sub?58:42, n=Math.max(items.length,1);
     var mx = o.max || Math.max.apply(null, items.map(function(x){ return Math.max(x.v||0, x.v2||0); }).concat([1e-9]));
-    var slot=(W-L-R)/n, two=items.some(function(x){ return x.v2!=null; }), bw=Math.min(two?24:46, slot*(two?0.34:0.62));
-    var c1=o.color||"#f2c14e", c2=o.color2||"#4f8cff", ph=H-T-B, base=H-B, maxCh=Math.max(4,Math.floor(slot/6.4));
-    var g='<defs><linearGradient id="'+id+'a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+c1+'"/><stop offset="1" stop-color="'+c1+'" stop-opacity=".4"/></linearGradient><linearGradient id="'+id+'b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+c2+'"/><stop offset="1" stop-color="'+c2+'" stop-opacity=".4"/></linearGradient></defs>';
+    var slot=(W-L-R)/n, two=items.some(function(x){ return x.v2!=null; }), bw=Math.min(two?26:48, slot*(two?0.34:0.6));
+    var c1=o.color||"#f2c14e", c2=o.color2||"#4f8cff", ph=H-T-B, base=H-B, maxCh=Math.max(4,Math.floor(slot/8));
+    var g='<defs><linearGradient id="'+id+'a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+c1+'"/><stop offset="1" stop-color="'+c1+'" stop-opacity=".45"/></linearGradient><linearGradient id="'+id+'b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+c2+'"/><stop offset="1" stop-color="'+c2+'" stop-opacity=".45"/></linearGradient></defs>';
     for(var k=0;k<=3;k++){ var y=T+ph*k/3; g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke="currentColor" opacity=".12"/>'; }
     items.forEach(function(x,i){
       var cx=L+slot*i+slot/2;
@@ -5168,11 +5223,11 @@
       var dx1 = two ? bw*0.6 : 0;
       if(two) g+=bar(x.v2,'b',-bw*0.6);
       g+=bar(x.v,'a',dx1);
-      var ty=base-Math.max(0,(x.v||0)/mx*ph)-6;
-      g+='<text x="'+(cx+dx1).toFixed(1)+'" y="'+Math.max(ty,12).toFixed(1)+'" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor" font-family="JetBrains Mono, monospace">'+esc(o.fmt?o.fmt(x.v||0):String(x.v))+'</text>';
+      var ty=base-Math.max(0,(x.v||0)/mx*ph)-7;
+      g+='<text x="'+(cx+dx1).toFixed(1)+'" y="'+Math.max(ty,14).toFixed(1)+'" text-anchor="middle" font-size="15" font-weight="700" fill="#ffd978">'+esc(o.fmt?o.fmt(x.v||0):String(x.v))+'</text>';
       var lb=String(x.label||""); if(lb.length>maxCh) lb=lb.slice(0,maxCh-1)+'…';
-      g+='<text x="'+cx.toFixed(1)+'" y="'+(base+17)+'" text-anchor="middle" font-size="11.5" fill="currentColor" opacity=".75"><title>'+esc(x.label)+'</title>'+esc(lb)+'</text>';
-      if(x.sub) g+='<text x="'+cx.toFixed(1)+'" y="'+(base+32)+'" text-anchor="middle" font-size="10.5" fill="currentColor" opacity=".5" font-family="JetBrains Mono, monospace">'+esc(x.sub)+'</text>';
+      g+='<text x="'+cx.toFixed(1)+'" y="'+(base+19)+'" text-anchor="middle" font-size="14" fill="#a9b9ee"><title>'+esc(x.label)+'</title>'+esc(lb)+'</text>';
+      if(x.sub) g+='<text x="'+cx.toFixed(1)+'" y="'+(base+37)+'" text-anchor="middle" font-size="13" fill="currentColor" opacity=".7">'+esc(x.sub)+'</text>';
     });
     return '<svg viewBox="0 0 '+W+' '+H+'" class="col-svg" style="color:var(--text)">'+g+'</svg>';
   }
@@ -5566,15 +5621,15 @@
     // ---------- графики ----------
     function lineChart(opts){
       // opts: {labels, series:[{name,color,values,dash}], height}
-      var W=900,H=opts.height||260,L=64,R=14,T=14,B=46, n=opts.labels.length;
+      var W=opts.W||900,H=opts.height||260,L=64,R=14,T=14,B=46, n=opts.labels.length;
       var mx = 0; opts.series.forEach(function(s){ s.values.forEach(function(v){ if(v!=null && v>mx) mx=v; }); });
       if(!mx) mx=1;
       function X(i){ return n>1 ? L+(W-L-R)*i/(n-1) : L+(W-L-R)/2; }
       function Y(v){ return T+(H-T-B)*(1-v/mx); }
       var g='';
-      for(var k=0;k<=4;k++){ var yv = mx*k/4, y=Y(yv); g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'" stroke="currentColor" opacity=".12"/><text x="'+(L-8)+'" y="'+(y+4)+'" text-anchor="end" font-size="12" fill="currentColor" opacity=".7">'+fmtMoneyShort(yv)+'</text>'; }
+      for(var k=0;k<=4;k++){ var yv = mx*k/4, y=Y(yv); g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'" stroke="currentColor" opacity=".12"/><text x="'+(L-8)+'" y="'+(y+4)+'" text-anchor="end" font-size="'+(opts.fs||12)+'" fill="currentColor" opacity=".7">'+fmtMoneyShort(yv)+'</text>'; }
       var step = Math.max(1, Math.ceil(n/12));
-      opts.labels.forEach(function(lb,i){ if(i%step===0 || i===n-1) g+='<text x="'+X(i)+'" y="'+(H-B+18)+'" text-anchor="middle" font-size="12" fill="currentColor" opacity=".7">'+esc(lb)+'</text>'; });
+      opts.labels.forEach(function(lb,i){ if(i%step===0 || i===n-1) g+='<text x="'+X(i)+'" y="'+(H-B+18)+'" text-anchor="middle" font-size="'+(opts.fs||12)+'" fill="currentColor" opacity=".7">'+esc(lb)+'</text>'; });
       opts.series.forEach(function(s){
         var pts=[]; s.values.forEach(function(v,i){ if(v!=null) pts.push(X(i).toFixed(1)+","+Y(v).toFixed(1)); });
         g+='<polyline fill="none" stroke="'+s.color+'" stroke-width="2.4" '+(s.dash?'stroke-dasharray="6 5" ':'')+'points="'+pts.join(" ")+'"/>';
@@ -5583,16 +5638,16 @@
     }
     function barChart(opts){
       // opts: {labels, values, line (constant), color, height, valFmt}
-      var W=900,H=opts.height||220,L=64,R=14,T=14,B=46, n=opts.labels.length;
+      var W=opts.W||900,H=opts.height||220,L=64,R=14,T=14,B=46, n=opts.labels.length;
       var mx = Math.max(opts.line||0, maxOf(opts.values.concat([0]))); if(!mx) mx=1;
       function Y(v){ return T+(H-T-B)*(1-v/mx); }
       var bw = (W-L-R)/Math.max(n,1), g='';
-      for(var k=0;k<=4;k++){ var yv=mx*k/4, y=Y(yv); g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'" stroke="currentColor" opacity=".12"/><text x="'+(L-8)+'" y="'+(y+4)+'" text-anchor="end" font-size="12" fill="currentColor" opacity=".7">'+(opts.axisFmt?opts.axisFmt(yv):fmtMoneyShort(yv))+'</text>'; }
+      for(var k=0;k<=4;k++){ var yv=mx*k/4, y=Y(yv); g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'" stroke="currentColor" opacity=".12"/><text x="'+(L-8)+'" y="'+(y+4)+'" text-anchor="end" font-size="'+(opts.fs||12)+'" fill="currentColor" opacity=".7">'+(opts.axisFmt?opts.axisFmt(yv):fmtMoneyShort(yv))+'</text>'; }
       var step = Math.max(1, Math.ceil(n/14));
       opts.values.forEach(function(v,i){
         var x = L+bw*i+bw*0.12, h=(H-T-B)*(v/mx);
         g+='<rect x="'+x.toFixed(1)+'" y="'+(Y(v)).toFixed(1)+'" width="'+(bw*0.76).toFixed(1)+'" height="'+Math.max(h,0).toFixed(1)+'" rx="2" fill="'+opts.color+'"><title>'+esc(opts.labels[i])+': '+(opts.valFmt?opts.valFmt(v):fmtCompact(v))+'</title></rect>';
-        if(i%step===0 || i===n-1) g+='<text x="'+(L+bw*i+bw/2).toFixed(1)+'" y="'+(H-B+18)+'" text-anchor="middle" font-size="12" fill="currentColor" opacity=".7">'+esc(opts.labels[i])+'</text>';
+        if(i%step===0 || i===n-1) g+='<text x="'+(L+bw*i+bw/2).toFixed(1)+'" y="'+(H-B+18)+'" text-anchor="middle" font-size="'+(opts.fs||12)+'" fill="currentColor" opacity=".7">'+esc(opts.labels[i])+'</text>';
       });
       if(opts.line){ var yl=Y(opts.line); g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yl+'" y2="'+yl+'" stroke="#e5484d" stroke-width="2" stroke-dasharray="6 5"/>'; }
       return '<svg viewBox="0 0 '+W+' '+H+'" class="chart-svg" style="width:100%;height:'+H+'px;color:var(--text)">'+g+'</svg>';
@@ -5670,7 +5725,7 @@
         var lastIdx = cumFact.length-1; while(lastIdx>0 && cumFact[lastIdx]==null) lastIdx--;
         cards += dCard("Накопительный сбор", 'факт '+money(cumFact[lastIdx])+' · план на дату '+money(cumPlan[lastIdx]),
           '<div class="chart-legend"><span class="li"><span class="dot" style="background:#35d0e0"></span>факт</span><span class="li"><span class="dot" style="background:#ff6b7a"></span>план</span><span class="li"><span class="dot" style="background:#8794bd"></span>прошлый период</span></div>'+
-          '<div class="chart-wrap">'+lineChart({labels:labels, series:[{name:"план",color:"#ff6b7a",values:cumPlan,dash:true},{name:"прошлый период",color:"#8794bd",values:cumPrev,dash:true},{name:"факт",color:"#35d0e0",values:cumFact}], height:230})+'</div>', 8);
+          '<div class="chart-wrap">'+lineChart({labels:labels, series:[{name:"план",color:"#ff6b7a",values:cumPlan,dash:true},{name:"прошлый период",color:"#8794bd",values:cumPrev,dash:true},{name:"факт",color:"#35d0e0",values:cumFact}], height:200, W:640, fs:13})+'</div>', 8);
       }
       // 3. группы: план/факт
       if(m.groups.length){
@@ -5700,7 +5755,7 @@
       // 6. сбор по дням
       var avgPlan = m.calc ? m.calc.planDay : (m.days.length ? m.days[0].plan : 0);
       if(m.days.length){
-        cards += dCard("Сбор по дням", 'пунктир — дневной план '+money(avgPlan), '<div class="chart-wrap">'+barChart({labels:labels, values:m.days.map(function(d){return d.fact;}), line:avgPlan, color:"#f2c14e", height:210})+'</div>', 7);
+        cards += dCard("Сбор по дням", 'пунктир — дневной план '+money(avgPlan), '<div class="chart-wrap">'+barChart({labels:labels, values:m.days.map(function(d){return d.fact;}), line:avgPlan, color:"#f2c14e", height:200, W:600, fs:13})+'</div>', 7);
       }
       html += '<div class="dgrid">'+cards+'</div>';
 
@@ -5966,6 +6021,7 @@
         if(!c.id) emptyIds++; else { if(ids[c.id]) dupIds++; ids[c.id]=1; if(c.hasW) workedIds[c.id]=1; if(c.rc) rcIds[c.id]=1; if(c.ptp && !ptpIds[c.id]){ ptpIds[c.id]=1; ptpDebt+=c.debt; } if(c.def && !defIds[c.id]){ defIds[c.id]=1; defDebt+=c.debt; } }
       });
       var uniq = Object.keys(ids).length, uw = Object.keys(workedIds).length;
+      var shortRes = function(r){ return String(r).replace(/^Контакт не установлен:\s*/i,'Нет контакта: ').replace(/^Разговор состоялся\s*/i,'Разговор: '); };
       var mny = function(x){ return fmtInt.format(Math.round(x))+' ₽'; };
       var pct0 = function(a,b){ return b ? (a/b*100).toFixed(0)+"%" : "—"; };
 
@@ -5993,7 +6049,7 @@
           '<div class="donut-row">'+donutSvg(SEG.map(function(n,i){ return {v:segD[i], color:segColors[i], title:n+': '+pct(segD[i],debt)}; }), big(debt), "остаток долга")+
           '<div class="legend">'+SEG.map(function(n,i){ return '<div class="li"><span class="sw" style="background:'+segColors[i]+'"></span><span class="ln" title="'+esc(n)+'">'+esc(n)+'</span><span class="lv">'+pct(segD[i],debt)+'</span></div>'; }).join("")+'</div></div>', K1);
         cards += dCard("Проработка по размеру долга", "% отработанных договоров",
-          colChartSvg(B.map(function(b){ return {label:b.n, v:b.c?b.w/b.c:0, sub:b.w+'/'+b.c, tip:b.n+': отработано '+b.w+' из '+b.c+' · '+big(b.d)}; }), {max:1, fmt:function(v){ return (v*100).toFixed(0)+"%"; }, height:215, sub:true}), K1);
+          '<div class="cmp-list">'+B.map(function(b){ var p=b.c? b.w/b.c : 0; return '<div class="cmp-item"><div class="cmp-top"><span class="cmp-name">'+b.n+'</span><span class="cmp-pct">'+pct(b.w,b.c)+'</span></div>'+cmpBar(p,"#f2c14e")+'<div class="cmp-sub"><span><b>'+fmtInt.format(b.w)+'</b> из '+fmtInt.format(b.c)+'</span><span>'+big(b.d)+'</span></div></div>'; }).join("")+'</div>', K1);
       }
       if(K){
         var rcTot = K.byOp.reduce(function(a,o){ a.cl+=o.cl; a.th+=o.th; a.no+=o.no; a.ms+=o.ms; a.lt+=o.lt; a.ptp+=o.ptp; return a; }, {cl:0,th:0,no:0,ms:0,lt:0,ptp:0});
@@ -6006,11 +6062,11 @@
         var mon = (K.byMonth || []).slice(-6);
         if(mon.length) cards += dCard("Звонки по месяцам", "звонки и дозвон",
           '<div class="chart-legend"><span class="li"><span class="dot" style="background:#f2c14e"></span>звонков</span><span class="li"><span class="dot" style="background:#4f8cff"></span>дозвонились</span></div>'+
-          colChartSvg(mon.map(function(a){ var cl=a.n-a.ms-a.lt, cv=a.cl+a.th; return {label:monthLbl(a.k).replace(/ \d{4}$/,function(y){ return " ’"+y.slice(-2); }), v:cl, v2:cv, sub:pct(cv,cl), tip:monthLbl(a.k)+': звонков '+cl+', дозвон '+cv+' ('+pct(cv,cl)+'), PTP '+a.ptp}; }), {fmt:function(v){ return fmtInt.format(v); }, height:225, sub:true}), 8);
+          colChartSvg(mon.map(function(a){ var cl=a.n-a.ms-a.lt, cv=a.cl+a.th; return {label:monthLbl(a.k).replace(/ \d{4}$/,function(y){ return " ’"+y.slice(-2); }), v:cl, v2:cv, sub:pct(cv,cl), tip:monthLbl(a.k)+': звонков '+cl+', дозвон '+cv+' ('+pct(cv,cl)+'), PTP '+a.ptp}; }), {fmt:function(v){ return fmtInt.format(v); }, height:215, sub:true, W:640}), 8);
 
         // результаты действий — кольцо
         var resSorted = K.byRes.slice().sort(function(a,b){ return b.n-a.n; });
-        var rparts = resSorted.slice(0,6).map(function(r,i){ return {name:r.k, v:r.n, color:DASH_COLORS[i], title:r.k+': '+r.n}; });
+        var rparts = resSorted.slice(0,6).map(function(r,i){ return {name:shortRes(r.k), v:r.n, color:DASH_COLORS[i], title:r.k+': '+r.n}; });
         var rrest = resSorted.slice(6).reduce(function(a,r){ return a+r.n; },0);
         if(rrest>0) rparts.push({name:"Остальные ("+(resSorted.length-6)+")", v:rrest, color:DASH_COLORS[7], title:"Остальные: "+rrest});
         cards += dCard("Результаты действий", "топ-6", '<div class="donut-row">'+donutSvg(rparts, fmtInt.format(K.n), "действий")+donutLegend(rparts, function(v){ return fmtInt.format(v); })+'</div>', 4);
@@ -6045,7 +6101,7 @@
         cards += dCard(esc(ttl), fmtInt.format(list.length)+' договоров',
           '<div style="display:flex;gap:8px;justify-content:flex-end;margin:-6px 0 10px">'+(filtered?'<button type="button" class="btn ghost" id="'+prefix+'clrF" style="font-size:13.5px">✕ Сбросить</button>':'')+'<button type="button" class="btn ghost" id="'+prefix+'exp" style="font-size:13.5px">⭳ Скачать в Excel</button></div>'+
           '<div class="table-wrap"><table class="tbl-compact"><thead><tr><th>ID договора</th><th>Должник</th><th class="amt">Остаток долга</th><th>Статус</th><th>Ответственный</th></tr></thead><tbody>'+
-          shown.map(function(u){ return '<tr><td>'+esc(u.id)+'</td><td>'+esc(u.name)+'</td><td class="amt">'+fmtCompact(u.debt)+'</td><td>'+esc(u.status)+'</td><td>'+esc(u.resp)+'</td></tr>'; }).join("")+'</tbody></table></div>'+
+          shown.map(function(u){ return '<tr><td class="id">'+esc(u.id)+'</td><td>'+esc(u.name)+'</td><td class="amt">'+fmtCompact(u.debt)+'</td><td>'+esc(u.status)+'</td><td>'+esc(u.resp)+'</td></tr>'; }).join("")+'</tbody></table></div>'+
           (list.length>shown.length?'<button type="button" class="btn ghost" id="'+prefix+'more" style="margin-top:10px">Показать все '+fmtInt.format(list.length)+'</button>':''), 8);
       }
       html += '<div class="dgrid">'+cards+'</div>';
@@ -6071,17 +6127,17 @@
       if(K){
         var M2 = K.metrics;
         var d2 = function(x){ return (x*100).toFixed(1).replace(".",",")+"%"; };
-        var fr = K.funnel.map(function(r){ return '<td class="amt">'+fmtInt.format(r.n)+'</td>'; }).join("");
-        var tail = '<td class="amt">'+fmtInt.format(M2.zvonki)+'</td><td class="amt">'+fmtInt.format(M2.total)+'</td><td class="amt">'+fmtInt.format(M2.rc)+'</td><td class="amt">'+(M2.zvonki?d2(M2.rc/M2.zvonki):"—")+'</td><td class="amt">'+fmtInt.format(M2.ptp)+'</td><td class="amt">'+(M2.rc?d2(M2.ptp/M2.rc):"—")+'</td><td class="amt">'+fmtCompact(M2.ptpDebt)+'</td><td class="amt">'+fmtInt.format(M2.def)+'</td><td class="amt">'+(M2.rc?d2(M2.def/M2.rc):"—")+'</td><td class="amt">'+fmtCompact(M2.defDebt)+'</td>';
-        more += det("funnel","Воронка по группе ТОП (широкая таблица)", '<div class="hint" style="margin-bottom:8px">Звонки = общий итог − мессенджеры − письма. RC % = RC ÷ звонки. PTP % = PTP ÷ RC. Суммы — по уникальным ID. Таблица прокручивается вправо.</div><div class="table-wrap" style="overflow-x:auto"><table class="tbl-compact"><thead><tr><th>Группа</th>'+K.funnel.map(function(r){ return '<th class="amt">'+esc(r.k||"Пусто")+'</th>'; }).join("")+'<th class="amt">Звонки</th><th class="amt">Общий итог</th><th class="amt">RC шт</th><th class="amt">RC %</th><th class="amt">PTP шт</th><th class="amt">PTP %</th><th class="amt">PTP сумма остатка долга, ₽</th><th class="amt">Отлож. обещ. шт</th><th class="amt">Отлож. обещ. %</th><th class="amt">Отлож. обещ. сумма остатка долга, ₽</th></tr></thead><tbody>'+
-          '<tr><td>Группа взыскания ТОП</td>'+fr+tail+'</tr><tr style="font-weight:700"><td>Общий итог</td>'+fr+tail+'</tr></tbody></table></div>');
-        more += det("prom","Обещания: события и суммы", '<div class="table-wrap"><table class="tbl-compact"><thead><tr><th>Вид</th><th class="amt">Событий</th><th class="amt">Уникальных ID</th><th class="amt">Сумма остатка долга</th><th class="amt">% суммы портфеля</th></tr></thead><tbody>'+
-          K.prom.map(function(p){ return '<tr'+(p.total?' style="font-weight:700"':'')+'><td>'+esc(p.name)+'</td><td class="amt">'+fmtInt.format(p.e)+'</td><td class="amt">'+fmtInt.format(p.ids)+'</td><td class="amt">'+fmtCompact(p.debt)+' ₽</td><td class="amt">'+pct(p.debt,debt,3)+'</td></tr>'; }).join("")+'</tbody></table></div>');
+        var kvi = function(l,v){ return '<div><span>'+esc(l)+'</span><b>'+v+'</b></div>'; };
+        more += det("funnel","Воронка по группе ТОП", '<div class="kvgrid-title">Результаты действий</div><div class="kvgrid">'+K.funnel.map(function(r){ return kvi(shortRes(r.k||"Пусто"), fmtInt.format(r.n)); }).join("")+'</div>'+
+          '<div class="kvgrid-title">Итоги</div><div class="kvgrid">'+[kvi("Звонки",fmtInt.format(M2.zvonki)),kvi("Общий итог",fmtInt.format(M2.total)),kvi("RC, шт",fmtInt.format(M2.rc)),kvi("RC, % от звонков",M2.zvonki?d2(M2.rc/M2.zvonki):"—"),kvi("PTP, шт",fmtInt.format(M2.ptp)),kvi("PTP, % от RC",M2.rc?d2(M2.ptp/M2.rc):"—"),kvi("PTP, остаток долга",fmtCompact(M2.ptpDebt)+' ₽'),kvi("Отложенных, шт",fmtInt.format(M2.def)),kvi("Отложенных, % от RC",M2.rc?d2(M2.def/M2.rc):"—"),kvi("Отложенных, остаток долга",fmtCompact(M2.defDebt)+' ₽')].join("")+'</div>'+
+          '<div class="hint" style="margin-top:8px">Звонки = общий итог − мессенджеры − письма. Суммы считаются по уникальным ID, без задвоения.</div>', "результаты и итоги");
+        more += det("prom","Обещания: события и суммы", '<div class="table-wrap"><table class="tbl-compact"><thead><tr><th>Вид</th><th class="amt">Событий</th><th class="amt">ID</th><th class="amt">Остаток долга</th><th class="amt">% портфеля</th></tr></thead><tbody>'+
+          K.prom.map(function(p){ return '<tr'+(p.total?' class="total"':'')+'><td>'+esc(p.name)+'</td><td class="amt">'+fmtInt.format(p.e)+'</td><td class="amt">'+fmtInt.format(p.ids)+'</td><td class="amt">'+fmtCompact(p.debt)+' ₽</td><td class="amt">'+pct(p.debt,debt,3)+'</td></tr>'; }).join("")+'</tbody></table></div>');
       }
       var pr = C.filter(function(c){ return c.ptp || c.def; }).sort(function(a,b){ return b.debt-a.debt; });
       if(pr.length){
         more += det("promc","Обещания по договорам ("+fmtInt.format(pr.length)+")", '<div class="hint" style="margin-bottom:8px">PTP: '+Object.keys(ptpIds).length+' ID · '+big(ptpDebt)+' · отложенные: '+Object.keys(defIds).length+' ID · '+big(defDebt)+(pr.length>50?' · показаны 50 крупнейших':'')+'</div><div class="table-wrap"><table class="tbl-compact"><thead><tr><th>ID договора</th><th>Должник</th><th class="amt">Остаток долга</th><th>Обещание</th><th class="amt">Действий</th></tr></thead><tbody>'+
-          pr.slice(0,50).map(function(c){ return '<tr><td>'+esc(c.id)+'</td><td>'+esc(c.name)+'</td><td class="amt">'+fmtCompact(c.debt)+'</td><td>'+(c.ptp?'PTP'+(c.ptpKind?' ('+esc(c.ptpKind)+')':''):'')+(c.ptp&&c.def?' + ':'')+(c.def?'отложенное'+(c.defKind?' ('+esc(c.defKind)+')':''):'')+'</td><td class="amt">'+fmtInt.format(c.act)+'</td></tr>'; }).join("")+'</tbody></table></div>');
+          pr.slice(0,50).map(function(c){ return '<tr><td class="id">'+esc(c.id)+'</td><td>'+esc(c.name)+'</td><td class="amt">'+fmtCompact(c.debt)+'</td><td>'+(c.ptp?'PTP'+(c.ptpKind?' ('+esc(c.ptpKind)+')':''):'')+(c.ptp&&c.def?' + ':'')+(c.def?'отложенное'+(c.defKind?' ('+esc(c.defKind)+')':''):'')+'</td><td class="amt">'+fmtInt.format(c.act)+'</td></tr>'; }).join("")+'</tbody></table></div>');
       }
       more += det("how","Как это считается", '<div class="module-subtitle"><b>Загрузка:</b> два файла — выгрузка ТОП (ID договора внутренний, сумма долга + ГП остаток, комментарии, статус, ответственный) и файл звонков (ID результата, дата, оператор, ID договора внутренний); порядок и количество загрузок не важны. Действия сопоставляются с ТОП по «ID договора внутренний». Можно загрузить и готовый отчёт с листами «Сверка_ID» и «Детализация». <b>База</b> — все строки файла ТОП, даже если ID повторяется. <b>Отработан</b> — по ID найдено хотя бы одно действие. <b>RC</b> — «Разговор состоялся Клиент», <b>PTP</b> — «Обещание оплаты» (клиент и третье лицо), <b>отложенные</b> — «Отложенное обещание»; суммы обещаний считаются по уникальным ID без задвоения. Тексты комментариев на странице не показываются и не выгружаются.</div>');
       html += '<div class="d-more">'+more+'</div></div>';
