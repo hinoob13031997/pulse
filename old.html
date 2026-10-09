@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Пульс Взысканий (новый вид)</title>
+<title>Пульс Взысканий</title>
 <style>
   :root{
     --bg:#f2f3f7; --bg-mesh-1:#6a4cf01a; --bg-mesh-2:#0ea5c414;
@@ -582,144 +582,6 @@
      чтобы не путать (Цель: кол-во/сумма — единственное, что там учитывается). */
   #ds_root.method-targets .ds-col-weight{ opacity:.35; }
   #ds_root.method-targets .ds-col-weight-input{ opacity:.35; pointer-events:none; background:var(--surface-2); }
-
-  /* ===== Дашборд-сетка вкладок «План и обещания» и «Проработка ТОП» ===== */
-  .dash{
-    --bg:#0a1228; --surface:#101a38; --surface-2:#18244c; --surface-raised:#15214a;
-    --border:#25356b; --border-soft:#25356b80;
-    --text:#eaf0ff; --text-dim:#aab7de; --text-faint:#8794bd;
-    --good:#3ddc97; --good-soft:#3ddc9722; --bad:#ff6b7a; --bad-soft:#ff6b7a22; --warn:#f5b84b; --warn-soft:#f5b84b22;
-    --gold:#f2c14e; --accent:#f2c14e; --accent-ink:#f2c14e; --grad-a:#f2c14e; --grad-b:#4f8cff;
-    --btn-a:#2f5fd0; --btn-b:#4f8cff;
-    --name:#a9b9ee; --num:#ffd978;
-    color-scheme:dark; color:var(--text);
-    background:radial-gradient(900px 420px at 85% -10%, #3b5bdb33, transparent 60%), radial-gradient(700px 360px at -5% 105%, #f2c14e18, transparent 60%), linear-gradient(165deg,#0b1430,#0a1124);
-    border:1px solid var(--border); border-radius:20px; padding:14px; margin-top:6px;
-    box-shadow:0 18px 50px #0a122855;
-  }
-  .dash .d-meta{ font-size:13.5px; color:var(--text-dim); margin:2px 2px 12px; display:flex; flex-wrap:wrap; gap:6px 14px; align-items:center; }
-  .dash .month-chips{ margin-bottom:12px; }
-  .dash .btn{ background:var(--surface-2); color:var(--text); border:1px solid var(--border); box-shadow:none; }
-  .dash .btn.ghost{ background:transparent; }
-  .dash .btn:hover{ border-color:var(--gold); }
-  .dash .hint{ color:var(--text-dim); }
-  .dash a, .dash .info-tip{ color:var(--text-dim); }
-  .kpis{ display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; margin-bottom:10px; }
-  .kpis .dcard{ grid-column:auto; }
-  @media (max-width:1000px){ .kpis{ grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); } }
-  .dgrid{ display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:10px; margin-bottom:10px; }
-  .dcard{
-    grid-column:span 12; min-width:0; position:relative;
-    background:linear-gradient(160deg,var(--surface-raised),var(--surface)); border:1px solid var(--border); border-radius:14px; padding:11px 14px 13px;
-    box-shadow:0 10px 28px #050a1c66, inset 0 1px 0 #ffffff12;
-  }
-  .dcard.s4{ grid-column:span 4; } .dcard.s5{ grid-column:span 5; } .dcard.s6{ grid-column:span 6; } .dcard.s7{ grid-column:span 7; } .dcard.s8{ grid-column:span 8; }
-  @media (max-width:1100px){ .dcard.s4,.dcard.s5{ grid-column:span 6; } .dcard.s7,.dcard.s8{ grid-column:span 12; } }
-  @media (max-width:700px){ .dcard.s4,.dcard.s5,.dcard.s6{ grid-column:span 12; } .dash{ padding:12px; border-radius:16px; } }
-  .dc-head{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
-  .dc-head h3{ margin:0; font-size:15.5px; font-weight:700; letter-spacing:.02em; }
-  .dc-head .hint{ font-size:13px; color:var(--name); }
-  .dcard.kpi{ padding:10px 12px 9px; overflow:hidden; display:flex; flex-direction:column; gap:2px; }
-  .kpi .k-top{ display:flex; align-items:center; gap:10px; }
-  .kpi .k-ico{ width:28px; height:28px; border-radius:9px; display:grid; place-items:center; font-size:14px; flex:0 0 auto; }
-  .kpi .k-label{ font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text-dim); line-height:1.25; }
-  .kpi .k-val{ font-size:24px; font-weight:800; letter-spacing:-.02em; margin-top:6px; overflow-wrap:anywhere; line-height:1.15; }
-  .kpi .k-val small{ font-size:13px; font-weight:600; color:var(--text-dim); letter-spacing:0; }
-  .kpi.bad .k-val{ color:var(--bad); }
-  .kpi .k-sub{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; font-size:13px; color:var(--num); margin-top:3px; }
-  .kpi .cmp-bar{ margin-top:8px; }
-  .kpi .k-spark{ display:block; width:calc(100% + 12px); height:30px; margin:6px -4px -3px; }
-  .dash .delta{ display:inline-flex; align-items:center; gap:3px; font-size:12px; font-weight:700; padding:2px 8px; border-radius:999px; font-family:"JetBrains Mono",monospace; white-space:nowrap; }
-  .dash .delta.up{ color:var(--good); background:var(--good-soft); }
-  .dash .delta.down{ color:var(--bad); background:var(--bad-soft); }
-  .gauge-wrap{ display:flex; gap:18px; align-items:center; flex-wrap:wrap; justify-content:center; }
-  .gauge-wrap .donut-svg{ width:170px; height:170px; }
-  .kv{ display:flex; flex-direction:column; gap:9px; margin:0; flex:1; min-width:150px; }
-  .kv > div{ display:flex; justify-content:space-between; gap:12px; font-size:13.5px; border-bottom:1px dashed var(--border); padding-bottom:6px; }
-  .kv dt{ color:var(--text-dim); } .kv dd{ margin:0; font-family:"JetBrains Mono",monospace; font-weight:700; text-align:right; }
-  .mini3{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-bottom:14px; }
-  .mini3 > div{ background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:9px 11px; min-width:0; }
-  .mini3 b{ display:block; font-family:"JetBrains Mono",monospace; font-size:16px; overflow-wrap:anywhere; }
-  .mini3 span{ font-size:11.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; }
-  .col-svg{ display:block; width:100%; height:auto; }
-  .dcard .donut-row{ justify-content:center; gap:16px; }
-  .dcard .legend{ min-width:150px; }
-  .dcard .legend .li{ font-size:13.5px; }
-  .cmp-list{ display:flex; flex-direction:column; gap:14px; flex:1; min-width:220px; }
-  .cmp-list.two{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px 26px; }
-  @media (max-width:700px){ .cmp-list.two{ grid-template-columns:1fr; } }
-  .cmp-item .cmp-top{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:6px; }
-  .cmp-name{ font-weight:600; font-size:14.5px; overflow-wrap:anywhere; }
-  .cmp-pct{ font-family:"JetBrains Mono",monospace; font-weight:700; font-size:14.5px; white-space:nowrap; }
-  .cmp-bar{ height:8px; background:var(--surface-2); border-radius:999px; overflow:hidden; }
-  .cmp-bar > i{ display:block; height:100%; border-radius:999px; }
-  .cmp-sub{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-top:5px; font-size:12.5px; color:var(--text-dim); font-family:"JetBrains Mono",monospace; }
-  .month-chips{ display:flex; gap:8px; flex-wrap:wrap; }
-  .dash .barlist .fill{ background:linear-gradient(90deg,#4f8cff,#35d0e0); }
-  .dash .barlist .row[data-rs]:hover .name, .dash .barlist .row[data-st]:hover .name{ color:var(--gold); }
-  .dash table{ font-size:13.5px; }
-  .dash .tbl-compact th, .dash .tbl-compact td{ padding:7px 8px; }
-  details.more{ border:1px solid var(--border); border-radius:12px; background:var(--surface); margin-bottom:10px; }
-  details.more > summary{ cursor:pointer; padding:12px 16px; font-weight:700; font-size:14.5px; list-style:none; display:flex; align-items:center; gap:10px; }
-  details.more > summary::-webkit-details-marker{ display:none; }
-  details.more > summary::before{ content:"▸"; color:var(--text-dim); transition:transform .15s; }
-  details.more[open] > summary::before{ transform:rotate(90deg); }
-  details.more > summary .hint{ font-weight:500; margin-left:auto; text-align:right; font-size:12.5px; }
-  details.more > .more-body{ padding:2px 16px 16px; }
-  details.more > .more-body > section{ border:0; box-shadow:none; background:transparent; padding:0; margin:0; }
-  .more-list{ margin-top:12px; }
-  .d-more{ margin-top:4px; }
-
-  /* ---- читаемость: крупнее шрифты, названия и цифры разными цветами ---- */
-  .dash .hint{ color:var(--name); }
-  .dash .gauge-wrap{ gap:12px; }
-  .dash .gauge-wrap .donut-svg, .dash .dcard .donut-svg{ width:140px; height:140px; }
-  .dash .kv{ gap:7px; min-width:140px; }
-  .dash .kv > div{ font-size:15px; padding-bottom:5px; }
-  .dash .kv dt{ color:var(--name); } .dash .kv dd{ color:var(--num); font-size:15.5px; }
-  .dash .mini3 b{ color:var(--num); } .dash .mini3 span{ color:var(--name); }
-  .dash .dcard .donut-row{ gap:10px; }
-  .dash .dcard .legend{ width:100%; min-width:0; flex:1 1 100%; gap:7px; }
-  .dash .dcard .legend .li{ font-size:14.5px; align-items:flex-start; gap:8px; }
-  .dash .dcard .legend .sw{ margin-top:5px; width:11px; height:11px; }
-  .dash .dcard .legend .ln{ white-space:normal; overflow:visible; text-overflow:clip; color:var(--name); line-height:1.3; }
-  .dash .dcard .legend .lv{ color:var(--num); font-size:14px; font-weight:600; }
-  .dash .cmp-list{ gap:11px; }
-  .dash .cmp-name{ color:var(--name); font-size:15px; }
-  .dash .cmp-pct{ color:var(--num); font-size:16px; }
-  .dash .cmp-sub{ font-size:13.5px; color:var(--text-dim); margin-top:4px; }
-  .dash .cmp-sub b{ color:var(--num); font-weight:600; }
-  .dash .barlist{ gap:8px; }
-  .dash .barlist .name{ color:var(--name); font-size:14.5px; }
-  .dash .barlist .num{ color:var(--num); font-size:14px; }
-  .dash .chart-legend{ font-size:13px; color:var(--name); }
-  .dash .chart-svg{ min-width:0 !important; height:auto !important; }
-  .dash .col-svg text{ font-family:"JetBrains Mono",monospace; }
-
-  /* ---- таблицы: плотные, названия и цифры разными цветами ---- */
-  .dash table{ width:100%; font-size:13.5px; }
-  .dash table th, .dash table td{ padding:6px 9px; }
-  .dash table th{ color:var(--text-faint); font-size:11.5px; letter-spacing:.06em; }
-  .dash table td{ color:var(--name); border-bottom:1px solid var(--border-soft); }
-  .dash table td.amt{ color:var(--num); font-family:"JetBrains Mono",monospace; font-weight:600; }
-  .dash table tr:last-child td{ border-bottom:0; }
-  .dash table .id{ color:var(--text-faint); font-family:"JetBrains Mono",monospace; }
-  .dash table tr.total td{ font-weight:700; }
-  .dash table tr.total td:first-child{ color:var(--text); }
-  .kvgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:7px; }
-  .kvgrid > div{ background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:6px 10px; min-width:0; }
-  .kvgrid span{ display:block; font-size:12.5px; color:var(--name); line-height:1.25; overflow-wrap:anywhere; }
-  .kvgrid b{ display:block; font-family:"JetBrains Mono",monospace; font-size:16px; color:var(--num); margin-top:2px; }
-  .kvgrid-title{ font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-faint); margin:10px 0 6px; }
-  .kvgrid-title:first-child{ margin-top:0; }
-
-  /* свёрнутые блоки — рядом друг с другом, раскрытый занимает всю ширину */
-  .d-more{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr)); gap:10px; align-items:start; margin-top:2px; }
-  .d-more details.more{ margin:0; }
-  .d-more details.more[open]{ grid-column:1/-1; }
-  .dash details.more > summary{ padding:10px 14px; font-size:14.5px; }
-  .dash details.more > summary .hint{ font-size:12.5px; }
-  .dash details.more > .more-body{ padding:2px 14px 12px; }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -5157,81 +5019,6 @@
   // при равных долях даёт равномерный баланс, а при разных — пропорциональный.
   // ===== «План и обещания»: объединённый отчёт по сбору (план/факт по группам и сотрудникам,
   // по дням, обещания, сводка по исходным платежам). Читает листы книги по названиям. =====
-  // ---- Карточки, кольца и мини-графики для вкладок «План и обещания» и «Проработка ТОП» ----
-  var DASH_COLORS = ["#f2c14e","#4f8cff","#35d0e0","#9b7bff","#3ddc97","#ff8a5c","#e879b9","#8d94a6"];
-  var _dashUid = 0;
-  function pColor(p){ return p==null ? "var(--border)" : (p>=1 ? "var(--good)" : (p>=0.7 ? "#f2c14e" : "#ff6b7a")); }
-  function cmpBar(p, color){ return '<div class="cmp-bar"><i style="width:'+(Math.max(0,Math.min(p||0,1))*100).toFixed(1)+'%;background:'+color+'"></i></div>'; }
-  function dCard(title, hint, body, span, extra){
-    return '<div class="dcard'+(span?' s'+span:'')+(extra?' '+extra:'')+'"><div class="dc-head"><h3>'+title+'</h3>'+(hint?'<span class="hint">'+hint+'</span>':'')+'</div>'+body+'</div>';
-  }
-  function sparkSvg(vals, color){
-    vals = (vals||[]).filter(function(v){ return v!=null && isFinite(v); });
-    if(vals.length<2) return '';
-    var id='sp'+(++_dashUid), W=200, H=44, P=3, mn=Math.min.apply(null,vals), mx=Math.max.apply(null,vals); if(mx===mn) mx=mn+1;
-    var pts = vals.map(function(v,i){ return [P+(W-2*P)*i/(vals.length-1), P+(H-2*P)*(1-(v-mn)/(mx-mn))]; });
-    var line = pts.map(function(p,i){ return (i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1); }).join(' ');
-    var area = line+' L'+pts[pts.length-1][0].toFixed(1)+' '+H+' L'+pts[0][0].toFixed(1)+' '+H+' Z';
-    return '<svg class="k-spark" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="'+id+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+color+'" stop-opacity=".38"/><stop offset="1" stop-color="'+color+'" stop-opacity="0"/></linearGradient></defs>'+
-      '<path d="'+area+'" fill="url(#'+id+')"/><path d="'+line+'" fill="none" stroke="'+color+'" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/></svg>';
-  }
-  // o: {label, value, icon, color, delta, sub, spark:[...], bar:0..1, bad, tip}
-  function dKpi(o){
-    var c = o.color || "#f2c14e";
-    return '<div class="dcard kpi'+(o.bad?' bad':'')+'" title="'+esc(o.tip||"")+'"><div class="k-top"><span class="k-ico" style="color:'+c+';background:'+c+'26">'+o.icon+'</span><span class="k-label">'+esc(o.label)+'</span></div>'+
-      '<div class="k-val mono">'+o.value+'</div>'+((o.delta||o.sub)?'<div class="k-sub">'+(o.delta||'')+(o.sub?'<span>'+o.sub+'</span>':'')+'</div>':'')+
-      (o.bar!=null ? cmpBar(o.bar, c) : '')+(o.spark ? sparkSvg(o.spark, c) : '')+'</div>';
-  }
-  function ringSvg(p, color, topTxt, botTxt){
-    var r=64, cx=80, cy=80, circ=2*Math.PI*r, len=Math.max(0,Math.min(p==null?0:p,1))*circ;
-    return '<svg class="donut-svg" width="160" height="160" viewBox="0 0 160 160" role="img" aria-label="'+esc(topTxt+" "+(botTxt||""))+'">'+
-      '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="var(--surface-2)" stroke-width="15"/>'+
-      '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="15" stroke-linecap="round" stroke-dasharray="'+len.toFixed(1)+' '+(circ-len).toFixed(1)+'" transform="rotate(-90 '+cx+' '+cy+')"/>'+
-      '<text x="80" y="84" text-anchor="middle" font-size="28" font-weight="800" fill="var(--text)" font-family="JetBrains Mono, monospace">'+esc(topTxt)+'</text>'+
-      (botTxt?'<text x="80" y="106" text-anchor="middle" font-size="12" fill="var(--text-dim)" font-family="JetBrains Mono, monospace">'+esc(botTxt)+'</text>':'')+'</svg>';
-  }
-  // parts: [{v,color,title}]
-  function donutSvg(parts, topTxt, botTxt){
-    var r=64, cx=80, cy=80, circ=2*Math.PI*r, tot=parts.reduce(function(a,x){ return a+x.v; },0)||1, off=0, segs='';
-    parts.forEach(function(x){
-      var len=x.v/tot*circ; if(len<=0) return;
-      var draw = parts.length>1 ? Math.max(0,len-2.5) : len;
-      segs += '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+x.color+'" stroke-width="17" stroke-dasharray="'+draw.toFixed(1)+' '+(circ-draw).toFixed(1)+'" stroke-dashoffset="'+(-off).toFixed(1)+'" transform="rotate(-90 '+cx+' '+cy+')"><title>'+esc(x.title||"")+'</title></circle>';
-      off += len;
-    });
-    return '<svg class="donut-svg" width="160" height="160" viewBox="0 0 160 160" role="img" aria-label="'+esc(topTxt+" "+(botTxt||""))+'"><circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="var(--surface-2)" stroke-width="17"/>'+segs+
-      '<text x="80" y="82" text-anchor="middle" font-size="16" font-weight="800" fill="var(--text)" font-family="JetBrains Mono, monospace">'+esc(topTxt)+'</text>'+
-      (botTxt?'<text x="80" y="102" text-anchor="middle" font-size="12" fill="var(--text-dim)" font-family="JetBrains Mono, monospace">'+esc(botTxt)+'</text>':'')+'</svg>';
-  }
-  function donutLegend(parts, fmt){
-    var tot = parts.reduce(function(a,x){ return a+x.v; },0) || 1;
-    return '<div class="legend">'+parts.map(function(x){ return '<div class="li"><span class="sw" style="background:'+x.color+'"></span><span class="ln" title="'+esc(x.name)+'">'+esc(x.name)+'</span><span class="lv">'+(fmt?fmt(x.v):String(x.v))+' · '+(x.v/tot*100).toFixed(1).replace(".",",")+'%</span></div>'; }).join("")+'</div>';
-  }
-  // items: [{label, v, v2?, sub?, tip?}]; v — основной (золото), v2 — второй (синий) столбец рядом.
-  // opts.W — ширина холста ≈ ширине карточки в пикселях, чтобы шрифт на экране не уменьшался.
-  function colChartSvg(items, o){
-    o = o || {};
-    var id='cc'+(++_dashUid), W=o.W||340, H=o.height||210, L=4, R=4, T=26, B=o.sub?58:42, n=Math.max(items.length,1);
-    var mx = o.max || Math.max.apply(null, items.map(function(x){ return Math.max(x.v||0, x.v2||0); }).concat([1e-9]));
-    var slot=(W-L-R)/n, two=items.some(function(x){ return x.v2!=null; }), bw=Math.min(two?26:48, slot*(two?0.34:0.6));
-    var c1=o.color||"#f2c14e", c2=o.color2||"#4f8cff", ph=H-T-B, base=H-B, maxCh=Math.max(4,Math.floor(slot/8));
-    var g='<defs><linearGradient id="'+id+'a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+c1+'"/><stop offset="1" stop-color="'+c1+'" stop-opacity=".45"/></linearGradient><linearGradient id="'+id+'b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+c2+'"/><stop offset="1" stop-color="'+c2+'" stop-opacity=".45"/></linearGradient></defs>';
-    for(var k=0;k<=3;k++){ var y=T+ph*k/3; g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke="currentColor" opacity=".12"/>'; }
-    items.forEach(function(x,i){
-      var cx=L+slot*i+slot/2;
-      function bar(v,f,dx){ var h=Math.max(0,(v||0)/mx*ph); return '<rect x="'+(cx+dx-bw/2).toFixed(1)+'" y="'+(base-h).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="5" fill="url(#'+id+f+')"><title>'+esc(x.tip||x.label)+'</title></rect>'; }
-      var dx1 = two ? bw*0.6 : 0;
-      if(two) g+=bar(x.v2,'b',-bw*0.6);
-      g+=bar(x.v,'a',dx1);
-      var ty=base-Math.max(0,(x.v||0)/mx*ph)-7;
-      g+='<text x="'+(cx+dx1).toFixed(1)+'" y="'+Math.max(ty,14).toFixed(1)+'" text-anchor="middle" font-size="15" font-weight="700" fill="#ffd978">'+esc(o.fmt?o.fmt(x.v||0):String(x.v))+'</text>';
-      var lb=String(x.label||""); if(lb.length>maxCh) lb=lb.slice(0,maxCh-1)+'…';
-      g+='<text x="'+cx.toFixed(1)+'" y="'+(base+19)+'" text-anchor="middle" font-size="14" fill="#a9b9ee"><title>'+esc(x.label)+'</title>'+esc(lb)+'</text>';
-      if(x.sub) g+='<text x="'+cx.toFixed(1)+'" y="'+(base+37)+'" text-anchor="middle" font-size="13" fill="currentColor" opacity=".7">'+esc(x.sub)+'</text>';
-    });
-    return '<svg viewBox="0 0 '+W+' '+H+'" class="col-svg" style="color:var(--text)">'+g+'</svg>';
-  }
-
   function createPlanModule(prefix, storageKey){
     var root = document.getElementById(prefix+"root");
     function el(id){ return document.getElementById(prefix+id); }
@@ -5520,13 +5307,13 @@
       var h = hdrOf(aoa), idx = {};
       function find(key, re, not){ for(var i=0;i<h.length;i++){ if(re.test(h[i]) && !(not && not.test(h[i]))){ idx[key]=i; return; } } }
       find("sum",/^сумма$/); if(idx.sum==null) find("sum",/сумм/,/долг|остат/);
-      find("created",/дата создания/); find("op",/оператор/); find("group",/группа/); find("ext",/внешн/); find("inn",/внутренн/); find("debt",/долг/); find("status",/рабочий статус/); if(idx.status==null) find("status",/статус/); find("uid",/^id\s*пользовател/);
+      find("created",/дата создания/); find("op",/оператор/); find("group",/группа/); find("ext",/внешн/); find("inn",/внутренн/); find("debt",/долг/); find("status",/рабочий статус|статус/);
       var det = [], from="", to="";
       for(var r=1;r<aoa.length;r++){
         var row = aoa[r]; if(!row) continue;
         var sum = idx.sum!=null ? num(row[idx.sum]) : 0; if(!sum) continue;
         var cv = idx.created!=null ? row[idx.created] : "", d = isoDate(cv); if(!d) continue;
-        var op = (idx.uid!=null && String(row[idx.uid]||"").trim()) || (idx.op!=null ? String(row[idx.op]||"").trim() : "");
+        var op = idx.op!=null ? String(row[idx.op]||"").trim() : "";
         var g = (idx.group!=null && String(row[idx.group]||"").trim()) || groupOfOperator(op) || "Без группы";
         det.push({ group:g, sum:sum, created:(cv instanceof Date ? d : String(cv).slice(0,16)), d:d, op:op, ext:idx.ext!=null?row[idx.ext]:"", inn:idx.inn!=null?row[idx.inn]:"", debt:idx.debt!=null?num(row[idx.debt]):0, status:idx.status!=null?String(row[idx.status]||"").trim():"" });
         if(!from || d<from) from=d; if(!to || d>to) to=d;
@@ -5621,15 +5408,15 @@
     // ---------- графики ----------
     function lineChart(opts){
       // opts: {labels, series:[{name,color,values,dash}], height}
-      var W=opts.W||900,H=opts.height||260,L=64,R=14,T=14,B=46, n=opts.labels.length;
+      var W=900,H=opts.height||260,L=64,R=14,T=14,B=46, n=opts.labels.length;
       var mx = 0; opts.series.forEach(function(s){ s.values.forEach(function(v){ if(v!=null && v>mx) mx=v; }); });
       if(!mx) mx=1;
       function X(i){ return n>1 ? L+(W-L-R)*i/(n-1) : L+(W-L-R)/2; }
       function Y(v){ return T+(H-T-B)*(1-v/mx); }
       var g='';
-      for(var k=0;k<=4;k++){ var yv = mx*k/4, y=Y(yv); g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'" stroke="currentColor" opacity=".12"/><text x="'+(L-8)+'" y="'+(y+4)+'" text-anchor="end" font-size="'+(opts.fs||12)+'" fill="currentColor" opacity=".7">'+fmtMoneyShort(yv)+'</text>'; }
+      for(var k=0;k<=4;k++){ var yv = mx*k/4, y=Y(yv); g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'" stroke="currentColor" opacity=".12"/><text x="'+(L-8)+'" y="'+(y+4)+'" text-anchor="end" font-size="12" fill="currentColor" opacity=".7">'+fmtMoneyShort(yv)+'</text>'; }
       var step = Math.max(1, Math.ceil(n/12));
-      opts.labels.forEach(function(lb,i){ if(i%step===0 || i===n-1) g+='<text x="'+X(i)+'" y="'+(H-B+18)+'" text-anchor="middle" font-size="'+(opts.fs||12)+'" fill="currentColor" opacity=".7">'+esc(lb)+'</text>'; });
+      opts.labels.forEach(function(lb,i){ if(i%step===0 || i===n-1) g+='<text x="'+X(i)+'" y="'+(H-B+18)+'" text-anchor="middle" font-size="12" fill="currentColor" opacity=".7">'+esc(lb)+'</text>'; });
       opts.series.forEach(function(s){
         var pts=[]; s.values.forEach(function(v,i){ if(v!=null) pts.push(X(i).toFixed(1)+","+Y(v).toFixed(1)); });
         g+='<polyline fill="none" stroke="'+s.color+'" stroke-width="2.4" '+(s.dash?'stroke-dasharray="6 5" ':'')+'points="'+pts.join(" ")+'"/>';
@@ -5638,16 +5425,16 @@
     }
     function barChart(opts){
       // opts: {labels, values, line (constant), color, height, valFmt}
-      var W=opts.W||900,H=opts.height||220,L=64,R=14,T=14,B=46, n=opts.labels.length;
+      var W=900,H=opts.height||220,L=64,R=14,T=14,B=46, n=opts.labels.length;
       var mx = Math.max(opts.line||0, maxOf(opts.values.concat([0]))); if(!mx) mx=1;
       function Y(v){ return T+(H-T-B)*(1-v/mx); }
       var bw = (W-L-R)/Math.max(n,1), g='';
-      for(var k=0;k<=4;k++){ var yv=mx*k/4, y=Y(yv); g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'" stroke="currentColor" opacity=".12"/><text x="'+(L-8)+'" y="'+(y+4)+'" text-anchor="end" font-size="'+(opts.fs||12)+'" fill="currentColor" opacity=".7">'+(opts.axisFmt?opts.axisFmt(yv):fmtMoneyShort(yv))+'</text>'; }
+      for(var k=0;k<=4;k++){ var yv=mx*k/4, y=Y(yv); g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'" stroke="currentColor" opacity=".12"/><text x="'+(L-8)+'" y="'+(y+4)+'" text-anchor="end" font-size="12" fill="currentColor" opacity=".7">'+(opts.axisFmt?opts.axisFmt(yv):fmtMoneyShort(yv))+'</text>'; }
       var step = Math.max(1, Math.ceil(n/14));
       opts.values.forEach(function(v,i){
         var x = L+bw*i+bw*0.12, h=(H-T-B)*(v/mx);
         g+='<rect x="'+x.toFixed(1)+'" y="'+(Y(v)).toFixed(1)+'" width="'+(bw*0.76).toFixed(1)+'" height="'+Math.max(h,0).toFixed(1)+'" rx="2" fill="'+opts.color+'"><title>'+esc(opts.labels[i])+': '+(opts.valFmt?opts.valFmt(v):fmtCompact(v))+'</title></rect>';
-        if(i%step===0 || i===n-1) g+='<text x="'+(L+bw*i+bw/2).toFixed(1)+'" y="'+(H-B+18)+'" text-anchor="middle" font-size="'+(opts.fs||12)+'" fill="currentColor" opacity=".7">'+esc(opts.labels[i])+'</text>';
+        if(i%step===0 || i===n-1) g+='<text x="'+(L+bw*i+bw/2).toFixed(1)+'" y="'+(H-B+18)+'" text-anchor="middle" font-size="12" fill="currentColor" opacity=".7">'+esc(opts.labels[i])+'</text>';
       });
       if(opts.line){ var yl=Y(opts.line); g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yl+'" y2="'+yl+'" stroke="#e5484d" stroke-width="2" stroke-dasharray="6 5"/>'; }
       return '<svg viewBox="0 0 '+W+' '+H+'" class="chart-svg" style="width:100%;height:'+H+'px;color:var(--text)">'+g+'</svg>';
@@ -5668,135 +5455,78 @@
       renderFiles();
       var m = composeModel();
       if(!m){ body.style.display="none"; empty.style.display="block"; setBadge("нет данных","empty"); return; }
-      // Запоминаем раскрытые блоки: перерисовка (ввод плана, смена месяца) их не схлопывает.
-      var openSet = {};
-      Array.prototype.forEach.call(body.querySelectorAll("details[data-k]"), function(d){ if(d.open) openSet[d.getAttribute("data-k")] = 1; });
-      function det(key, title, inner, hint){
-        return '<details class="more" data-k="'+key+'"'+(openSet[key]?' open':'')+'><summary>'+title+(hint?'<span class="hint">'+hint+'</span>':'')+'</summary><div class="more-body">'+inner+'</div></details>';
-      }
       m = effective(m);
       body.style.display="block"; empty.style.display="none";
       setBadge("загружено","live");
+      var hasPlan = m.groups.length>0;
       var tPlan=0,tFact=0,tPrev=0,tCnt=0,tCntPrev=0;
       m.groups.forEach(function(g){ tPlan+=g.plan; tFact+=g.fact; tPrev+=g.prev; tCnt+=g.cnt; tCntPrev+=g.cntPrev; });
       if(m.calc){ tPlan = m.calc.total; tFact = m.calc.fact; tCnt = m.calc.cnt; tPrev = m.calc.hasPrev? m.calc.prevFact : 0; tCntPrev = m.calc.hasPrev? m.calc.prevCnt : 0; }
       var dFrom = m.days.length ? m.days[0].date : "", dTo = m.days.length ? m.days[m.days.length-1].date : "";
       var pSum=0,pCnt=0; m.pGroups.forEach(function(g){ pSum+=g.sum; pCnt+=g.cnt; });
-      var base = m.calc ? m.calc.planToDate : tPlan, devV = tFact-base, comp = tPlan ? tFact/tPlan : null;
-      function sgnMoney(v){ return (v>=0?"+":"−")+fmtCompact(Math.abs(v)); }
-      var money = function(v){ return fmtCompact(v)+' ₽'; };
-
-      // ряды для мини-графиков и графиков
-      var labels = m.days.map(function(d){ return ruShort(d.date); }), cumPlan=[], cumPrev=[], cumFact=[], cp=0, cpr=0;
-      var spFact=[], spDev=[], spRatio=[], spCnt=[];
-      m.days.forEach(function(d){
-        cp+=d.plan; cpr+=d.prevFact; cumPlan.push(cp); cumPrev.push(cpr); cumFact.push(d.cum);
-        if(d.cum!=null){ spFact.push(d.cum); spDev.push(d.cum-cp); spRatio.push(tPlan? d.cum/tPlan : 0); spCnt.push(d.cnt); }
-      });
-      var spProm = m.pDays.map(function(d){ return d.sum; });
-
-      var html = '<div class="dash">';
-      html += '<div class="d-meta"><span>'+esc(m.fileName||"")+'</span>'+(dFrom?'<span>период по дням: '+ru(dFrom)+' – '+ru(dTo)+'</span>':'')+'</div>';
-      if(m.calc && m.monthList && m.monthList.length>1){
-        html += '<div class="month-chips">'+m.monthList.map(function(k){ return '<button type="button" class="btn'+(k===m.calc.mk?'':' ghost')+'" data-pmonth="'+k+'" style="font-size:14px">'+esc(monthLbl(k))+'</button>'; }).join("")+'</div>';
-      }
-      if(m.calc) html += det("set", "⚙ Планы и календарь", settingsPanel(m), "месячный план, нерабочие дни, отчётная дата");
-
-      // --- ключевые показатели ---
-      html += '<div class="kpis">'+[
-        dKpi({label:"Фактический сбор", value:fmtCompact(tFact)+' <small>₽</small>', icon:"₽", color:"#f2c14e", delta:delta(tFact,tPrev,true), spark:spFact, tip:"Сумма платежей за период. Стрелка — разница с прошлым периодом."}),
-        dKpi({label:"Выполнение плана", value:pct(comp), icon:"✓", color:"#3ddc97", sub:tPlan?'план '+money(tPlan):'', bar:comp, spark:null, tip:"Факт ÷ месячный план."}),
-        dKpi({label:m.calc?"Откл. от плана на дату":"Отклонение от плана", value:(tPlan?sgnMoney(devV)+' <small>₽</small>':'—'), icon:"△", color:(devV<0?"#ff6b7a":"#3ddc97"), bad:(tPlan&&devV<0), spark:spDev, tip:m.calc?"Факт − план на отчётную дату.":"Факт − месячный план."}),
-        dKpi({label:"Платежей", value:fmtInt.format(tCnt), icon:"▤", color:"#4f8cff", delta:delta(tCnt,tCntPrev,false), spark:spCnt, tip:"Количество платежей; стрелка — к прошлому периоду."}),
-        dKpi({label:"Обещаний", value:fmtInt.format(pCnt)+' <small>шт</small>', icon:"✎", color:"#9b7bff", sub:money(pSum), spark:spProm, tip:"Количество и сумма обещаний оплаты."})
-      ].join("")+'</div>';
-
-      // --- сетка карточек ---
-      var cards = '';
-      // 1. кольцо плана + ключевые суммы
-      cards += dCard("Выполнение плана", m.calc?esc(monthLbl(m.calc.mk))+' · на '+ru(m.calc.asOf):'',
-        '<div class="gauge-wrap">'+ringSvg(comp, pColor(comp), comp==null?"—":pct(comp,0), "от плана")+
-        '<dl class="kv"><div><dt>Месячный план</dt><dd>'+(tPlan?money(tPlan):'—')+'</dd></div>'+
-        (m.calc?'<div><dt>План на дату</dt><dd>'+money(m.calc.planToDate)+'</dd></div>':'')+
-        '<div><dt>Факт</dt><dd>'+money(tFact)+'</dd></div>'+
-        '<div><dt>Осталось до плана</dt><dd>'+(tPlan?money(Math.max(tPlan-tFact,0)):'—')+'</dd></div></dl></div>', 4);
-      // 2. накопительный сбор
-      if(m.days.length){
-        var lastIdx = cumFact.length-1; while(lastIdx>0 && cumFact[lastIdx]==null) lastIdx--;
-        cards += dCard("Накопительный сбор", 'факт '+money(cumFact[lastIdx])+' · план на дату '+money(cumPlan[lastIdx]),
-          '<div class="chart-legend"><span class="li"><span class="dot" style="background:#35d0e0"></span>факт</span><span class="li"><span class="dot" style="background:#ff6b7a"></span>план</span><span class="li"><span class="dot" style="background:#8794bd"></span>прошлый период</span></div>'+
-          '<div class="chart-wrap">'+lineChart({labels:labels, series:[{name:"план",color:"#ff6b7a",values:cumPlan,dash:true},{name:"прошлый период",color:"#8794bd",values:cumPrev,dash:true},{name:"факт",color:"#35d0e0",values:cumFact}], height:200, W:640, fs:13})+'</div>', 8);
-      }
-      // 3. группы: план/факт
+      var html = '';
+      html += '<details class="how" style="margin-bottom:12px"><summary style="cursor:pointer;font-weight:600">Как это считается</summary><div class="module-subtitle" style="margin-top:8px"><b>Загрузка:</b> как и раньше — один объединённый отчёт (листы «По группам», «По дням», «Обещания …», «Исходные данные»). <b>Планы:</b> месячный план и планы групп вводятся вручную в блоке «Планы и календарь» (для каждого месяца отдельно, сохраняются в браузере). <b>План по дням:</b> месячный план делится поровну на рабочие дни месяца (сб/вс и указанные нерабочие даты — 0). <b>План на отчётную дату</b> = план × рабочие дни с 1-го числа до отчётной даты ÷ рабочие дни месяца. <b>Факт</b> — сумма платежей по <b>дате платежа</b> из листа «Исходные данные» (в итог идут строки с «Учитывается в общем итоге = Да», в группы — с «Учитывается в группах = Да», поэтому сумма групп может быть меньше итога — разница показана строкой «Вне групп (Спирин В.А., прочие операторы)»). <b>Прошлый период</b> — из колонок «предыдущего периода» файла. Другие вкладки дашборда с этой вкладкой не связаны. Наведите курсор на «i» у раздела — там формула.</div></details>';
+      html += '<div class="module-subtitle" style="margin-bottom:12px">'+esc(m.fileName||"")+(dFrom?' · период по дням: '+ru(dFrom)+' – '+ru(dTo):'')+'</div>';
+      var tiles = [
+        {tip:"Сумма месячных планов всех групп (лист «По группам»).", label:"Месячный план", value:fmtCompact(tPlan)+' <small>₽</small>', icon:"◎"},
+        {tip:"Сумма фактического сбора по группам. Стрелка — разница с прошлым периодом.", label:"Фактический сбор", value:fmtCompact(tFact)+' <small>₽</small>'+delta(tFact,tPrev,true), icon:"₽", iconCls:"gold", accent:true},
+        {tip:"Факт ÷ месячный план.", label:"Выполнение плана", value:pct(tPlan?tFact/tPlan:null), icon:"✓", iconCls:(tFact>=tPlan?"good":"")},
+        {tip:"Факт − план на отчётную дату (при ручном плане) или месячный план.", label:m.calc?"Откл. от плана на дату":"Отклонение от плана", value:(function(){ var b = m.calc? m.calc.planToDate : tPlan; return (tFact-b>=0?"+":"")+fmtCompact(tFact-b); })()+' <small>₽</small>', icon:"△"},
+        {tip:"Количество платежей за период по группам; стрелка — к прошлому периоду.", label:"Платежей", value:fmtInt.format(tCnt)+delta(tCnt,tCntPrev,false), icon:"▤"},
+        {tip:"Количество и сумма обещаний (листы «Обещания»).", label:"Обещаний", value:fmtInt.format(pCnt)+' <small>'+fmtCompact(pSum)+' ₽</small>', icon:"✎"}
+      ];
+      html += '<div class="tiles">'+tiles.map(function(t){
+        return '<div class="tile'+(t.accent?" accent":"")+'"><div class="tile-icon'+(t.iconCls?" "+t.iconCls:"")+'">'+t.icon+'</div><div class="label">'+esc(t.label)+'</div><div class="value mono">'+t.value+'</div></div>';
+      }).join("")+'</div>';
+      html += settingsPanel(m)+planBlock(m);
       if(m.groups.length){
-        cards += dCard("Сбор по группам", "% от месячного плана",
-          '<div class="cmp-list two">'+m.groups.map(function(g){
-            var p = g.plan ? g.fact/g.plan : null, dy = g.prev ? (g.fact-g.prev)/g.prev : null;
-            return '<div class="cmp-item"><div class="cmp-top"><span class="cmp-name">'+esc(g.name)+'</span><span class="cmp-pct">'+(p==null?'—':pct(p))+'</span></div>'+
-              (p!=null ? cmpBar(p, pColor(p)) : '')+
-              '<div class="cmp-sub"><span>'+fmtCompact(g.fact)+' ₽'+(g.plan?' из '+fmtCompact(g.plan)+' ₽':'')+'</span>'+(dy==null?'':'<span class="delta '+(dy>=0?'up':'down')+'">'+(dy>=0?'▲ +':'▼ ')+pct(dy)+'</span>')+'</div></div>';
-          }).join("")+'</div>', 7);
-        // 4. доли групп в сборе
-        var gp = m.groups.filter(function(g){ return g.fact>0; }).slice().sort(function(a,b){ return b.fact-a.fact; });
-        var gparts = gp.slice(0,7).map(function(g,i){ return {name:g.name, v:g.fact, color:DASH_COLORS[i], title:g.name+': '+fmtCompact(g.fact)+' ₽'}; });
-        var restV = gp.slice(7).reduce(function(a,g){ return a+g.fact; },0);
-        if(restV>0) gparts.push({name:"Другие", v:restV, color:DASH_COLORS[7], title:"Другие: "+fmtCompact(restV)+' ₽'});
-        if(gparts.length) cards += dCard("Доли групп в сборе", "по сумме", '<div class="donut-row">'+donutSvg(gparts, fmtCompact(tFact), "₽ всего")+donutLegend(gparts, function(v){ return fmtCompact(v)+' ₽'; })+'</div>', 5);
+        html += '<section><div class="head"><h2>План / факт по группам <span class="info-tip" title="Источник: лист «По группам». Месячный план и фактический сбор взяты из файла как есть. % плана = факт ÷ месячный план. Отклонение = факт − месячный план. Динамика = (факт − факт прошлого периода) ÷ факт прошлого периода. Итого — сумма по группам.">i</span></h2><span class="hint">полоса — доля месячного плана; метка — 100%</span></div><div class="table-wrap"><table><thead><tr><th>Группа</th><th class="amt">Месячный план</th>'+(m.calc?'<th class="amt">План на дату</th>':'')+'<th class="amt">Факт</th><th class="amt">% плана</th><th style="min-width:140px"></th><th class="amt">Откл., ₽</th><th class="amt">Прошлый период</th><th class="amt">Динамика</th><th class="amt">Платежей</th></tr></thead><tbody>'+
+          m.groups.map(function(g){
+            var p = g.plan? g.fact/g.plan : null, dy = g.prev? (g.fact-g.prev)/g.prev : null;
+            var base = m.calc ? g.planDate : g.plan;
+            return '<tr><td>'+esc(g.name)+'</td><td class="amt">'+(g.plan?fmtCompact(g.plan):'—')+'</td>'+(m.calc?'<td class="amt">'+(g.plan?fmtCompact(g.planDate):'—')+'</td>':'')+'<td class="amt">'+fmtCompact(g.fact)+'</td><td class="amt">'+(g.plan?pct(p):'—')+'</td><td>'+(p!=null?planBar(p):'')+'</td><td class="amt">'+(g.plan?(g.fact-base>=0?"+":"")+fmtCompact(g.fact-base):'—')+'</td><td class="amt">'+fmtCompact(g.prev)+'</td><td class="amt">'+(dy==null?'—':'<span class="delta '+(dy>=0?'up':'down')+'">'+(dy>=0?'▲ +':'▼ ')+pct(dy)+'</span>')+'</td><td class="amt">'+fmtInt.format(g.cnt)+'</td></tr>';
+          }).join("")+
+          '<tr style="font-weight:700"><td>Итого</td><td class="amt">'+fmtCompact(tPlan)+'</td>'+(m.calc?'<td class="amt">'+fmtCompact(m.calc.planToDate)+'</td>':'')+'<td class="amt">'+fmtCompact(tFact)+'</td><td class="amt">'+pct(tPlan?tFact/tPlan:null)+'</td><td>'+(tPlan?planBar(tFact/tPlan):'')+'</td><td class="amt">'+(function(){ var b=m.calc?m.calc.planToDate:tPlan; return (tFact-b>=0?"+":"")+fmtCompact(tFact-b); })()+'</td><td class="amt">'+fmtCompact(tPrev)+'</td><td class="amt">'+(tPrev?'<span class="delta '+(tFact>=tPrev?'up':'down')+'">'+(tFact>=tPrev?'▲ +':'▼ ')+pct((tFact-tPrev)/tPrev)+'</span>':'—')+'</td><td class="amt">'+fmtInt.format(tCnt)+'</td></tr>'+
+          '</tbody></table></div></section>';
       }
-      // 5. обещания
+      if(m.days.length){
+        var labels = m.days.map(function(d){ return ruShort(d.date); });
+        var cumPlan=[], cumPrev=[], cp=0, cpr=0, cumFact=[];
+        m.days.forEach(function(d){ cp+=d.plan; cpr+=d.prevFact; cumPlan.push(cp); cumPrev.push(cpr); cumFact.push(d.cum); });
+        var lastIdx = cumFact.length-1; while(lastIdx>0 && cumFact[lastIdx]==null) lastIdx--;
+        var lastCum = cumFact[lastIdx], lastPlan = cumPlan[lastIdx];
+        html += '<section><div class="head"><h2>Накопительный сбор по дням <span class="info-tip" title="Источник: лист «По дням». Факт — накопительная колонка файла; план — сумма дневных планов с начала периода; прошлый период — накопленная сумма колонки «Факт предыдущего периода». Если факт выше красной линии плана — идёте с опережением.">i</span></h2><span class="hint">факт на конец периода: '+fmtCompact(lastCum)+' ₽ · план на ту же дату: '+fmtCompact(lastPlan)+' ₽</span></div>'+
+          '<div class="chart-legend"><span class="li"><span class="dot" style="background:var(--grad-a)"></span>факт</span><span class="li"><span class="dot" style="background:#e5484d"></span>план</span><span class="li"><span class="dot" style="background:#8b95a8"></span>прошлый период</span></div>'+
+          '<div class="chart-wrap">'+lineChart({labels:labels, series:[{name:"план",color:"#e5484d",values:cumPlan,dash:true},{name:"прошлый период",color:"#8b95a8",values:cumPrev,dash:true},{name:"факт",color:"#1aa9bd",values:cumFact}]})+'</div></section>';
+        var avgPlan = m.calc ? m.calc.planDay : (m.days.length ? m.days[0].plan : 0);
+        html += '<section><div class="head"><h2>Сбор по дням <span class="info-tip" title="Источник: лист «По дням». Столбец — фактический сбор за день, красный пунктир — дневной план. Ниже — количество платежей за день.">i</span></h2><span class="hint">пунктир — дневной план ('+fmtCompact(avgPlan)+' ₽)</span></div><div class="chart-wrap">'+
+          barChart({labels:labels, values:m.days.map(function(d){return d.fact;}), line:avgPlan, color:"#1aa9bd"})+'</div>'+
+          '<div class="chart-wrap" style="margin-top:6px"><div class="hint" style="margin:4px 0">Количество платежей по дням</div>'+barChart({labels:labels, values:m.days.map(function(d){return d.cnt;}), color:"#8b6bff", height:170, valFmt:function(v){return fmtInt.format(v);}, axisFmt:function(v){return fmtInt.format(Math.round(v));}})+'</div></section>';
+      }
+      // обещания
       if(m.pGroups.length || m.pDays.length || m.pEmps.length){
-        var pmx = m.pGroups.reduce(function(a,g){ return Math.max(a,g.sum); },0) || 1;
-        cards += dCard("Обещания оплаты", "по группам",
-          '<div class="mini3"><div><b>'+fmtInt.format(pCnt)+'</b><span>обещаний</span></div><div><b>'+fmtCompact(pSum)+'</b><span>сумма, ₽</span></div><div><b>'+fmtCompact(pCnt?pSum/pCnt:0)+'</b><span>среднее, ₽</span></div></div>'+
-          (m.pGroups.length ? '<div class="barlist">'+m.pGroups.map(function(g){
-            return '<div class="row"><div class="name">'+esc(g.name)+'</div><div class="num">'+fmtInt.format(g.cnt)+' шт · '+fmtCompact(g.sum)+' ₽</div><div class="track"><div class="fill" style="width:'+(g.sum/pmx*100).toFixed(1)+'%"></div></div></div>';
-          }).join("")+'</div>' : ''), 5);
-      }
-      // 5б. обещания по дням
-      if(m.pDays.length){
-        var many = m.pDays.length>12, pdItems = m.pDays.map(function(d){ return {label: many ? String(+d.date.slice(8,10)) : ruShort(d.date), v:d.sum, sub: many ? "" : fmtInt.format(d.cnt)+' шт', tip: ru(d.date)+': '+fmtInt.format(d.cnt)+' шт · '+money(d.sum)}; });
-        cards += dCard("Обещания по дням", "сумма, ₽ · по дате создания", '<div class="chart-wrap">'+colChartSvg(pdItems, {W:600, height:230, sub:!many, color:"#9b7bff", fmt:fmtCompact})+'</div>', 7);
-        cards += dCard("По дням: шт и сумма", "всего "+fmtInt.format(pCnt)+' шт · '+fmtCompact(pSum)+' ₽',
-          '<div class="table-wrap" style="max-height:290px;overflow:auto"><table class="tight"><thead><tr><th>Дата</th><th class="amt">Шт</th><th class="amt">Сумма</th></tr></thead><tbody>'+
-          m.pDays.map(function(d){ return '<tr><td class="id">'+esc(ru(d.date))+'</td><td class="amt">'+fmtInt.format(d.cnt)+'</td><td class="amt">'+fmtCompact(d.sum)+' ₽</td></tr>'; }).join("")+
-          '<tr class="total"><td>Итого</td><td class="amt">'+fmtInt.format(pCnt)+'</td><td class="amt">'+fmtCompact(pSum)+' ₽</td></tr></tbody></table></div>', 5);
-      }
-      // 6. сбор по дням
-      var avgPlan = m.calc ? m.calc.planDay : (m.days.length ? m.days[0].plan : 0);
-      if(m.days.length){
-        cards += dCard("Сбор по дням", 'пунктир — дневной план '+money(avgPlan), '<div class="chart-wrap">'+barChart({labels:labels, values:m.days.map(function(d){return d.fact;}), line:avgPlan, color:"#f2c14e", height:200, W:600, fs:13})+'</div>', 7);
-      }
-      html += '<div class="dgrid">'+cards+'</div>';
-
-      // --- подробности — свёрнуто ---
-      var more = '';
-      if(m.pDays.length || m.pDetails.length) more += det("prom","Динамика и список обещаний", pDetailsInner(), m.pDetails.length?fmtInt.format(m.pDetails.length)+' строк':'');
-      function pDetailsInner(){
-        var inner = '';
+        html += '<section><div class="head"><h2>Обещания оплаты <span class="info-tip" title="Источник: листы «Обещания — группы / сотрудники / дни / детализация». Количество и сумма обещаний взяты из файла; среднее = сумма ÷ количество.">i</span></h2><span class="hint">'+fmtInt.format(pCnt)+' шт · '+fmtCompact(pSum)+' ₽ · среднее '+fmtCompact(pCnt?pSum/pCnt:0)+' ₽</span></div>';
+        if(m.pGroups.length) html += '<div class="table-wrap"><table><thead><tr><th>Группа</th><th class="amt">Обещаний</th><th class="amt">Сумма</th><th class="amt">Среднее</th></tr></thead><tbody>'+
+          m.pGroups.map(function(g){ return '<tr><td>'+esc(g.name)+'</td><td class="amt">'+fmtInt.format(g.cnt)+'</td><td class="amt">'+fmtCompact(g.sum)+'</td><td class="amt">'+(g.cnt?fmtCompact(g.sum/g.cnt):'—')+'</td></tr>'; }).join("")+'</tbody></table></div>';
+        if(m.pDays.length) html += '<div class="chart-wrap" style="margin-top:12px"><div class="hint" style="margin:4px 0">Сумма обещаний по дням</div>'+barChart({labels:m.pDays.map(function(d){return ruShort(d.date);}), values:m.pDays.map(function(d){return d.sum;}), color:"#f0a941", height:190})+'</div>';
         if(m.pDetails.length){
-          var detl = m.pDetails, shown = state.showAllDetails ? detl : detl.slice(0,30);
-          inner += '<div class="head more-list"><h2 style="font-size:16px">Список обещаний ('+fmtInt.format(detl.length)+')</h2><button type="button" class="btn ghost" id="'+prefix+'detExport" style="font-size:14px">⭳ Скачать в Excel</button></div>'+
+          var det = m.pDetails, shown = state.showAllDetails ? det : det.slice(0,100);
+          html += '<div class="head" style="margin-top:16px"><h2 style="font-size:19px">Детализация обещаний ('+fmtInt.format(det.length)+')</h2><button type="button" class="btn ghost" id="'+prefix+'detExport" style="font-size:14px">⭳ Скачать в Excel</button></div>'+
             '<div class="table-wrap"><table><thead><tr><th>Создано</th><th>Группа</th><th>Оператор</th><th class="amt">Сумма</th><th class="amt">Остаток долга</th><th>ID внешний</th><th>Рабочий статус</th></tr></thead><tbody>'+
-            shown.map(function(d){ return '<tr><td>'+esc(d.created)+'</td><td>'+esc(d.group)+'</td><td>'+esc(d.op)+'</td><td class="amt">'+fmtCompact(d.sum)+'</td><td class="amt">'+(d.debt?fmtCompact(d.debt):'—')+'</td><td>'+esc(d.ext)+'</td><td>'+esc(d.status)+'</td></tr>'; }).join("")+'</tbody></table></div>'+
-            (detl.length>shown.length ? '<button type="button" class="btn ghost" id="'+prefix+'detMore" style="margin-top:10px">Показать все '+fmtInt.format(detl.length)+'</button>' : '');
+            shown.map(function(d){ return '<tr><td>'+esc(d.created)+'</td><td>'+esc(d.group)+'</td><td>'+esc(d.op)+'</td><td class="amt">'+fmtCompact(d.sum)+'</td><td class="amt">'+fmtCompact(d.debt)+'</td><td>'+esc(d.ext)+'</td><td>'+esc(d.status)+'</td></tr>'; }).join("")+'</tbody></table></div>'+
+            (det.length>shown.length ? '<button type="button" class="btn ghost" id="'+prefix+'detMore" style="margin-top:10px">Показать все '+fmtInt.format(det.length)+'</button>' : '');
         }
-        return inner;
-      }
-      if(m.days.length){
-        more += det("cnt","Количество платежей по дням", '<div class="chart-wrap">'+barChart({labels:labels, values:m.days.map(function(d){return d.cnt;}), color:"#4f8cff", height:170, valFmt:function(v){return fmtInt.format(v);}, axisFmt:function(v){return fmtInt.format(Math.round(v));}})+'</div>');
+        html += '</section>';
       }
       if(m.raw){
-        var bl = function(items){ var mx = items.length? items[0].s||1 : 1; return '<div class="barlist">'+items.map(function(x){ return '<div class="row"><div class="name">'+esc(x.name)+'</div><div class="num">'+fmtInt.format(x.n)+' пл. · '+fmtCompact(x.s)+' ₽</div><div class="track"><div class="fill" style="width:'+(Math.max(x.s,0)/mx*100).toFixed(1)+'%"></div></div></div>'; }).join("")+'</div>'; };
-        more += det("raw","Исходные платежи: по типу и статусу", '<div class="grid2"><div><div class="hint" style="margin-bottom:8px">По типу</div>'+bl(m.raw.byType)+'</div><div><div class="hint" style="margin-bottom:8px">По рабочему статусу (топ-15)</div>'+bl(m.raw.byStatus)+'</div></div>', fmtInt.format(m.raw.n)+' платежей · '+fmtCompact(m.raw.total)+' ₽');
+        function bl(items, mxn){ var mx = items.length? items[0].s||1 : 1; return '<div class="barlist">'+items.map(function(x){ return '<div class="row"><div class="name">'+esc(x.name)+'</div><div class="num">'+fmtInt.format(x.n)+' пл. · '+fmtCompact(x.s)+' ₽</div><div class="track"><div class="fill" style="width:'+(Math.max(x.s,0)/mx*100).toFixed(1)+'%"></div></div></div>'; }).join("")+'</div>'; }
+        html += '<section><div class="head"><h2>Исходные платежи <span class="info-tip" title="Источник: лист «Исходные данные». Берутся строки периода «Текущий период», у которых «Учитывается в общем итоге» = «Да». Суммы группируются по колонкам «Тип» и «Рабочий статус».">i</span></h2><span class="hint">'+fmtInt.format(m.raw.n)+' платежей · '+fmtCompact(m.raw.total)+' ₽ (текущий период, учитываются в итоге)</span></div><div class="grid2"><div><div class="hint" style="margin-bottom:8px">По типу</div>'+bl(m.raw.byType)+'</div><div><div class="hint" style="margin-bottom:8px">По рабочему статусу (топ-15)</div>'+bl(m.raw.byStatus)+'</div></div></section>';
       }
-      if(m.calc) more += det("calc","Расчёт выполнения плана (таблица)", planBlock(m));
       if(m.general.length){
-        var gv = function(v){ if(typeof v==="number") return Math.abs(v)<10 && v!==Math.round(v) ? pct(v) : (Math.abs(v)>=1000? fmtCompact(v) : String(v).replace(".",",")); if(v instanceof Date) return ru(isoDate(v)); return String(v); };
-        more += det("gen","Сводка на отчётную дату"+(m.reportDate?' · '+ru(m.reportDate):''), '<div class="table-wrap"><table><tbody>'+m.general.map(function(g){ return '<tr><td>'+esc(g.label)+'</td><td class="amt">'+esc(gv(g.value))+'</td></tr>'; }).join("")+'</tbody></table></div>', 'лист «Общая информация»');
+        function gv(v){ if(typeof v==="number") return Math.abs(v)<10 && v!==Math.round(v) ? pct(v) : (Math.abs(v)>=1000? fmtCompact(v) : String(v).replace(".",",")); if(v instanceof Date) return ru(isoDate(v)); return String(v); }
+        html += '<section><div class="head"><h2>Сводка на отчётную дату'+(m.reportDate?' · '+ru(m.reportDate):'')+'</h2><span class="hint">лист «Общая информация» как в файле</span></div><div class="table-wrap"><table><tbody>'+
+          m.general.map(function(g){ return '<tr><td>'+esc(g.label)+'</td><td class="amt">'+esc(gv(g.value))+'</td></tr>'; }).join("")+'</tbody></table></div></section>';
       }
-      more += det("how","Как это считается", '<div class="module-subtitle"><b>Загрузка:</b> один объединённый отчёт (листы «По группам», «По дням», «Обещания …», «Исходные данные») либо отдельные выгрузки платежей и обещаний. <b>Планы</b> вводятся вручную в блоке «Планы и календарь» (отдельно для каждого месяца, сохраняются в браузере). <b>План по дням</b> — месячный план поровну на рабочие дни (сб/вс и указанные нерабочие даты — 0). <b>План на отчётную дату</b> = план × рабочие дни с 1-го числа до отчётной даты ÷ рабочие дни месяца. <b>Факт</b> — платежи по дате платежа («Учитывается в общем итоге = Да»; в группы — «Учитывается в группах = Да», поэтому сумма групп может быть меньше итога — разница в строке «Вне групп»). <b>Прошлый период</b> — из платежей прошлого месяца или из колонок файла.</div>');
-      html += '<div class="d-more">'+more+'</div></div>';
-
       body.innerHTML = html;
       // wiring
       wireSettings(body, m);
@@ -6005,20 +5735,14 @@
       })();
     }
 
-    function bars(items, cls, skip){
+    function bars(items, cls){
       var mx = items.length ? Math.max.apply(null, items.map(function(x){ return x.v; })) || 1 : 1;
-      return '<div class="barlist"'+(skip?' style="counter-reset:rank '+skip+'"':'')+'>'+items.map(function(x){ return '<div class="row"><div class="name">'+esc(x.name)+'</div><div class="num">'+x.num+'</div><div class="track"><div class="fill" style="width:'+(x.v/mx*100).toFixed(1)+'%;'+(x.color?'background:'+x.color:'')+'"></div></div></div>'; }).join("")+'</div>';
+      return '<div class="barlist">'+items.map(function(x){ return '<div class="row"><div class="name">'+esc(x.name)+'</div><div class="num">'+x.num+'</div><div class="track"><div class="fill" style="width:'+(x.v/mx*100).toFixed(1)+'%;'+(x.color?'background:'+x.color:'')+'"></div></div></div>'; }).join("")+'</div>';
     }
 
     function render(){
       var m = state.model, body = el("bodyWrap"), empty = el("emptyState");
       if(!m){ body.style.display="none"; empty.style.display="block"; setBadge("нет данных","empty"); return; }
-      // Запоминаем раскрытые блоки: фильтр по статусу/ответственному перерисовывает страницу.
-      var openSet = {};
-      Array.prototype.forEach.call(body.querySelectorAll("details[data-k]"), function(d){ if(d.open) openSet[d.getAttribute("data-k")] = 1; });
-      function det(key, title, inner, hint){
-        return '<details class="more" data-k="'+key+'"'+(openSet[key]?' open':'')+'><summary>'+title+(hint?'<span class="hint">'+hint+'</span>':'')+'</summary><div class="more-body">'+inner+'</div></details>';
-      }
       body.style.display="block"; empty.style.display="none"; setBadge("загружено","live");
       var C = m.contracts, U = m.unworked, K = m.calls;
       var total = C.length, debt = 0, worked = 0, workedDebt = 0, segN=[0,0,0,0], segD=[0,0,0,0];
@@ -6029,131 +5753,96 @@
         if(!c.id) emptyIds++; else { if(ids[c.id]) dupIds++; ids[c.id]=1; if(c.hasW) workedIds[c.id]=1; if(c.rc) rcIds[c.id]=1; if(c.ptp && !ptpIds[c.id]){ ptpIds[c.id]=1; ptpDebt+=c.debt; } if(c.def && !defIds[c.id]){ defIds[c.id]=1; defDebt+=c.debt; } }
       });
       var uniq = Object.keys(ids).length, uw = Object.keys(workedIds).length;
-      var shortRes = function(r){ return String(r).replace(/^Контакт не установлен:\s*/i,'Нет контакта: ').replace(/^Разговор состоялся\s*/i,'Разговор: '); };
-      var mny = function(x){ return fmtInt.format(Math.round(x))+' ₽'; };
-      var pct0 = function(a,b){ return b ? (a/b*100).toFixed(0)+"%" : "—"; };
+      var html = '<details class="how" style="margin-bottom:12px"><summary style="cursor:pointer;font-weight:600">Как это считается</summary><div class="module-subtitle" style="margin-top:8px"><b>Загрузка:</b> два файла — выгрузка ТОП (ID договора внутренний, сумма долга + ГП остаток, комментарии, статус, ответственный) и файл звонков (ID результата, дата, оператор, ID договора внутренний); порядок и количество загрузок не важны, можно заменить один файл, не трогая другой. Действия сопоставляются с ТОП по «ID договора внутренний», учитываются только найденные ID. Можно загрузить и готовый отчёт со листами «Сверка_ID» и «Детализация». <b>База</b> — все строки файла ТОП с данными, даже если ID повторяется; уникальные ID — отдельно, для контроля. <b>Отработан</b> — по ID найдено хотя бы одно действие. <b>Комментарий</b> — непустая ячейка комментариев. <b>RC</b> — события «Разговор состоялся Клиент», <b>PTP</b> — «Обещание оплаты» (клиент и третье лицо), <b>отложенные</b> — «Отложенное обещание»; суммы обещаний считаются по уникальным ID без задвоения. Тексты комментариев на странице не показываются и не выгружаются.</div></details>';
+      html += '<div class="module-subtitle" style="margin-bottom:12px">'+esc(m.fileName||"")+(K&&K.from?' · действия: '+ru(K.from)+' – '+ru(K.to):'')+'</div>';
+      var tiles = [
+        {tip:"Строки листа «Сверка_ID». Уникальных ID — без повторов: "+uniq, label:"Договоров ТОП", value:fmtInt.format(total), icon:"▤", accent:true},
+        {tip:"Сумма «Сумма долга + ГП Остаток» по всем строкам базы.", label:"Остаток долга", value:big(debt), icon:"₽", iconCls:"gold"},
+        {tip:"Договоры, по которым есть хотя бы одно действие.", label:"Отработано", value:fmtInt.format(worked)+' <small>'+pct(worked,total)+'</small>', icon:"✓", iconCls:"good"},
+        {tip:"Доля суммы долга по отработанным договорам.", label:"Долга отработано", value:pct(workedDebt,debt)+' <small>'+big(workedDebt)+'</small>', icon:"◔", iconCls:"good"},
+        {tip:"Договоры без единого действия.", label:"Не отработано", value:fmtInt.format(total-worked)+' <small>'+pct(total-worked,total)+'</small>', icon:"△"},
+        {tip:"Договоры (уникальные ID), по которым состоялся разговор с клиентом.", label:"Разговор с клиентом", value:fmtInt.format(Object.keys(rcIds).length)+' <small>ID</small>', icon:"◎"},
+        {tip:"Уникальные ID с обещанием оплаты (PTP) и с отложенным обещанием.", label:"Обещания", value:fmtInt.format(Object.keys(ptpIds).length)+' <small>PTP</small> '+fmtInt.format(Object.keys(defIds).length)+' <small>отлож.</small>', icon:"✎"}
+      ];
+      html += '<div class="tiles">'+tiles.map(function(t){ return '<div class="tile'+(t.accent?" accent":"")+'"><div class="tile-icon'+(t.iconCls?" "+t.iconCls:"")+'">'+t.icon+'</div><div class="label" title="'+esc(t.tip)+'">'+esc(t.label)+'</div><div class="value mono">'+t.value+'</div></div>'; }).join("")+'</div>';
 
-      var html = '<div class="dash">';
-      html += '<div class="d-meta"><span>'+esc(m.fileName||"")+'</span>'+(K&&K.from?'<span>действия: '+ru(K.from)+' – '+ru(K.to)+'</span>':'')+'</div>';
-
-      // --- ключевые показатели ---
-      var monSpark = K && K.byMonth ? K.byMonth.map(function(a){ return a.n-a.ms-a.lt; }) : null;
-      html += '<div class="kpis">'+[
-        dKpi({label:"Договоров ТОП", value:fmtInt.format(total), icon:"▤", color:"#4f8cff", sub:big(debt)+' долга', tip:"Строки листа «Сверка_ID». Уникальных ID — без повторов: "+uniq}),
-        dKpi({label:"Отработано", value:pct(worked,total), icon:"✓", color:"#3ddc97", sub:fmtInt.format(worked)+' договоров', bar:total?worked/total:0, tip:"Договоры, по которым есть хотя бы одно действие."}),
-        dKpi({label:"Долга отработано", value:pct(workedDebt,debt), icon:"◔", color:"#f2c14e", sub:big(workedDebt), bar:debt?workedDebt/debt:0, tip:"Доля суммы долга по отработанным договорам."}),
-        dKpi({label:"Не отработано", value:fmtInt.format(total-worked), icon:"△", color:"#ff6b7a", bad:(total-worked>0), sub:pct(total-worked,total)+' · '+big(debt-workedDebt), tip:"Договоры без единого действия."}),
-        dKpi({label:"Обещания", value:fmtInt.format(Object.keys(ptpIds).length)+' <small>PTP</small>', icon:"✎", color:"#9b7bff", sub:fmtInt.format(Object.keys(defIds).length)+' отложенных · '+big(ptpDebt), spark:monSpark, tip:"Уникальные ID с обещанием оплаты (PTP) и с отложенным обещанием."})
-      ].join("")+'</div>';
-
-      var cards = '';
-      var segColors = ["#35d0e0","#3ddc97","#f2c14e","#8794bd"];
       if(total){
-        var B = [{n:"до 1 млн",lo:0,hi:1e6},{n:"1–3 млн",lo:1e6,hi:3e6},{n:"3–5 млн",lo:3e6,hi:5e6},{n:"5–10 млн",lo:5e6,hi:1e7},{n:"10 млн+",lo:1e7,hi:1e99}].map(function(b){ b.c=0;b.w=0;b.d=0;b.wd=0; return b; });
+        var cRows = 0, cDebt = 0, wRows = 0, withId = 0, withIdDebt = 0;
+        C.forEach(function(c){ if(c.hasC){ cRows++; cDebt += c.debt; } if(c.id){ withId++; withIdDebt += c.debt; } });
+        var mny = function(x){ return fmtInt.format(Math.round(x))+' ₽'; };
+        html += '<section><div class="head"><h2>Объём базы и отработка'+tipI("Строки файла ТОП (с повторами) и уникальные ID. Отработано — по ID найдено хотя бы одно действие.")+'</h2></div><div class="table-wrap"><table><thead><tr><th>Показатель</th><th class="amt">Договоров</th><th class="amt">% базы</th><th class="amt">Остаток долга</th><th class="amt">% суммы</th></tr></thead><tbody>'+
+          [['Всего строк ТОП',total,debt],['Строк с внутренним ID',withId,withIdDebt],['Отработано',worked,workedDebt],['Не отработано',total-worked,debt-workedDebt],['Есть комментарий',cRows,cDebt]].map(function(r){ return '<tr><td>'+r[0]+'</td><td class="amt">'+fmtInt.format(r[1])+'</td><td class="amt">'+pct(r[1],total)+'</td><td class="amt">'+mny(r[2])+'</td><td class="amt">'+pct(r[2],debt)+'</td></tr>'; }).join("")+
+          [['Уникальных ID',uniq],['Отработано уникальных ID',uw],['Не отработано уникальных ID',uniq-uw]].map(function(r){ return '<tr><td>'+r[0]+'</td><td class="amt">'+fmtInt.format(r[1])+'</td><td class="amt">'+pct(r[1],uniq)+'</td><td class="amt">—</td><td class="amt">—</td></tr>'; }).join("")+
+          '</tbody></table></div></section>';
+        var segColors = ["#1aa9bd","#2fcf95","#f0a941","#c4cad6"];
+        html += '<section><div class="head"><h2>Отработка и комментарии'+tipI("Лист «Сверка_ID»: сопоставление наличия действий (отработки) и непустого комментария по договору. Доли — от всех строк базы и от суммы долга.")+'</h2><span class="hint">полоса — доля суммы долга</span></div>'+
+          '<div style="display:flex;height:16px;border-radius:999px;overflow:hidden;margin-bottom:12px">'+segD.map(function(d,i){ return '<div title="'+esc(SEG[i])+': '+pct(d,debt)+'" style="width:'+(debt?d/debt*100:0)+'%;background:'+segColors[i]+'"></div>'; }).join("")+'</div>'+
+          '<div class="table-wrap"><table><thead><tr><th>Сегмент</th><th class="amt">Договоров</th><th class="amt">% базы</th><th class="amt">Остаток долга</th><th class="amt">% суммы</th></tr></thead><tbody>'+
+          SEG.map(function(n,i){ return '<tr><td><span class="dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+segColors[i]+';margin-right:8px"></span>'+esc(n)+'</td><td class="amt">'+fmtInt.format(segN[i])+'</td><td class="amt">'+pct(segN[i],total)+'</td><td class="amt">'+big(segD[i])+'</td><td class="amt">'+pct(segD[i],debt)+'</td></tr>'; }).join("")+
+          '<tr style="font-weight:700"><td>Всего</td><td class="amt">'+fmtInt.format(total)+'</td><td class="amt">100%</td><td class="amt">'+big(debt)+'</td><td class="amt">100%</td></tr></tbody></table></div>'+
+          '<div class="hint" style="margin-top:8px">Уникальных ID: '+fmtInt.format(uniq)+' · отработано уникальных: '+fmtInt.format(uw)+' ('+pct(uw,uniq)+') · повторяющихся строк: '+fmtInt.format(dupIds)+(emptyIds?' · без ID: '+emptyIds:'')+'</div></section>';
+        // размер долга
+        var B = [{n:"до 1 млн",lo:0,hi:1e6},{n:"1–3 млн",lo:1e6,hi:3e6},{n:"3–5 млн",lo:3e6,hi:5e6},{n:"5–10 млн",lo:5e6,hi:1e7},{n:"10 млн и больше",lo:1e7,hi:1e99}].map(function(b){ b.c=0;b.w=0;b.d=0;b.wd=0; return b; });
         C.forEach(function(c){ for(var i=0;i<B.length;i++){ if(c.debt>=B[i].lo && c.debt<B[i].hi){ B[i].c++; B[i].d+=c.debt; if(c.hasW){B[i].w++; B[i].wd+=c.debt;} break; } } });
-        B = B.filter(function(b){ return b.c>0; });
-        var K1 = K ? 4 : 6;
-        cards += dCard("Отработка и комментарии", "доля суммы долга",
-          '<div class="donut-row">'+donutSvg(SEG.map(function(n,i){ return {v:segD[i], color:segColors[i], title:n+': '+pct(segD[i],debt)}; }), big(debt), "остаток долга")+
-          '<div class="legend">'+SEG.map(function(n,i){ return '<div class="li"><span class="sw" style="background:'+segColors[i]+'"></span><span class="ln" title="'+esc(n)+'">'+esc(n)+'</span><span class="lv">'+pct(segD[i],debt)+'</span></div>'; }).join("")+'</div></div>', K1);
-        cards += dCard("Проработка по размеру долга", "% отработанных договоров",
-          '<div class="cmp-list">'+B.map(function(b){ var p=b.c? b.w/b.c : 0; return '<div class="cmp-item"><div class="cmp-top"><span class="cmp-name">'+b.n+'</span><span class="cmp-pct">'+pct(b.w,b.c)+'</span></div>'+cmpBar(p,"#f2c14e")+'<div class="cmp-sub"><span><b>'+fmtInt.format(b.w)+'</b> из '+fmtInt.format(b.c)+'</span><span>'+big(b.d)+'</span></div></div>'; }).join("")+'</div>', K1);
+        html += '<section><div class="head"><h2>Проработка по размеру долга'+tipI("Договоры разбиты по остатку долга; для каждой корзины — сколько отработано. Видно, достаточно ли внимания уделяется самым крупным долгам.")+'</h2></div><div class="table-wrap"><table><thead><tr><th>Остаток долга</th><th class="amt">Договоров</th><th class="amt">Отработано</th><th class="amt">% отработки</th><th style="min-width:130px"></th><th class="amt">Сумма</th><th class="amt">% суммы отработано</th></tr></thead><tbody>'+
+          B.map(function(b){ var p=b.c? b.w/b.c : 0; return '<tr><td>'+b.n+'</td><td class="amt">'+fmtInt.format(b.c)+'</td><td class="amt">'+fmtInt.format(b.w)+'</td><td class="amt">'+pct(b.w,b.c)+'</td><td><div style="height:9px;background:var(--surface-2);border-radius:999px"><div style="height:100%;width:'+(p*100).toFixed(1)+'%;background:var(--grad-a);border-radius:999px"></div></div></td><td class="amt">'+big(b.d)+'</td><td class="amt">'+pct(b.wd,b.d)+'</td></tr>'; }).join("")+'</tbody></table></div></section>';
       }
       if(K){
         var rcTot = K.byOp.reduce(function(a,o){ a.cl+=o.cl; a.th+=o.th; a.no+=o.no; a.ms+=o.ms; a.lt+=o.lt; a.ptp+=o.ptp; return a; }, {cl:0,th:0,no:0,ms:0,lt:0,ptp:0});
-        var calls = K.n - rcTot.ms - rcTot.lt, conv = rcTot.cl+rcTot.th, M = K.metrics, convP = calls? conv/calls : null;
-        cards += dCard("Дозвон", fmtInt.format(K.n)+' действий',
-          '<div class="gauge-wrap">'+ringSvg(convP, "#f2c14e", convP==null?"—":(convP*100).toFixed(0)+"%", "дозвон")+
-          '<dl class="kv"><div><dt>Звонков</dt><dd>'+fmtInt.format(calls)+'</dd></div><div><dt>Дозвонились</dt><dd>'+fmtInt.format(conv)+'</dd></div><div><dt>Обещаний (PTP)</dt><dd>'+fmtInt.format(M.ptp)+'</dd></div><div><dt>Действий на договор</dt><dd>'+(K.uniqueIds?(K.n/K.uniqueIds).toFixed(1).replace(".",","):"—")+'</dd></div></dl></div>', 4);
-
-        // звонки по месяцам
-        var mon = (K.byMonth || []).slice(-6);
-        if(mon.length) cards += dCard("Звонки по месяцам", "звонки и дозвон",
-          '<div class="chart-legend"><span class="li"><span class="dot" style="background:#f2c14e"></span>звонков</span><span class="li"><span class="dot" style="background:#4f8cff"></span>дозвонились</span></div>'+
-          colChartSvg(mon.map(function(a){ var cl=a.n-a.ms-a.lt, cv=a.cl+a.th; return {label:monthLbl(a.k).replace(/ \d{4}$/,function(y){ return " ’"+y.slice(-2); }), v:cl, v2:cv, sub:pct(cv,cl), tip:monthLbl(a.k)+': звонков '+cl+', дозвон '+cv+' ('+pct(cv,cl)+'), PTP '+a.ptp}; }), {fmt:function(v){ return fmtInt.format(v); }, height:215, sub:true, W:640}), 8);
-
-        // результаты действий — кольцо
-        var resSorted = K.byRes.slice().sort(function(a,b){ return b.n-a.n; });
-        var rparts = resSorted.slice(0,6).map(function(r,i){ return {name:shortRes(r.k), v:r.n, color:DASH_COLORS[i], title:r.k+': '+r.n}; });
-        var rrest = resSorted.slice(6).reduce(function(a,r){ return a+r.n; },0);
-        if(rrest>0) rparts.push({name:"Остальные ("+(resSorted.length-6)+")", v:rrest, color:DASH_COLORS[7], title:"Остальные: "+rrest});
-        cards += dCard("Результаты действий", "топ-6", '<div class="donut-row">'+donutSvg(rparts, fmtInt.format(K.n), "действий")+donutLegend(rparts, function(v){ return fmtInt.format(v); })+'</div>', 4);
-
-        // сотрудники
-        var ops = K.byOp.slice().sort(function(a,b){ return (b.n-b.ms-b.lt)-(a.n-a.ms-a.lt); });
-        var opHead = '<thead><tr><th>Сотрудник</th><th class="amt">Звонков</th><th class="amt">Дозвон</th><th class="amt">PTP</th><th class="amt">Договоров</th></tr></thead>';
-        var opRows = function(list){ return list.map(function(a){ var cl=a.n-a.ms-a.lt; return '<tr><td>'+esc(a.k)+'</td><td class="amt">'+fmtInt.format(cl)+'</td><td class="amt">'+pct(a.cl+a.th,cl)+'</td><td class="amt">'+fmtInt.format(a.ptp)+'</td><td class="amt">'+fmtInt.format(a.ids)+'</td></tr>'; }).join(""); };
-        if(ops.length) cards += dCard("Сотрудники", "по числу звонков",
-          '<div class="table-wrap"><table class="tbl-compact">'+opHead+'<tbody>'+opRows(ops.slice(0,8))+'</tbody></table></div>'+
-          (ops.length>8 ? '<div class="more-list">'+det("opRest","Ещё сотрудники ("+(ops.length-8)+")", '<div class="table-wrap"><table class="tbl-compact">'+opHead+'<tbody>'+opRows(ops.slice(8))+'</tbody></table></div>')+'</div>' : ''), 7);
+        var calls = K.n - rcTot.ms - rcTot.lt, conv = rcTot.cl+rcTot.th;
+        html += '<section><div class="head"><h2>Действия по договорам'+tipI("Лист «Детализация»: каждая строка — одно действие (звонок, сообщение в мессенджер, письмо). Звонки = действия без мессенджеров и писем. Дозвон = звонки, где состоялся разговор (клиент или третье лицо).")+'</h2><span class="hint">'+fmtInt.format(K.n)+' действий по '+fmtInt.format(K.uniqueIds)+' договорам</span></div>'+
+          '<div class="tiles">'+[
+            {l:"Звонков",v:fmtInt.format(calls),i:"☎"},
+            {l:"Дозвон (разговор состоялся)",v:fmtInt.format(conv)+' <small>'+pct(conv,calls)+'</small>',i:"◎"},
+            {l:"С клиентом",v:fmtInt.format(rcTot.cl)+' <small>'+pct(rcTot.cl,calls)+'</small>',i:"✓",c:"good"},
+            {l:"С третьим лицом",v:fmtInt.format(rcTot.th),i:"☺"},
+            {l:"Мессенджеры / письма",v:fmtInt.format(rcTot.ms)+' / '+fmtInt.format(rcTot.lt),i:"✉"},
+            {l:"Действий на договор",v:K.uniqueIds? (K.n/K.uniqueIds).toFixed(1).replace(".",","):"—",i:"∑"}
+          ].map(function(t){ return '<div class="tile"><div class="tile-icon'+(t.c?" "+t.c:"")+'">'+t.i+'</div><div class="label">'+esc(t.l)+'</div><div class="value mono">'+t.v+'</div></div>'; }).join("")+'</div>'+
+          '<div class="head" style="margin-top:14px"><h2 style="font-size:19px">Результаты действий</h2></div>'+
+          bars(K.byRes.map(function(r){ return {name:r.k, v:r.n, num:fmtInt.format(r.n)+' · '+pct(r.n,K.n), color:/^разговор состоялся/i.test(r.k)?"linear-gradient(90deg,#2fcf95,#1aa9bd)":(/^контакт не/i.test(r.k)?"#c4cad6":null)}; }))+'</section>';
+        var M = K.metrics;
+        function d2(x){ return (x*100).toFixed(1).replace(".",",")+"%"; }
+        var fr = K.funnel.map(function(r){ return '<td class="amt">'+fmtInt.format(r.n)+'</td>'; }).join("");
+        var tail = '<td class="amt">'+fmtInt.format(M.zvonki)+'</td><td class="amt">'+fmtInt.format(M.total)+'</td><td class="amt">'+fmtInt.format(M.rc)+'</td><td class="amt">'+(M.zvonki?d2(M.rc/M.zvonki):"—")+'</td><td class="amt">'+fmtInt.format(M.ptp)+'</td><td class="amt">'+(M.rc?d2(M.ptp/M.rc):"—")+'</td><td class="amt">'+fmtCompact(M.ptpDebt)+'</td><td class="amt">'+fmtInt.format(M.def)+'</td><td class="amt">'+(M.rc?d2(M.def/M.rc):"—")+'</td><td class="amt">'+fmtCompact(M.defDebt)+'</td>';
+        html += '<section><div class="head"><h2>Воронка по группе ТОП'+tipI("Все результаты действий отдельными колонками. Звонки = общий итог − WhatsApp/Max/Telegram − письма. RC шт = события «Разговор состоялся Клиент». RC % = RC ÷ звонки. PTP шт = события «Обещание оплаты» (клиент и третье лицо). PTP % = PTP ÷ RC. Суммы остатка долга по PTP и отложенным обещаниям — по уникальным ID, без задвоения.")+'</h2><span class="hint">таблица прокручивается вправо</span></div><div class="table-wrap" style="overflow-x:auto"><table><thead><tr><th>Группа</th>'+K.funnel.map(function(r){ return '<th class="amt">'+esc(r.k||"Пусто")+'</th>'; }).join("")+'<th class="amt">Звонки</th><th class="amt">Общий итог</th><th class="amt">RC шт</th><th class="amt">RC %</th><th class="amt">PTP шт</th><th class="amt">PTP %</th><th class="amt">PTP сумма остатка долга, ₽</th><th class="amt">Отлож. обещ. шт</th><th class="amt">Отлож. обещ. %</th><th class="amt">Отлож. обещ. сумма остатка долга, ₽</th></tr></thead><tbody>'+
+          '<tr><td>Группа взыскания ТОП</td>'+fr+tail+'</tr><tr style="font-weight:700"><td>Общий итог</td>'+fr+tail+'</tr></tbody></table></div></section>';
+        html += '<section><div class="head"><h2>Обещания'+tipI("События — количество строк действий; уникальные ID — договоры без повторов; сумма остатка долга считается один раз на ID.")+'</h2></div><div class="table-wrap"><table><thead><tr><th>Вид</th><th class="amt">Событий</th><th class="amt">Уникальных ID</th><th class="amt">Сумма остатка долга</th><th class="amt">% суммы портфеля</th></tr></thead><tbody>'+
+          K.prom.map(function(p){ return '<tr'+(p.total?' style="font-weight:700"':'')+'><td>'+esc(p.name)+'</td><td class="amt">'+fmtInt.format(p.e)+'</td><td class="amt">'+fmtInt.format(p.ids)+'</td><td class="amt">'+fmtCompact(p.debt)+' ₽</td><td class="amt">'+pct(p.debt,debt,3)+'</td></tr>'; }).join("")+'</tbody></table></div></section>';
+        if(K.byMonth.length){
+          html += '<section><div class="head"><h2>По месяцам'+tipI("Действия из листа «Детализация» по календарным месяцам. Дозвон — разговор состоялся; PTP — обещание оплаты. «Договоров» — уникальные ID с действием в месяце.")+'</h2></div><div class="table-wrap"><table><thead><tr><th>Месяц</th><th class="amt">Действий</th><th class="amt">Звонков</th><th class="amt">Дозвон</th><th class="amt">% дозвона</th><th class="amt">PTP</th><th class="amt">Договоров</th></tr></thead><tbody>'+
+            K.byMonth.map(function(a){ var cl=a.n-a.ms-a.lt, cv=a.cl+a.th; return '<tr><td>'+esc(monthLbl(a.k))+'</td><td class="amt">'+fmtInt.format(a.n)+'</td><td class="amt">'+fmtInt.format(cl)+'</td><td class="amt">'+fmtInt.format(cv)+'</td><td class="amt">'+pct(cv,cl)+'</td><td class="amt">'+fmtInt.format(a.ptp)+'</td><td class="amt">'+fmtInt.format(a.ids)+'</td></tr>'; }).join("")+'</tbody></table></div></section>';
+        }
+        html += '<section><div class="head"><h2>По сотрудникам'+tipI("Оператор взаимодействия из листа «Детализация». Дозвон % = разговоры (клиент + третье лицо) ÷ звонки (без мессенджеров и писем). Договоров — уникальные ID, по которым у сотрудника есть действия.")+'</h2></div><div class="table-wrap"><table><thead><tr><th>Сотрудник</th><th class="amt">Действий</th><th class="amt">Звонков</th><th class="amt">С клиентом</th><th class="amt">С третьим</th><th class="amt">% дозвона</th><th class="amt">PTP</th><th class="amt">Договоров</th></tr></thead><tbody>'+
+          K.byOp.map(function(a){ var cl=a.n-a.ms-a.lt; return '<tr><td>'+esc(a.k)+'</td><td class="amt">'+fmtInt.format(a.n)+'</td><td class="amt">'+fmtInt.format(cl)+'</td><td class="amt">'+fmtInt.format(a.cl)+'</td><td class="amt">'+fmtInt.format(a.th)+'</td><td class="amt">'+pct(a.cl+a.th,cl)+'</td><td class="amt">'+fmtInt.format(a.ptp)+'</td><td class="amt">'+fmtInt.format(a.ids)+'</td></tr>'; }).join("")+'</tbody></table></div></section>';
       }
-
-      // --- не отработано ---
       if(U.length){
         var st = {}, rs = {}, ud = 0;
         U.forEach(function(u){ ud+=u.debt; var a=st[u.status]||(st[u.status]={n:0,d:0}); a.n++; a.d+=u.debt; var b=rs[u.resp]||(rs[u.resp]={n:0,d:0}); b.n++; b.d+=u.debt; });
-        var arr = function(o){ return Object.keys(o).map(function(k){ return {k:k,n:o[k].n,d:o[k].d}; }).sort(function(a,b){ return b.d-a.d; }); };
+        function arr(o){ return Object.keys(o).map(function(k){ return {k:k,n:o[k].n,d:o[k].d}; }).sort(function(a,b){ return b.d-a.d; }); }
         var stA = arr(st), rsA = arr(rs);
-        var rowsHtml = function(list, attr, sel, mx){ return list.map(function(a){ return '<div class="row" '+attr+'="'+esc(a.k)+'" style="cursor:pointer'+(sel===a.k?';font-weight:700':'')+'"><div class="name" title="'+esc(a.k)+'">'+esc(a.k)+'</div><div class="num">'+fmtInt.format(a.n)+' · '+big(a.d)+'</div><div class="track"><div class="fill" style="width:'+(mx? a.d/mx*100:0).toFixed(1)+'%"></div></div></div>'; }).join(""); };
-        var col = function(list, attr, sel, key, n){
-          var mx = list.length ? list[0].d : 1;
-          return '<div class="barlist">'+rowsHtml(list.slice(0,n), attr, sel, mx)+'</div>'+
-            (list.length>n ? '<div class="more-list">'+det(key,"Ещё ("+(list.length-n)+")", '<div class="barlist" style="counter-reset:rank '+n+'">'+rowsHtml(list.slice(n), attr, sel, mx)+'</div>')+'</div>' : '');
-        };
-        cards += dCard("Не отработано: ответственные", fmtInt.format(U.length)+' договоров · '+big(ud), '<div class="hint" style="margin:-4px 0 10px">нажмите на строку — список ниже отфильтруется</div>'+col(rsA, "data-rs", state.respFilter, "rsRest", 6), K?5:6);
-        cards += dCard("Не отработано: статусы", "по сумме долга", col(stA, "data-st", state.statusFilter, "stRest", 6), 4);
+        html += '<section><div class="head"><h2>Не отработано'+tipI("Лист «Не отработано»: договоры без действий. Нажмите на статус или ответственного — ниже появится список договоров (его можно скачать в Excel). Комментарии в список не выводятся.")+'</h2><span class="hint">'+fmtInt.format(U.length)+' договоров · '+big(ud)+'</span></div>'+
+          '<div><div class="hint" style="margin-bottom:6px">По ответственному</div><div class="table-wrap"><table><thead><tr><th>Ответственный</th><th class="amt">Договоров</th><th class="amt">Остаток долга</th><th class="amt">% суммы</th></tr></thead><tbody>'+
+          rsA.map(function(a){ return '<tr data-rs="'+esc(a.k)+'" style="cursor:pointer'+(state.respFilter===a.k?';font-weight:700':'')+'"><td>'+esc(a.k)+'</td><td class="amt">'+fmtInt.format(a.n)+'</td><td class="amt">'+big(a.d)+'</td><td class="amt">'+pct(a.d,ud)+'</td></tr>'; }).join("")+'</tbody></table></div></div>'+
+          '<div style="margin-top:10px"><div class="hint" style="margin-bottom:6px">По статусу договора</div><div class="table-wrap" style="overflow-x:auto"><table><thead><tr><th>Статус</th><th class="amt">Договоров</th><th class="amt">Остаток долга</th><th class="amt">% суммы</th></tr></thead><tbody>'+
+          stA.map(function(a){ return '<tr data-st="'+esc(a.k)+'" style="cursor:pointer'+(state.statusFilter===a.k?';font-weight:700':'')+'"><td>'+esc(a.k)+'</td><td class="amt">'+fmtInt.format(a.n)+'</td><td class="amt">'+big(a.d)+'</td><td class="amt">'+pct(a.d,ud)+'</td></tr>'; }).join("")+'</tbody></table></div></div>';
         var list = U.filter(function(u){ return (!state.statusFilter||u.status===state.statusFilter) && (!state.respFilter||u.resp===state.respFilter); }).sort(function(a,b){ return b.debt-a.debt; });
-        var filtered = !!(state.statusFilter||state.respFilter);
-        var ttl = filtered ? ('Список: '+[state.statusFilter,state.respFilter].filter(Boolean).join(" · ")) : 'Крупнейшие неотработанные договоры';
-        var shown = state.showAll ? list : list.slice(0,10);
-        cards += dCard(esc(ttl), fmtInt.format(list.length)+' договоров',
-          '<div style="display:flex;gap:8px;justify-content:flex-end;margin:-6px 0 10px">'+(filtered?'<button type="button" class="btn ghost" id="'+prefix+'clrF" style="font-size:13.5px">✕ Сбросить</button>':'')+'<button type="button" class="btn ghost" id="'+prefix+'exp" style="font-size:13.5px">⭳ Скачать в Excel</button></div>'+
-          '<div class="table-wrap"><table class="tbl-compact"><thead><tr><th>ID договора</th><th>Должник</th><th class="amt">Остаток долга</th><th>Статус</th><th>Ответственный</th></tr></thead><tbody>'+
-          shown.map(function(u){ return '<tr><td class="id">'+esc(u.id)+'</td><td>'+esc(u.name)+'</td><td class="amt">'+fmtCompact(u.debt)+'</td><td>'+esc(u.status)+'</td><td>'+esc(u.resp)+'</td></tr>'; }).join("")+'</tbody></table></div>'+
-          (list.length>shown.length?'<button type="button" class="btn ghost" id="'+prefix+'more" style="margin-top:10px">Показать все '+fmtInt.format(list.length)+'</button>':''), 8);
-      }
-      html += '<div class="dgrid">'+cards+'</div>';
-
-      // --- подробности — свёрнуто ---
-      var more = '';
-      if(K){
-        var resSorted2 = K.byRes.slice().sort(function(a,b){ return b.n-a.n; });
-        more += det("res","Все результаты действий", bars(resSorted2.map(function(r){ return {name:r.k, v:r.n, num:fmtInt.format(r.n)+' · '+pct(r.n,K.n)}; })), fmtInt.format(resSorted2.length)+' видов');
-        if(K.byMonth.length){
-          var monRows = K.byMonth.map(function(a){ var cl=a.n-a.ms-a.lt, cv=a.cl+a.th; return '<tr><td>'+esc(monthLbl(a.k))+'</td><td class="amt">'+fmtInt.format(a.n)+'</td><td class="amt">'+fmtInt.format(cl)+'</td><td class="amt">'+fmtInt.format(cv)+'</td><td class="amt">'+pct(cv,cl)+'</td><td class="amt">'+fmtInt.format(a.ptp)+'</td><td class="amt">'+fmtInt.format(a.ids)+'</td></tr>'; }).join("");
-          more += det("months","По месяцам (таблица)", '<div class="table-wrap"><table class="tbl-compact"><thead><tr><th>Месяц</th><th class="amt">Действий</th><th class="amt">Звонков</th><th class="amt">Дозвон</th><th class="amt">% дозвона</th><th class="amt">PTP</th><th class="amt">Договоров</th></tr></thead><tbody>'+monRows+'</tbody></table></div>');
-        }
-      }
-      if(total){
-        var cRows = 0, cDebt = 0, withId = 0, withIdDebt = 0;
-        C.forEach(function(c){ if(c.hasC){ cRows++; cDebt += c.debt; } if(c.id){ withId++; withIdDebt += c.debt; } });
-        more += det("base","Объём базы и отработка (таблица)", '<div class="table-wrap"><table class="tbl-compact"><thead><tr><th>Показатель</th><th class="amt">Договоров</th><th class="amt">% базы</th><th class="amt">Остаток долга</th><th class="amt">% суммы</th></tr></thead><tbody>'+
-          [['Всего строк ТОП',total,debt],['Строк с внутренним ID',withId,withIdDebt],['Отработано',worked,workedDebt],['Не отработано',total-worked,debt-workedDebt],['Есть комментарий',cRows,cDebt]].map(function(r){ return '<tr><td>'+r[0]+'</td><td class="amt">'+fmtInt.format(r[1])+'</td><td class="amt">'+pct(r[1],total)+'</td><td class="amt">'+mny(r[2])+'</td><td class="amt">'+pct(r[2],debt)+'</td></tr>'; }).join("")+
-          [['Уникальных ID',uniq],['Отработано уникальных ID',uw],['Не отработано уникальных ID',uniq-uw]].map(function(r){ return '<tr><td>'+r[0]+'</td><td class="amt">'+fmtInt.format(r[1])+'</td><td class="amt">'+pct(r[1],uniq)+'</td><td class="amt">—</td><td class="amt">—</td></tr>'; }).join("")+
-          '</tbody></table></div><div class="hint" style="margin-top:8px">Повторяющихся строк: '+fmtInt.format(dupIds)+(emptyIds?' · без ID: '+emptyIds:'')+'</div>', 'строки, уникальные ID, комментарии');
-      }
-      if(K){
-        var M2 = K.metrics;
-        var d2 = function(x){ return (x*100).toFixed(1).replace(".",",")+"%"; };
-        var kvi = function(l,v){ return '<div><span>'+esc(l)+'</span><b>'+v+'</b></div>'; };
-        more += det("funnel","Воронка по группе ТОП", '<div class="kvgrid-title">Результаты действий</div><div class="kvgrid">'+K.funnel.map(function(r){ return kvi(shortRes(r.k||"Пусто"), fmtInt.format(r.n)); }).join("")+'</div>'+
-          '<div class="kvgrid-title">Итоги</div><div class="kvgrid">'+[kvi("Звонки",fmtInt.format(M2.zvonki)),kvi("Общий итог",fmtInt.format(M2.total)),kvi("RC, шт",fmtInt.format(M2.rc)),kvi("RC, % от звонков",M2.zvonki?d2(M2.rc/M2.zvonki):"—"),kvi("PTP, шт",fmtInt.format(M2.ptp)),kvi("PTP, % от RC",M2.rc?d2(M2.ptp/M2.rc):"—"),kvi("PTP, остаток долга",fmtCompact(M2.ptpDebt)+' ₽'),kvi("Отложенных, шт",fmtInt.format(M2.def)),kvi("Отложенных, % от RC",M2.rc?d2(M2.def/M2.rc):"—"),kvi("Отложенных, остаток долга",fmtCompact(M2.defDebt)+' ₽')].join("")+'</div>'+
-          '<div class="hint" style="margin-top:8px">Звонки = общий итог − мессенджеры − письма. Суммы считаются по уникальным ID, без задвоения.</div>', "результаты и итоги");
-        more += det("prom","Обещания: события и суммы", '<div class="table-wrap"><table class="tbl-compact"><thead><tr><th>Вид</th><th class="amt">Событий</th><th class="amt">ID</th><th class="amt">Остаток долга</th><th class="amt">% портфеля</th></tr></thead><tbody>'+
-          K.prom.map(function(p){ return '<tr'+(p.total?' class="total"':'')+'><td>'+esc(p.name)+'</td><td class="amt">'+fmtInt.format(p.e)+'</td><td class="amt">'+fmtInt.format(p.ids)+'</td><td class="amt">'+fmtCompact(p.debt)+' ₽</td><td class="amt">'+pct(p.debt,debt,3)+'</td></tr>'; }).join("")+'</tbody></table></div>');
+        var ttl = (state.statusFilter||state.respFilter) ? ('Список: '+[state.statusFilter,state.respFilter].filter(Boolean).join(" · ")) : 'Крупнейшие неотработанные договоры';
+        var shown = state.showAll ? list : list.slice(0,50);
+        html += '<div class="head" style="margin-top:16px"><h2 style="font-size:19px">'+esc(ttl)+' <span class="hint">('+fmtInt.format(list.length)+')</span></h2><div style="display:flex;gap:8px">'+((state.statusFilter||state.respFilter)?'<button type="button" class="btn ghost" id="'+prefix+'clrF" style="font-size:14px">✕ Сбросить</button>':'')+'<button type="button" class="btn ghost" id="'+prefix+'exp" style="font-size:14px">⭳ Скачать в Excel</button></div></div>'+
+          '<div class="table-wrap"><table><thead><tr><th>ID договора</th><th>Должник</th><th class="amt">Остаток долга</th><th>Статус</th><th>Ответственный</th><th>Оператор</th></tr></thead><tbody>'+
+          shown.map(function(u){ return '<tr><td>'+esc(u.id)+'</td><td>'+esc(u.name)+'</td><td class="amt">'+fmtCompact(u.debt)+'</td><td>'+esc(u.status)+'</td><td>'+esc(u.resp)+'</td><td>'+esc(u.op||"—")+'</td></tr>'; }).join("")+'</tbody></table></div>'+
+          (list.length>shown.length?'<button type="button" class="btn ghost" id="'+prefix+'more" style="margin-top:10px">Показать все '+fmtInt.format(list.length)+'</button>':'')+'</section>';
       }
       var pr = C.filter(function(c){ return c.ptp || c.def; }).sort(function(a,b){ return b.debt-a.debt; });
       if(pr.length){
-        more += det("promc","Обещания по договорам ("+fmtInt.format(pr.length)+")", '<div class="hint" style="margin-bottom:8px">PTP: '+Object.keys(ptpIds).length+' ID · '+big(ptpDebt)+' · отложенные: '+Object.keys(defIds).length+' ID · '+big(defDebt)+(pr.length>50?' · показаны 50 крупнейших':'')+'</div><div class="table-wrap"><table class="tbl-compact"><thead><tr><th>ID договора</th><th>Должник</th><th class="amt">Остаток долга</th><th>Обещание</th><th class="amt">Действий</th></tr></thead><tbody>'+
-          pr.slice(0,50).map(function(c){ return '<tr><td class="id">'+esc(c.id)+'</td><td>'+esc(c.name)+'</td><td class="amt">'+fmtCompact(c.debt)+'</td><td>'+(c.ptp?'PTP'+(c.ptpKind?' ('+esc(c.ptpKind)+')':''):'')+(c.ptp&&c.def?' + ':'')+(c.def?'отложенное'+(c.defKind?' ('+esc(c.defKind)+')':''):'')+'</td><td class="amt">'+fmtInt.format(c.act)+'</td></tr>'; }).join("")+'</tbody></table></div>');
+        html += '<section><div class="head"><h2>Обещания по договорам'+tipI("Договоры из «Сверки_ID», где есть обещание оплаты (PTP) или отложенное обещание. Вид — клиент или третье лицо.")+'</h2><span class="hint">PTP: '+Object.keys(ptpIds).length+' ID · '+big(ptpDebt)+' · отложенные: '+Object.keys(defIds).length+' ID · '+big(defDebt)+'</span></div><div class="table-wrap"><table><thead><tr><th>ID договора</th><th>Должник</th><th class="amt">Остаток долга</th><th>Обещание</th><th class="amt">Действий</th></tr></thead><tbody>'+
+          pr.map(function(c){ return '<tr><td>'+esc(c.id)+'</td><td>'+esc(c.name)+'</td><td class="amt">'+fmtCompact(c.debt)+'</td><td>'+(c.ptp?'PTP'+(c.ptpKind?' ('+esc(c.ptpKind)+')':''):'')+(c.ptp&&c.def?' + ':'')+(c.def?'отложенное'+(c.defKind?' ('+esc(c.defKind)+')':''):'')+'</td><td class="amt">'+fmtInt.format(c.act)+'</td></tr>'; }).join("")+'</tbody></table></div></section>';
       }
-      more += det("how","Как это считается", '<div class="module-subtitle"><b>Загрузка:</b> два файла — выгрузка ТОП (ID договора внутренний, сумма долга + ГП остаток, комментарии, статус, ответственный) и файл звонков (ID результата, дата, оператор, ID договора внутренний); порядок и количество загрузок не важны. Действия сопоставляются с ТОП по «ID договора внутренний». Можно загрузить и готовый отчёт с листами «Сверка_ID» и «Детализация». <b>База</b> — все строки файла ТОП, даже если ID повторяется. <b>Отработан</b> — по ID найдено хотя бы одно действие. <b>RC</b> — «Разговор состоялся Клиент», <b>PTP</b> — «Обещание оплаты» (клиент и третье лицо), <b>отложенные</b> — «Отложенное обещание»; суммы обещаний считаются по уникальным ID без задвоения. Тексты комментариев на странице не показываются и не выгружаются.</div>');
-      html += '<div class="d-more">'+more+'</div></div>';
-
       body.innerHTML = html;
       Array.prototype.forEach.call(body.querySelectorAll("[data-st]"), function(r){ r.addEventListener("click", function(){ var v=r.getAttribute("data-st"); state.statusFilter = state.statusFilter===v?null:v; state.showAll=false; render(); }); });
       Array.prototype.forEach.call(body.querySelectorAll("[data-rs]"), function(r){ r.addEventListener("click", function(){ var v=r.getAttribute("data-rs"); state.respFilter = state.respFilter===v?null:v; state.showAll=false; render(); }); });
-      var more2 = document.getElementById(prefix+"more"); if(more2) more2.addEventListener("click", function(){ state.showAll = true; render(); });
+      var more = document.getElementById(prefix+"more"); if(more) more.addEventListener("click", function(){ state.showAll = true; render(); });
       var clr = document.getElementById(prefix+"clrF"); if(clr) clr.addEventListener("click", function(){ state.statusFilter=null; state.respFilter=null; state.showAll=false; render(); });
       var ex = document.getElementById(prefix+"exp");
       if(ex) ex.addEventListener("click", function(){
