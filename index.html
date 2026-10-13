@@ -184,21 +184,16 @@
   .lay-panel button.primary{ background:var(--accent); border-color:var(--accent); color:#fff; font-weight:700; }
   .lay-hid{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
   .lay-act{ display:flex; gap:8px; justify-content:flex-end; }
-  .lay-block{ position:relative; }
-  body.lay-on .lay-block{ outline:2px dashed color-mix(in srgb, var(--accent) 55%, transparent); outline-offset:-2px; }
-  .lay-block > .dc-head, .lay-block > .k-top, .lay-block > .head{ cursor:grab; }
+  .lay-block{ position:relative; outline:2px dashed color-mix(in srgb, var(--accent) 55%, transparent); outline-offset:-2px; }
   .lay-block.lay-drag{ opacity:.45; }
   .lay-hidden{ display:none !important; }
   body.lay-on .lay-hidden{ display:none !important; }
-  .lay-ui{ opacity:0; pointer-events:none; transition:opacity .15s; position:absolute; top:6px; right:6px; z-index:6; display:flex; gap:3px; align-items:center; background:var(--surface); border:1px solid var(--border); border-radius:9px; padding:2px 3px; box-shadow:var(--shadow-sm); }
-  .lay-block:hover > .lay-ui, .lay-block:hover > summary > .lay-ui, body.lay-on .lay-ui, .lay-ui:hover{ opacity:1; pointer-events:auto; }
-  .lay-ui button{ display:none; }
-  .lay-block:hover > .lay-ui button, .lay-block:hover > summary > .lay-ui button, .lay-ui:hover button, body.lay-on .lay-ui button{ display:inline-block; }
+  .lay-ui{ position:absolute; top:6px; right:6px; z-index:6; display:flex; gap:3px; align-items:center; background:var(--surface); border:1px solid var(--border); border-radius:9px; padding:2px 3px; box-shadow:var(--shadow-sm); }
   .lay-ui button{ border:0; background:transparent; color:var(--text-dim); font-size:12px; font-weight:700; padding:3px 6px; border-radius:6px; cursor:pointer; line-height:1; }
   .lay-ui button:hover{ background:var(--surface-2); color:var(--text); }
   .lay-ui button.on{ background:var(--accent); color:#fff; }
-  body.lay-on .lay-block > .dc-head, body.lay-on .lay-block > .head{ padding-right:150px; }
-  body.lay-on .lay-block.kpi > .k-top{ margin-top:26px; }
+  .lay-block > .dc-head, .lay-block > .k-top, .lay-block > .head{ padding-right:150px; }
+  .lay-block.kpi > .k-top{ padding-right:0; margin-top:26px; }
   .lay-h{ cursor:grab; padding:2px 6px; font-size:15px; color:var(--text-dim); user-select:none; }
   .lay-h:active{ cursor:grabbing; }
   @media (min-width:701px){ .lay-sz{ grid-column:span var(--lay-span) !important; } }
@@ -7361,7 +7356,7 @@
   // ===== Раскладка блоков: перетаскивание, ширина, скрытие. Работает на всех вкладках; порядок
   // запоминается в браузере и накладывается поверх при каждой перерисовке (в т.ч. после загрузки файла).
   (function initLayoutEditor(){
-    var LS = "pulse_layout_v1", lay = {}, editing = true, panelOn = false;
+    var LS = "pulse_layout_v1", lay = {}, editing = false;
     try{ lay = JSON.parse(localStorage.getItem(LS)||"{}") || {}; }catch(e){ lay = {}; }
     function save(){ try{ safeSetItem(LS, JSON.stringify(lay)); }catch(e){} }
     var BSEL = ".dcard, .tile, section, details.more";
@@ -7461,10 +7456,8 @@
     // --- перетаскивание ---
     var drag = null;
     document.addEventListener("mousedown", function(e){
-      if(e.button) return;
-      var h = e.target.closest && e.target.closest(".lay-h, .dc-head, .head, .k-top"); if(!h) return;
-      if(e.target.closest("button, a, input, select, textarea, label")) return;
-      var b = h.closest(".lay-block"); if(b && b.contains(h) && !h.closest(".dcard .dcard")){ b.draggable = true; }
+      var h = e.target.closest && e.target.closest(".lay-h"); if(!h) return;
+      var b = h.closest(".lay-block"); if(b){ b.draggable = true; }
     });
     document.addEventListener("mouseup", function(){ document.querySelectorAll(".lay-block[draggable=true]").forEach(function(b){ b.draggable = false; }); });
     document.addEventListener("dragstart", function(e){
@@ -7523,9 +7516,9 @@
       var page = activePage();
       if(!page){ fab.style.display = "none"; return; }
       fab.style.display = "";
-      if(!panelOn){ fab.innerHTML = '<button type="button" class="lay-fab-btn" data-lact="edit" title="Блоки можно просто перетаскивать мышью. Здесь — вернуть скрытые и сбросить расположение.">✥ Раскладка</button>'; return; }
+      if(!editing){ fab.innerHTML = '<button type="button" class="lay-fab-btn" data-lact="edit" title="Менять порядок и размер блоков на этой вкладке">✥ Раскладка</button>'; return; }
       var hl = hiddenList(page);
-      fab.innerHTML = '<div class="lay-panel"><b>Раскладка блоков</b><span>Любой блок можно перетащить мышью за заголовок или за ⠿. Ширина — кнопки ⅓ ½ ⅔ ▬ рядом с ⠿, ✕ — скрыть блок.</span>'+
+      fab.innerHTML = '<div class="lay-panel"><b>Режим раскладки</b><span>Тяните блок за ⠿, меняйте ширину кнопками ⅓ ½ ⅔ ▬, ✕ — скрыть.</span>'+
         (hl.length ? '<div class="lay-hid">Скрыто: '+hl.map(function(x,i){ return '<button type="button" data-lshow="'+i+'">+ '+esc(x.k)+'</button>'; }).join("")+'</div>' : '')+
         '<div class="lay-act"><button type="button" data-lact="reset">↺ Сбросить вкладку</button><button type="button" class="primary" data-lact="done">Готово</button></div></div>';
       fab.__hl = hl;
@@ -7534,8 +7527,8 @@
       var a = e.target.closest("[data-lact]"), sh = e.target.closest("[data-lshow]"), page = activePage(); if(!page) return;
       if(sh){ var it = fab.__hl[+sh.getAttribute("data-lshow")]; var st = lay[page.id] && lay[page.id][it.ck]; if(st && st.hide){ delete st.hide[it.k]; save(); } applyPage(page); panel(); return; }
       if(!a) return; var act = a.getAttribute("data-lact");
-      if(act==="edit"){ panelOn = true; document.body.classList.add("lay-on"); panel(); }
-      if(act==="done"){ panelOn = false; document.body.classList.remove("lay-on"); panel(); }
+      if(act==="edit"){ editing = true; document.body.classList.add("lay-on"); allPages().forEach(applyPage); panel(); }
+      if(act==="done"){ editing = false; document.body.classList.remove("lay-on"); allPages().forEach(applyPage); panel(); }
       if(act==="reset"){ delete lay[page.id]; save(); // вернуть исходный порядок — перерисовкой вкладки
         var btnFix = page.id; location.hash = ""; try{ sessionStorage.setItem("pulse_lay_page", btnFix); }catch(x){} location.reload(); }
     });
