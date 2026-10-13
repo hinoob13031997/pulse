@@ -174,6 +174,56 @@
   .app-tab[data-cat="portfolio"]{ --tab-dot:#f0a941; }
   .app-tab[data-cat="journal"]{ --tab-dot:#22c3a6; }
   .app-tab[data-cat="distrib"]{ --tab-dot:#d1479c; }
+  /* --- раскладка блоков --- */
+  #layFab{ position:fixed; right:18px; bottom:18px; z-index:60; display:flex; justify-content:flex-end; }
+  .lay-fab-btn{ border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:999px; padding:9px 16px; font:inherit; font-size:13.5px; font-weight:700; cursor:pointer; box-shadow:var(--shadow); }
+  .lay-fab-btn:hover{ border-color:var(--accent); color:var(--accent-ink); }
+  .lay-panel{ max-width:340px; background:var(--surface); color:var(--text); border:1px solid var(--accent); border-radius:16px; padding:12px 14px; box-shadow:var(--shadow-lg); display:flex; flex-direction:column; gap:8px; font-size:13px; }
+  .lay-panel span{ color:var(--text-dim); line-height:1.35; }
+  .lay-panel button{ font:inherit; font-size:13px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:9px; padding:6px 11px; cursor:pointer; }
+  .lay-panel button.primary{ background:var(--accent); border-color:var(--accent); color:#fff; font-weight:700; }
+  .lay-hid{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .lay-act{ display:flex; gap:8px; justify-content:flex-end; }
+  .lay-block{ position:relative; outline:2px dashed color-mix(in srgb, var(--accent) 55%, transparent); outline-offset:-2px; }
+  .lay-block.lay-drag{ opacity:.45; }
+  .lay-hidden{ display:none !important; }
+  body.lay-on .lay-hidden{ display:none !important; }
+  .lay-ui{ position:absolute; top:6px; right:6px; z-index:6; display:flex; gap:3px; align-items:center; background:var(--surface); border:1px solid var(--border); border-radius:9px; padding:2px 3px; box-shadow:var(--shadow-sm); }
+  .lay-ui button{ border:0; background:transparent; color:var(--text-dim); font-size:12px; font-weight:700; padding:3px 6px; border-radius:6px; cursor:pointer; line-height:1; }
+  .lay-ui button:hover{ background:var(--surface-2); color:var(--text); }
+  .lay-ui button.on{ background:var(--accent); color:#fff; }
+  .lay-block > .dc-head, .lay-block > .k-top, .lay-block > .head{ padding-right:150px; }
+  .lay-block.kpi > .k-top{ padding-right:0; margin-top:26px; }
+  .lay-h{ cursor:grab; padding:2px 6px; font-size:15px; color:var(--text-dim); user-select:none; }
+  .lay-h:active{ cursor:grabbing; }
+  @media (min-width:701px){ .lay-sz{ grid-column:span var(--lay-span) !important; } }
+  @media (hover:none){ #layFab{ display:none !important; } }
+  @media print{ #layFab, .lay-ui{ display:none !important; } }
+  .app-tab[data-cat="match"]{ --tab-dot:#22b8cf; }
+  .app-tab[data-cat="match"].active{ background:linear-gradient(135deg,#0e7490,#22b8cf); }
+  .app-tab[data-page="page-match"]{ --ico:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%229%22 cy=%2212%22 r=%226%22/%3E%3Ccircle cx=%2215%22 cy=%2212%22 r=%226%22/%3E%3C/svg%3E"); }
+  .tab-page.cat-match{ --grad-a:#0e9fb8; --grad-b:#4fd1e6; --accent:#0e9fb8; --accent2:#4fd1e6; --accent-soft:#0e9fb81c; --accent-ink:#0e7490; --btn-a:#0e7490; --btn-b:#22b8cf; }
+  :root[data-theme="dark"] .tab-page.cat-match{ --accent-ink:#7fe0f0; }
+  /* --- вкладка «Сопоставление» --- */
+  .mt-files{ gap:8px !important; }
+  .mt-chip{ display:inline-flex; align-items:center; gap:6px; padding:4px 6px 4px 10px; border:1px solid var(--border); border-radius:999px; background:var(--surface-2); font-size:13px; color:var(--text); }
+  .mt-chip b{ color:var(--gold); }
+  .mt-chip button{ border:0; background:transparent; color:var(--text-dim); cursor:pointer; font-size:12px; padding:2px 5px; border-radius:50%; }
+  .mt-chip button:hover{ color:var(--bad); }
+  .mt-bar{ display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; margin-bottom:12px; }
+  .mt-bar label{ font-size:13px; color:var(--name); display:flex; gap:6px; align-items:center; }
+  .dash select, .dash input[type=date], .dash textarea{ background:var(--surface-2); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:6px 8px; font:inherit; font-size:13.5px; }
+  .mt-bar .seg{ display:inline-flex; border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+  .mt-bar .seg button{ border:0; background:transparent; color:var(--text-dim); padding:6px 14px; cursor:pointer; font:inherit; font-size:13.5px; font-weight:600; }
+  .mt-bar .seg button.on{ background:var(--gold); color:#1b1500; }
+  .mt-fun .fr{ margin:11px 0; }
+  .mt-fun .ftop{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:5px; }
+  .mt-fun .fl{ font-size:14.5px; color:var(--name); }
+  .mt-fun .fv{ font-family:"JetBrains Mono",monospace; font-size:12.5px; color:var(--text-dim); text-align:right; }
+  .mt-fun .fv b{ font-size:17px; color:var(--num); }
+  .mt-fun .fv i{ font-style:normal; }
+  .mt-fun .ft{ display:flex; justify-content:center; background:var(--surface-2); border-radius:9px; height:24px; overflow:hidden; }
+  .mt-fun .fb{ height:100%; border-radius:9px; }
   .app-tab[data-cat="top"]{ --tab-dot:#e5603b; }
   .app-tab[data-cat="top"].active{ background:linear-gradient(135deg,#b3401f,#e5603b); }
   .tab-page.cat-top{ --grad-a:#e5603b; --grad-b:#f5a25d; --accent:#e5603b; --accent2:#f5a25d; --accent-soft:#e5603b1c; --accent-ink:#b3401f; --btn-a:#b3401f; --btn-b:#e5603b; }
@@ -761,6 +811,7 @@
   <button class="app-tab" data-page="page-portall" data-cat="portfolio">Портфель весь</button>
   <button class="app-tab" data-page="page-plan" data-cat="plan">План и обещания</button>
   <button class="app-tab" data-page="page-top" data-cat="top">Проработка ТОП</button>
+  <button class="app-tab" data-page="page-match" data-cat="match">Сопоставление</button>
   <button class="app-tab" data-page="page-distrib" data-cat="distrib">Распределение договоров</button>
 </nav>
 
@@ -1280,6 +1331,25 @@
   </div>
 </div>
 
+<div id="page-match" class="tab-page cat-match">
+  <div id="mt_root">
+    <div class="module-head">
+      <div class="module-info">
+        <span class="module-title">Сопоставление файлов</span>
+        <span class="badge empty" id="mt_sourceBadge">нет данных</span>
+      </div>
+      <div class="controls">
+        <label class="btn primary" for="mt_fileInput">⭱ Загрузить файлы</label>
+        <input type="file" id="mt_fileInput" accept=".xlsx,.xls,.csv" multiple />
+        <button class="btn ghost" id="mt_resetBtn">✕ Очистить</button>
+      </div>
+    </div>
+    <div class="module-subtitle" style="margin-bottom:14px;">Загрузите сразу несколько файлов: историю звонков (журнал взаимодействия) и списки договоров — например, файл с обещаниями и суммами или просто ID, которые нужно найти. Дашборд сопоставит их по «ID договора внутренний» и покажет, сколько договоров проработано и кем (по ID оператора — по группам и по сотрудникам). Эта вкладка не берёт данные из других вкладок.</div>
+    <div id="mt_emptyState" class="empty-state"><div class="es-icon">⭱</div>Загрузите историю звонков и список договоров — воронка построится сама.</div>
+    <div id="mt_bodyWrap" style="display:none"></div>
+  </div>
+</div>
+
 <div id="page-distrib" class="tab-page cat-distrib">
   <div id="ds_root">
     <div class="module-head">
@@ -1530,7 +1600,11 @@
     {key:"pulse_portfolio_odv", extra:[]},
     {key:"pulse_portfolio_all", extra:[]},
     {key:"pulse_distrib_settings", extra:[]},
-    {key:"pulse_distrib_data", extra:["_label"]}
+    {key:"pulse_distrib_data", extra:["_label"]},
+    {key:"pulse_plan", extra:[]},
+    {key:"pulse_top", extra:[]},
+    {key:"pulse_match", extra:[]},
+    {key:"pulse_layout_v1", extra:[]}
   ];
 
   // ---- Надёжное сохранение в localStorage ----
@@ -6180,6 +6254,366 @@
     render();
   }
 
+  // ===== «Сопоставление»: любые файлы звонков/истории + списки договоров (в т.ч. файл обещаний с суммами).
+  // Ничего не берёт из других вкладок. Договоры из списков (объединение) сопоставляются с событиями
+  // по «ID договора внутренний»; оператор — «ID Оператора История софт» (или «Оператор взаимодействия»).
+  function createMatchModule(prefix, storageKey){
+    var root = document.getElementById(prefix+"root"); if(!root) return;
+    function el(id){ return document.getElementById(prefix+id); }
+    var state = { src:{lists:[], calls:[]}, opt:{from:"", to:"", attr:"all", amt:"max", mode:"group"}, model:null, showAll:false, filt:null };
+    try{ var sv = JSON.parse(localStorage.getItem(storageKey)||"null"); if(sv){ if(sv.src) state.src = { lists:sv.src.lists||[], calls:sv.src.calls||[] }; if(sv.opt) for(var k in sv.opt) state.opt[k]=sv.opt[k]; } }catch(e){}
+    var RX = { cl:/^разговор состоялся клиент/i, th:/^разговор состоялся третье/i, no:/^контакт не установлен/i, ms:/^whatsapp|^telegram|^max\b/i, lt:/^письмо/i, ptp:/обещание оплат/i, def:/отложенн[а-яё]* обещание/i };
+    function lc(x){ return String(x==null?"":x).trim().toLowerCase(); }
+    function normId(v){ var s = String(v==null?"":v).trim(); if(/^\d+\.0+$/.test(s)) s = s.replace(/\.0+$/,""); return s; }
+    function num(v){ if(v==null||v==="") return 0; if(typeof v==="number") return isFinite(v)?v:0; var n = parseFloat(String(v).replace(/[^\d,.\-]/g,"").replace(",",".")); return isFinite(n)?n:0; }
+    function p2(n){ return (n<10?"0":"")+n; }
+    function dtstr(v){
+      if(v instanceof Date && !isNaN(v)) return v.getFullYear()+"-"+p2(v.getMonth()+1)+"-"+p2(v.getDate())+" "+p2(v.getHours())+":"+p2(v.getMinutes())+":"+p2(v.getSeconds());
+      var s = String(v==null?"":v).trim(), m;
+      if((m=/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?/.exec(s))) return m[1]+"-"+m[2]+"-"+m[3]+" "+(m[4]||"00")+":"+(m[5]||"00")+":"+(m[6]||"00");
+      if((m=/^(\d{2})\.(\d{2})\.(\d{4})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?/.exec(s))) return m[3]+"-"+m[2]+"-"+m[1]+" "+(m[4]||"00")+":"+(m[5]||"00")+":"+(m[6]||"00");
+      return "";
+    }
+    function ru(d){ var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(d||""); return m? m[3]+"."+m[2]+"."+m[1] : (d||""); }
+    function pct(a,b,dig){ return b ? (a/b*100).toFixed(dig==null?1:dig).replace(".",",")+"%" : "—"; }
+    function big(v){ var a=Math.abs(v); if(a>=1e9) return (v/1e9).toFixed(2).replace(".",",")+" млрд ₽"; if(a>=1e6) return (v/1e6).toFixed(1).replace(".",",")+" млн ₽"; return fmtCompact(v)+" ₽"; }
+    function shortRes(r){ return String(r||"Пусто").replace(/^Контакт не установлен:\s*/i,"Нет контакта: ").replace(/^Разговор состоялся\s*/i,"Разговор: "); }
+    function resGroup(r){ if(!r||/^пусто$/i.test(r)) return 6; if(RX.ms.test(r)) return 0; if(RX.no.test(r)) return 1; if(RX.cl.test(r)) return 2; if(RX.th.test(r)) return 3; if(RX.lt.test(r)) return 4; return 5; }
+
+    // ---------- чтение файлов ----------
+    function findHdr(aoa){
+      for(var i=0;i<Math.min(aoa.length,8);i++){
+        var h = (aoa[i]||[]).map(lc);
+        if(h.some(function(x){ return /id результата/.test(x); }) && h.some(function(x){ return /^id договора внутренний|^id договора|^id$/.test(x); })) return {row:i, kind:"calls"};
+      }
+      for(var j=0;j<Math.min(aoa.length,8);j++){
+        var g = (aoa[j]||[]).map(lc);
+        if(g.some(function(x){ return /^id договора внутренний/.test(x); })) return {row:j, kind:"list"};
+      }
+      for(var q=0;q<Math.min(aoa.length,8);q++){
+        var w = (aoa[q]||[]).map(lc);
+        if(w.some(function(x){ return /^id\b|айди|^id договора/.test(x); })) return {row:q, kind:"list"};
+      }
+      // без заголовка: первая колонка — сплошь числа
+      var tot = 0, dig = 0; for(var r=0;r<Math.min(aoa.length,200);r++){ var c0 = aoa[r] && aoa[r][0]; if(c0===""||c0==null) continue; tot++; if(/^\d+(\.0+)?$/.test(String(c0).trim())) dig++; }
+      if(tot>=1 && dig/tot>=0.8) return {row:-1, kind:"list"};
+      return null;
+    }
+    function classify(sheets){
+      for(var i=0;i<sheets.length;i++){
+        var a = sheets[i].aoa; if(!a || !a.length) continue; var f = findHdr(a);
+        if(f) return { kind:f.kind, aoa:a.slice(f.row+1), head:f.row>=0 ? a[f.row] : null };
+      }
+      return { kind:null };
+    }
+    function colIdx(h, res){ for(var k=0;k<res.length;k++){ for(var i=0;i<h.length;i++) if(res[k].test(h[i])) return i; } return -1; }
+    function parseCalls(head, rows, name){
+      var h = head.map(lc);
+      var iId = colIdx(h,[/^id договора внутренний/,/^id договора/,/^id$/]), iRes = colIdx(h,[/id результата/]), iDate = colIdx(h,[/дата сообщения/,/^дата/]);
+      var iOp = colIdx(h,[/id оператора/,/оператор взаимодействия/,/оператор/]);
+      var resT = [], resM = {}, opT = [], opM = {}, ev = [];
+      rows.forEach(function(row){
+        if(!row) return; var id = normId(row[iId]); if(!id) return;
+        var res = String(row[iRes]==null?"":row[iRes]).trim(), op = iOp>=0 ? String(row[iOp]==null?"":row[iOp]).trim().replace(/\s+/g," ") : "";
+        if(resM[res]==null){ resM[res]=resT.length; resT.push(res); } if(opM[op]==null){ opM[op]=opT.length; opT.push(op); }
+        ev.push([id, resM[res], dtstr(row[iDate]), opM[op]]);
+      });
+      return { name:name, res:resT, ops:opT, ev:ev };
+    }
+    function parseList(head, rows, name){
+      var out = [], iId = 0, iAmt = -1;
+      if(head){
+        var h = head.map(lc);
+        iId = colIdx(h,[/^id договора внутренний/,/^id договора/,/^id$/,/^id\b/,/айди/]); if(iId<0) iId = 0;
+        iAmt = colIdx(h,[/сумма обещан|обещан[а-я]* сумм|сумма плат[её]ж|сумма оплат/,/^сумма$/,/^сумма\b(?!.*долг)/,/сумма долга/,/сумм/]);
+        if(iAmt===iId) iAmt = -1;
+      } else {
+        // без заголовка: вторая колонка, если числовая — сумма
+        iAmt = (rows[0] && rows[0].length>1 && typeof rows[0][1]==="number") ? 1 : -1;
+        rows = rows.length? rows : [];
+      }
+      rows.forEach(function(row){ if(!row) return; var id = normId(row[iId]); if(!id || !/^\d+$/.test(id)) return; out.push([id, iAmt>=0 ? num(row[iAmt]) : 0]); });
+      return { name:name, rows:out, hasAmt: iAmt>=0 };
+    }
+    function pastedList(text){
+      var ids = (String(text||"").match(/\d{3,}/g)||[]), seen = {}, out = [];
+      ids.forEach(function(i){ if(!seen[i]){ seen[i]=1; out.push([i,0]); } });
+      return { name:"Вставленный список", rows:out, hasAmt:false };
+    }
+    function put(arr, item){ for(var i=0;i<arr.length;i++) if(arr[i].name===item.name){ arr[i]=item; return; } arr.push(item); }
+
+    // ---------- расчёт ----------
+    var opGroupCache = {};
+    function groupOf(op){
+      if(opGroupCache[op]!=null) return opGroupCache[op];
+      var res = "Прочие";
+      OPERATOR_GROUPS.forEach(function(g){ if(res!=="Прочие" || g.all) return; if((g.names||[]).some(function(n){ return opNameMatches(op, n); })) res = g.label; });
+      return (opGroupCache[op] = res);
+    }
+    function compute(){
+      var S = state.src, O = state.opt;
+      var base = {}, amt = {}, listStats = [];
+      S.lists.forEach(function(l){
+        var per = {}, cnt = {};
+        l.rows.forEach(function(r){ var id = r[0], v = r[1]; cnt[id]=1; per[id] = (O.amt==="sum") ? (per[id]||0)+v : Math.max(per[id]||0, v); });
+        var ids = Object.keys(cnt), s = 0; ids.forEach(function(id){ base[id]=1; var v = per[id]||0; s += v; if(v>(amt[id]||0)) amt[id]=v; });
+        listStats.push({ name:l.name, n:ids.length, rowsN:l.rows.length, sum:s, hasAmt:l.hasAmt });
+      });
+      var hasList = Object.keys(base).length>0;
+      // события (с удалением полных дублей между файлами)
+      var seen = {}, events = [], dup = 0, outside = 0, from = "", to = "";
+      S.calls.forEach(function(f){
+        f.ev.forEach(function(e){
+          var id = e[0], dt = e[2], d = dt.slice(0,10);
+          if(O.from && d && d<O.from) return; if(O.to && d && d>O.to) return;
+          var key = id+"|"+dt+"|"+e[1]+"|"+e[3]+"|"+f.res.length;
+          var res = f.res[e[1]], op = f.ops[e[3]] || "—";
+          var k2 = id+"|"+dt+"|"+res+"|"+op;
+          if(seen[k2]){ dup++; return; } seen[k2]=1;
+          if(hasList && !base[id]){ outside++; return; }
+          events.push({id:id, dt:dt, res:res, op:op});
+          if(d){ if(!from||d<from) from=d; if(!to||d>to) to=d; }
+        });
+      });
+      if(!hasList){ events.forEach(function(e){ base[e.id]=1; }); }
+      var byId = {}, resCnt = {};
+      events.forEach(function(e){
+        var cl = RX.cl.test(e.res), th = RX.th.test(e.res), no = RX.no.test(e.res), ms = RX.ms.test(e.res)&&!no, lt = RX.lt.test(e.res);
+        var ptp = RX.ptp.test(e.res) && !RX.def.test(e.res), df = RX.def.test(e.res);
+        e.f = {cl:cl, th:th, no:no, ms:ms, lt:lt, ptp:ptp, df:df, call:!(ms||lt)};
+        var b = byId[e.id] || (byId[e.id] = {n:0, call:0, cl:0, th:0, ptp:0, df:0, last:null, ops:{}});
+        b.n++; if(e.f.call) b.call++; if(cl) b.cl++; if(th) b.th++; if(ptp) b.ptp++; if(df) b.df++;
+        if(!b.last || e.dt>=b.last.dt) b.last = e;
+        var o = b.ops[e.op] || (b.ops[e.op] = {n:0, call:0, cl:0, th:0, ptp:0, df:0, lastDt:""});
+        o.n++; if(e.f.call) o.call++; if(cl) o.cl++; if(th) o.th++; if(ptp) o.ptp++; if(df) o.df++; if(e.dt>o.lastDt) o.lastDt = e.dt;
+        resCnt[e.res||"Пусто"] = (resCnt[e.res||"Пусто"]||0)+1;
+      });
+      var baseIds = Object.keys(base), total = baseIds.length, totAmt = 0; baseIds.forEach(function(id){ totAmt += amt[id]||0; });
+      var worked = [], notW = [];
+      baseIds.forEach(function(id){ (byId[id] ? worked : notW).push(id); });
+      function sumA(ids){ var s=0; ids.forEach(function(i){ s+=amt[i]||0; }); return s; }
+      var st = {
+        base:baseIds, any:worked,
+        call:worked.filter(function(i){ return byId[i].call>0; }),
+        contact:worked.filter(function(i){ return byId[i].cl+byId[i].th>0; }),
+        cl:worked.filter(function(i){ return byId[i].cl>0; }),
+        ptp:worked.filter(function(i){ return byId[i].ptp>0; }),
+        df:worked.filter(function(i){ return byId[i].df>0; })
+      };
+      var stages = [
+        {k:"base", name:"В списках", ids:st.base, color:"#8794bd", tip:"Уникальные договоры из загруженных списков (или все ID из звонков, если списков нет)."},
+        {k:"any", name:"Есть действие (проработаны)", ids:st.any, color:"#4f8cff", tip:"По договору есть хотя бы одно событие в истории."},
+        {k:"call", name:"Звонок (без мессенджеров и писем)", ids:st.call, color:"#35d0e0", tip:"Есть хотя бы один звонок: все события минус WhatsApp/Max/Telegram и письма."},
+        {k:"contact", name:"Разговор состоялся (клиент или третье лицо)", ids:st.contact, color:"#3ddc97", tip:"Есть событие «Разговор состоялся …»."},
+        {k:"cl", name:"Разговор с клиентом", ids:st.cl, color:"#f2c14e", tip:"Есть событие «Разговор состоялся Клиент: …»."},
+        {k:"ptp", name:"Обещание оплаты", ids:st.ptp, color:"#ff8a5c", tip:"Есть событие «Обещание оплаты» (клиент или третье лицо). Отложенные обещания — отдельно."}
+      ].map(function(s){ s.n = s.ids.length; s.sum = sumA(s.ids); return s; });
+      // владельцы договора
+      function owners(id){
+        var b = byId[id], names = Object.keys(b.ops);
+        if(O.attr==="last") return [b.last.op];
+        return names;
+      }
+      var ents = { op:{}, grp:{} };
+      function ent(kind, key, grp){
+        var m = ents[kind]; return m[key] || (m[key] = { name:key, grp:grp||"", n:0, call:0, cl:0, th:0, ptp:0, df:0, no:0, ms:0, lt:0, own:{}, c1:{}, c2:{}, c3:{}, c4:{}, byRes:{} });
+      }
+      events.forEach(function(e){
+        [["op", e.op, groupOf(e.op)], ["grp", groupOf(e.op), ""]].forEach(function(t){
+          var x = ent(t[0], t[1], t[2]); x.n++; if(e.f.call) x.call++; if(e.f.cl) x.cl++; if(e.f.th) x.th++; if(e.f.ptp) x.ptp++; if(e.f.df) x.df++;
+          x.byRes[e.res||"Пусто"] = (x.byRes[e.res||"Пусто"]||0)+1;
+        });
+      });
+      worked.forEach(function(id){
+        var b = byId[id];
+        owners(id).forEach(function(op){
+          var g = groupOf(op);
+          [["op",op,g],["grp",g,""]].forEach(function(t){
+            var x = ent(t[0], t[1], t[2]); x.own[id]=1;
+            // признаки: при «всем, кто работал» — по событиям самого оператора/группы, при «последнему» — по договору целиком
+            var fl;
+            if(O.attr==="last") fl = b;
+            else if(t[0]==="op") fl = b.ops[op];
+            else { fl = {call:0, cl:0, th:0, ptp:0}; Object.keys(b.ops).forEach(function(o2){ if(groupOf(o2)===g){ var q=b.ops[o2]; fl.call+=q.call; fl.cl+=q.cl; fl.th+=q.th; fl.ptp+=q.ptp; } }); }
+            if(fl.call>0) x.c1[id]=1; if(fl.cl+fl.th>0) x.c2[id]=1; if(fl.cl>0) x.c3[id]=1; if(fl.ptp>0) x.c4[id]=1;
+          });
+        });
+      });
+      function fin(m){
+        return Object.keys(m).map(function(k){
+          var x = m[k], own = Object.keys(x.own);
+          return { name:x.name, grp:x.grp, n:x.n, call:x.call, cl:x.cl, th:x.th, ptp:x.ptp, df:x.df,
+            ids:own.length, idsAmt:sumA(own), callIds:Object.keys(x.c1).length, contactIds:Object.keys(x.c2).length, clIds:Object.keys(x.c3).length,
+            ptpIds:Object.keys(x.c4).length, ptpAmt:sumA(Object.keys(x.c4)), byRes:x.byRes };
+        }).sort(function(a,b){ return b.ids-a.ids || b.n-a.n; });
+      }
+      var resList = Object.keys(resCnt).sort(function(a,b){ return resGroup(a)-resGroup(b) || resCnt[b]-resCnt[a]; });
+      var resIds = {}; events.forEach(function(e){ var k=e.res||"Пусто"; (resIds[k]||(resIds[k]={}))[e.id]=1; });
+      var contracts = baseIds.map(function(id){
+        var b = byId[id];
+        var ops = b ? Object.keys(b.ops) : [], gs = {}; ops.forEach(function(o){ gs[groupOf(o)]=1; });
+        return { id:id, amt:amt[id]||0, worked:!!b, ops:ops, groups:Object.keys(gs), n:b?b.n:0, rc:b&&b.cl>0, ptp:b&&b.ptp>0, df:b&&b.df>0, lastDt:b?b.last.dt:"", lastRes:b?b.last.res:"", lastOp:b?b.last.op:"" };
+      });
+      return { hasList:hasList, listStats:listStats, total:total, totAmt:totAmt, stages:stages, events:events.length, dup:dup, outside:outside, from:from, to:to,
+        ops:fin(ents.op), groups:fin(ents.grp), resList:resList.map(function(k){ return {k:k, n:resCnt[k], ids:Object.keys(resIds[k]).length}; }),
+        contracts:contracts, notWorked:notW.map(function(id){ return {id:id, amt:amt[id]||0}; }).sort(function(a,b){ return b.amt-a.amt; }),
+        dfIds:st.df.length, dfAmt:sumA(st.df), workedAmt:sumA(worked) };
+    }
+    function persist(){
+      try{ var js = JSON.stringify({src:state.src, opt:state.opt}); if(js.length < 4800000) safeSetItem(storageKey, js); else { localStorage.removeItem(storageKey); pulseNotice("Файлы слишком большие, чтобы запомнить их между сессиями — после перезагрузки страницы загрузите их заново."); } }catch(e){}
+    }
+    function refresh(){ state.model = (state.src.lists.length||state.src.calls.length) ? compute() : null; persist(); render(); }
+    function setBadge(label, cls){ var b = el("sourceBadge"); if(b){ b.textContent = label; b.className = "badge "+cls; } }
+
+    // ---------- загрузка ----------
+    function loadFiles(list){
+      var files = Array.prototype.slice.call(list||[]); if(!files.length) return;
+      var idx = 0, done = [], bad = [];
+      pulseBusy(true, "Читаю файлы…", "0 из "+files.length);
+      (function next(){
+        if(idx>=files.length){
+          pulseBusy(false);
+          if(done.length){ refresh(); pulseNotice("Загружено: "+done.join("; ")+(bad.length?" · не распознано: "+bad.join(", "):"")); }
+          else pulseNotice("Не удалось распознать: "+bad.join(", ")+". Нужны история звонков (ID Результата, ID договора внутренний, оператор) или список договоров (ID договора внутренний, при желании сумма).", true);
+          return;
+        }
+        var file = files[idx++]; pulseBusy(true, "Читаю файлы…", idx+" из "+files.length+" · "+file.name);
+        readWorkbookAllSheetsRaw(file, function(err, sheets){
+          if(err){ bad.push(file.name); next(); return; }
+          try{ var r = addSheets(sheets, file.name); if(r) done.push(r); else bad.push(file.name); }catch(e){ bad.push(file.name); }
+          setTimeout(next, 20);
+        });
+      })();
+    }
+    function addSheets(sheets, name){
+      var c = classify(sheets);
+      if(c.kind==="calls"){ var k = parseCalls(c.head, c.aoa, name); if(!k.ev.length) return null; put(state.src.calls, k); return name+" — история звонков ("+fmtInt.format(k.ev.length)+" событий)"; }
+      if(c.kind==="list"){ var l = parseList(c.head, c.aoa, name); if(!l.rows.length) return null; put(state.src.lists, l); return name+" — список договоров ("+fmtInt.format(l.rows.length)+" строк"+(l.hasAmt?", с суммами":"")+")"; }
+      return null;
+    }
+
+    // ---------- отрисовка ----------
+    function bars(items){
+      var mx = items.length ? Math.max.apply(null, items.map(function(x){ return x.v; })) || 1 : 1;
+      return '<div class="barlist">'+items.map(function(x){ return '<div class="row"><div class="name">'+esc(x.name)+'</div><div class="num">'+x.num+'</div><div class="track"><div class="fill" style="width:'+(x.v/mx*100).toFixed(1)+'%"></div></div></div>'; }).join("")+'</div>';
+    }
+    function dash(){ return state.model; }
+    function render(){
+      var m = state.model, body = el("bodyWrap"), empty = el("emptyState");
+      if(!m){ body.style.display="none"; empty.style.display="block"; setBadge("нет данных","empty"); return; }
+      body.style.display="block"; empty.style.display="none"; setBadge("загружено","live");
+      var O = state.opt, mny = function(x){ return fmtInt.format(Math.round(x))+" ₽"; };
+      var hasAmt = m.totAmt>0;
+      var html = '<div class="dash">';
+      // файлы
+      var chips = state.src.lists.map(function(l,i){ return '<span class="mt-chip" title="Список договоров"><b>▤</b> '+esc(l.name)+' · '+fmtInt.format(new Set(l.rows.map(function(r){return r[0];})).size)+' ID<button type="button" data-rm="l:'+i+'" aria-label="Убрать файл">✕</button></span>'; })
+        .concat(state.src.calls.map(function(c,i){ return '<span class="mt-chip" title="История звонков"><b>☎</b> '+esc(c.name)+' · '+fmtInt.format(c.ev.length)+' событий<button type="button" data-rm="c:'+i+'" aria-label="Убрать файл">✕</button></span>'; }));
+      html += '<div class="d-meta mt-files">'+(chips.join("")||'<span>файлов нет</span>')+'</div>';
+      html += '<div class="mt-bar">'+
+        '<label>Период с <input type="date" data-opt="from" value="'+esc(O.from)+'"></label><label>по <input type="date" data-opt="to" value="'+esc(O.to)+'"></label>'+
+        '<label title="«Всем, кто работал» — договор засчитывается каждому оператору, который по нему работал. «Последнему» — только оператору с последним действием, суммы по сотрудникам тогда не задваиваются.">Засчитывать договор <select data-opt="attr"><option value="all"'+(O.attr==="all"?' selected':'')+'>всем, кто работал</option><option value="last"'+(O.attr==="last"?' selected':'')+'>последнему оператору</option></select></label>'+
+        (state.src.lists.some(function(l){ return l.hasAmt; }) ? '<label title="Если по договору в файле несколько строк с суммой: взять наибольшую (без задвоения) или сложить все.">Сумма по договору <select data-opt="amt"><option value="max"'+(O.amt==="max"?' selected':'')+'>наибольшая из строк</option><option value="sum"'+(O.amt==="sum"?' selected':'')+'>сумма строк</option></select></label>' : '')+
+        '<button type="button" class="btn ghost" id="'+prefix+'exp">⭳ Выгрузить в Excel</button></div>';
+      html += '<details class="more" data-k="paste"><summary>Вставить список ID вручную<span class="hint">по одному ID в строке или через запятую</span></summary><div class="more-body"><textarea id="'+prefix+'paste" rows="4" style="width:100%" placeholder="755388&#10;634654&#10;…"></textarea><div style="margin-top:8px"><button type="button" class="btn" id="'+prefix+'pasteBtn">Добавить список</button></div></div></details>';
+
+      // KPI
+      var S = m.stages, sAny = S[1], sCl = S[4], sPtp = S[5], sCt = S[3];
+      html += '<div class="kpis">'+[
+        dKpi({label:"Договоров в списках", value:fmtInt.format(m.total), icon:"▤", color:"#4f8cff", sub:hasAmt?big(m.totAmt):(m.hasList?"суммы в списках не найдены":"списков нет — по звонкам"), tip:"Уникальные ID из всех загруженных списков."}),
+        dKpi({label:"Проработано", value:pct(sAny.n,m.total), icon:"✓", color:"#3ddc97", sub:fmtInt.format(sAny.n)+" договоров"+(hasAmt?" · "+big(sAny.sum):""), bar:m.total?sAny.n/m.total:0, tip:"Договоры, по которым есть хотя бы одно действие."}),
+        dKpi({label:"Не проработано", value:fmtInt.format(m.total-sAny.n), icon:"△", color:"#ff6b7a", bad:(m.total-sAny.n>0), sub:pct(m.total-sAny.n,m.total)+(hasAmt?" · "+big(m.totAmt-sAny.sum):""), tip:"Договоры из списков без единого действия."}),
+        dKpi({label:"Разговор состоялся", value:fmtInt.format(sCt.n), icon:"◎", color:"#35d0e0", sub:pct(sCt.n,sAny.n)+" от проработанных · клиент: "+fmtInt.format(sCl.n), tip:"Договоры с событием «Разговор состоялся …»."}),
+        dKpi({label:"Обещания оплаты", value:fmtInt.format(sPtp.n)+' <small>ID</small>', icon:"✎", color:"#9b7bff", sub:(hasAmt?big(sPtp.sum)+" · ":"")+fmtInt.format(m.dfIds)+" отложенных", tip:"Договоры с «Обещанием оплаты». Сумма — из списков (без задвоения по ID)."})
+      ].join("")+'</div>';
+
+      var cards = '';
+      // воронка
+      cards += dCard("Воронка проработки", "уникальные договоры"+(m.from?' · действия '+ru(m.from)+' – '+ru(m.to):''),
+        '<div class="mt-fun">'+S.map(function(s,i){
+          var w = m.total? Math.max(s.n/m.total*100, s.n?2.5:0) : 0, prev = i? S[i-1].n : 0;
+          return '<div class="fr" title="'+esc(s.tip)+'"><div class="ftop"><span class="fl">'+esc(s.name)+'</span><span class="fv"><b>'+fmtInt.format(s.n)+'</b> <i>'+pct(s.n,m.total)+' от списка'+(i>1?' · '+pct(s.n,prev)+' от пред.':'')+(hasAmt?' · '+big(s.sum):'')+'</i></span></div><div class="ft"><div class="fb" style="width:'+w.toFixed(1)+'%;background:linear-gradient(90deg,'+s.color+','+s.color+'bb)"></div></div></div>';
+            '<div class="fv"><b>'+fmtInt.format(s.n)+'</b><span>'+pct(s.n,m.total)+' от списка'+(i>1?' · '+pct(s.n,prev)+' от пред.':'')+'</span>'+(hasAmt?'<span>'+big(s.sum)+'</span>':'')+'</div></div>';
+        }).join("")+'</div>', 7);
+      // доли по группам
+      var gOwn = m.groups.filter(function(g){ return g.ids>0; });
+      cards += dCard("Кто проработал: доли групп", O.attr==="last"?"договор — последнему оператору":"договор — каждому, кто работал",
+        gOwn.length ? '<div class="donut-row">'+donutSvg(gOwn.map(function(g,i){ return {v:g.ids, color:DASH_COLORS[i%DASH_COLORS.length], title:g.name+': '+g.ids}; }), fmtInt.format(sAny.n), "проработано")+
+          '<div class="legend">'+gOwn.map(function(g,i){ return '<div class="li"><span class="sw" style="background:'+DASH_COLORS[i%DASH_COLORS.length]+'"></span><span class="ln">'+esc(g.name)+'</span><span class="lv">'+fmtInt.format(g.ids)+' · '+pct(g.ids,sAny.n,0)+'</span></div>'; }).join("")+'</div></div>' : '<div class="hint">Действий по договорам нет.</div>', 5);
+      // таблица по группам / сотрудникам
+      var rows = O.mode==="emp" ? m.ops : m.groups;
+      var maxIds = rows.reduce(function(a,r){ return Math.max(a, r.ids); }, 1);
+      var thead = '<tr><th>'+(O.mode==="emp"?'Сотрудник':'Группа')+'</th>'+(O.mode==="emp"?'<th>Группа</th>':'')+'<th class="amt" title="Уникальных договоров с действием">Проработано</th><th class="amt" title="События оператора">Действий</th><th class="amt">Звонков</th><th class="amt" title="Договоров с разговором (клиент или третье лицо)">Разговор</th><th class="amt" title="Договоров с разговором с клиентом">С клиентом</th><th class="amt" title="Договоров с обещанием оплаты">Обещаний</th>'+(hasAmt?'<th class="amt">Сумма проработ.</th><th class="amt">Сумма обещ.</th>':'')+'<th class="amt" title="Разговор / проработано">Разг./проработ.</th><th class="amt" title="Обещание / разговор">Обещ./разг.</th></tr>';
+      var trs = rows.map(function(r){
+        return '<tr><td>'+esc(r.name)+'<div class="cmp-bar" style="margin-top:4px;height:5px"><i style="width:'+(r.ids/maxIds*100).toFixed(1)+'%;background:#4f8cff"></i></div></td>'+(O.mode==="emp"?'<td class="muted">'+esc(r.grp)+'</td>':'')+
+          '<td class="amt">'+fmtInt.format(r.ids)+'</td><td class="amt">'+fmtInt.format(r.n)+'</td><td class="amt">'+fmtInt.format(r.call)+'</td><td class="amt">'+fmtInt.format(r.contactIds)+'</td><td class="amt">'+fmtInt.format(r.clIds)+'</td><td class="amt">'+fmtInt.format(r.ptpIds)+'</td>'+
+          (hasAmt?'<td class="amt">'+fmtCompact(r.idsAmt)+'</td><td class="amt">'+fmtCompact(r.ptpAmt)+'</td>':'')+'<td class="amt">'+pct(r.contactIds,r.ids)+'</td><td class="amt">'+pct(r.ptpIds,r.contactIds)+'</td></tr>';
+      }).join("");
+      var tot = '<tr class="total"><td>Итого (уникальные договоры)</td>'+(O.mode==="emp"?'<td></td>':'')+'<td class="amt">'+fmtInt.format(sAny.n)+'</td><td class="amt">'+fmtInt.format(m.events)+'</td><td class="amt">'+fmtInt.format(rows.reduce(function(a,r){return a+r.call;},0))+'</td><td class="amt">'+fmtInt.format(sCt.n)+'</td><td class="amt">'+fmtInt.format(sCl.n)+'</td><td class="amt">'+fmtInt.format(sPtp.n)+'</td>'+
+        (hasAmt?'<td class="amt">'+fmtCompact(sAny.sum)+'</td><td class="amt">'+fmtCompact(sPtp.sum)+'</td>':'')+'<td class="amt">'+pct(sCt.n,sAny.n)+'</td><td class="amt">'+pct(sPtp.n,sCt.n)+'</td></tr>';
+      cards += dCard("Воронка по "+(O.mode==="emp"?"сотрудникам":"группам"), "оператор — по ID оператора из истории звонков",
+        '<div class="mt-bar" style="margin:-4px 0 10px"><span class="seg"><button type="button" class="'+(O.mode!=="emp"?'on':'')+'" data-mode="group">Группы</button><button type="button" class="'+(O.mode==="emp"?'on':'')+'" data-mode="emp">Сотрудники</button></span></div>'+
+        '<div class="table-wrap"><table class="tbl-compact"><thead>'+thead+'</thead><tbody>'+trs+tot+'</tbody></table></div>'+
+        '<div class="hint" style="margin-top:8px">'+(O.attr==="last"?'Каждый договор записан одному оператору (с последним действием), поэтому «Проработано» по сотрудникам складывается в итог.':'Договор, с которым работали несколько сотрудников, учитывается у каждого из них; в итоговой строке — один раз.')+' «Действий», «Звонков» — события самого оператора.</div>', 12);
+      // результаты действий
+      cards += dCard("Результаты действий", "события · уникальных договоров",
+        bars(m.resList.map(function(r){ return {name:shortRes(r.k), v:r.n, num:fmtInt.format(r.n)+' · '+fmtInt.format(r.ids)+' дог.'}; })), 6);
+      // не проработано
+      var nw = m.notWorked, shown = state.showAll ? nw : nw.slice(0,30);
+      cards += dCard("Не проработано", fmtInt.format(nw.length)+" договоров"+(hasAmt?" · "+big(nw.reduce(function(a,x){return a+x.amt;},0)):""),
+        nw.length ? '<div class="table-wrap"><table class="tbl-compact"><thead><tr><th>ID договора</th>'+(hasAmt?'<th class="amt">Сумма</th>':'')+'</tr></thead><tbody>'+shown.map(function(x){ return '<tr><td class="id">'+esc(x.id)+'</td>'+(hasAmt?'<td class="amt">'+fmtCompact(x.amt)+'</td>':'')+'</tr>'; }).join("")+'</tbody></table></div>'+
+          (nw.length>shown.length?'<button type="button" class="btn ghost" id="'+prefix+'more" style="margin-top:10px">Показать все '+fmtInt.format(nw.length)+'</button>':'') : '<div class="hint">Все договоры из списков проработаны.</div>', 6);
+      html += '<div class="dgrid">'+cards+'</div>';
+
+      // подробности
+      var more = '';
+      var keys = m.resList.map(function(r){ return r.k; });
+      var mrows = (O.mode==="emp"?m.ops:m.groups);
+      more += '<details class="more" data-k="matrix"><summary>Результаты по '+(O.mode==="emp"?'сотрудникам':'группам')+' (матрица, события)<span class="hint">'+fmtInt.format(keys.length)+' результатов</span></summary><div class="more-body"><div class="table-wrap"><table class="tbl-compact"><thead><tr><th>'+(O.mode==="emp"?'Сотрудник':'Группа')+'</th>'+keys.map(function(k){ return '<th class="amt" title="'+esc(k)+'">'+esc(shortRes(k))+'</th>'; }).join("")+'<th class="amt">Всего</th></tr></thead><tbody>'+
+        mrows.map(function(r){ return '<tr><td>'+esc(r.name)+'</td>'+keys.map(function(k){ return '<td class="amt">'+(r.byRes[k]?fmtInt.format(r.byRes[k]):"—")+'</td>'; }).join("")+'<td class="amt"><b>'+fmtInt.format(r.n)+'</b></td></tr>'; }).join("")+'</tbody></table></div></div></details>';
+      more += '<details class="more" data-k="lists"><summary>Файлы и сверка<span class="hint">'+fmtInt.format(state.src.lists.length)+' списков · '+fmtInt.format(state.src.calls.length)+' файлов звонков</span></summary><div class="more-body"><div class="table-wrap"><table class="tbl-compact"><thead><tr><th>Список</th><th class="amt">Строк</th><th class="amt">Уникальных ID</th><th class="amt">Сумма</th></tr></thead><tbody>'+
+        (m.listStats.map(function(l){ return '<tr><td>'+esc(l.name)+'</td><td class="amt">'+fmtInt.format(l.rowsN)+'</td><td class="amt">'+fmtInt.format(l.n)+'</td><td class="amt">'+(l.hasAmt?fmtCompact(l.sum)+' ₽':'—')+'</td></tr>'; }).join("")||'<tr><td colspan="4">Списков нет</td></tr>')+'</tbody></table></div>'+
+        '<div class="hint" style="margin-top:8px">Событий учтено: '+fmtInt.format(m.events)+(m.dup?' · повторов между файлами убрано: '+fmtInt.format(m.dup):'')+(m.outside?' · событий по договорам вне списков: '+fmtInt.format(m.outside):'')+'</div></div></details>';
+      more += '<details class="more" data-k="how"><summary>Как это считается</summary><div class="more-body"><div class="module-subtitle"><b>Загрузка:</b> можно выбрать сразу несколько файлов, тип определяется сам. <b>История звонков</b> — есть «ID Результата» и «ID договора внутренний»; оператор берётся из «ID Оператора История софт» (если нет — «Оператор взаимодействия»). <b>Список договоров</b> — любой файл с «ID договора внутренний» (или просто колонка ID); если есть колонка суммы (сумма обещания, сумма долга…), берётся она. Данные не связаны с другими вкладками. Договоры всех списков объединяются. <b>Проработан</b> — по ID есть хотя бы одно событие. <b>Звонок</b> — событие, кроме WhatsApp/Max/Telegram и писем. <b>Разговор</b> — «Разговор состоялся Клиент/Третье лицо». <b>Обещание</b> — «Обещание оплаты» (отложенные считаются отдельно). Полностью совпадающие события из разных файлов (то же время, договор, результат, оператор) считаются один раз. Группы — как на вкладке «Воронка».</div></div></details>';
+      html += '<div class="d-more">'+more+'</div></div>';
+      body.innerHTML = html;
+    }
+
+    function exportXlsx(){
+      var m = state.model; if(!m) return;
+      if(typeof XLSX==="undefined"){ alert("Модуль экспорта не загружен."); return; }
+      try{
+        var wb = XLSX.utils.book_new(), hasAmt = m.totAmt>0;
+        function add(name, rows){ XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows.length?rows:[{"":""}]), name); }
+        add("Воронка", m.stages.map(function(s,i){ var o = {"Этап":s.name, "Договоров":s.n, "% от списка":m.total?+(s.n/m.total*100).toFixed(1):0}; if(hasAmt) o["Сумма"]=s.sum; return o; }));
+        function ent(list, withGrp){ return list.map(function(r){ var o = {}; o[withGrp?"Сотрудник":"Группа"] = r.name; if(withGrp) o["Группа"] = r.grp; o["Проработано договоров"]=r.ids; o["Действий"]=r.n; o["Звонков"]=r.call; o["Разговор (ID)"]=r.contactIds; o["С клиентом (ID)"]=r.clIds; o["Обещаний (ID)"]=r.ptpIds; if(hasAmt){ o["Сумма проработанных"]=r.idsAmt; o["Сумма обещаний"]=r.ptpAmt; } return o; }); }
+        add("По группам", ent(m.groups,false)); add("По сотрудникам", ent(m.ops,true));
+        add("Договоры", m.contracts.map(function(c){ var o = {"ID договора":c.id}; if(hasAmt) o["Сумма"]=c.amt; o["Проработан"]=c.worked?"да":"нет"; o["Действий"]=c.n; o["Кто работал"]=c.ops.join("; "); o["Группы"]=c.groups.join("; "); o["Разговор с клиентом"]=c.rc?"да":""; o["Обещание оплаты"]=c.ptp?"да":""; o["Отложенное обещание"]=c.df?"да":""; o["Последнее действие"]=c.lastDt; o["Последний результат"]=c.lastRes; o["Последний оператор"]=c.lastOp; return o; }));
+        add("Не проработано", m.notWorked.map(function(x){ var o = {"ID договора":x.id}; if(hasAmt) o["Сумма"]=x.amt; return o; }));
+        saveFile("Сопоставление.xlsx", XLSX.write(wb, {bookType:"xlsx", type:"array"}));
+      }catch(e){ alert("Не удалось подготовить файл Excel: "+(e&&e.message||e)); }
+    }
+
+    // ---------- события ----------
+    el("fileInput").addEventListener("change", function(e){ var fl = Array.prototype.slice.call(e.target.files||[]); e.target.value=""; if(fl.length) loadFiles(fl); });
+    el("resetBtn").addEventListener("click", function(){ state.src={lists:[],calls:[]}; state.model=null; try{ localStorage.removeItem(storageKey); }catch(e){} render(); });
+    el("bodyWrap").addEventListener("click", function(e){
+      var t = e.target;
+      var rm = t.closest && t.closest("[data-rm]");
+      if(rm){ var p = rm.getAttribute("data-rm").split(":"); state.src[p[0]==="l"?"lists":"calls"].splice(+p[1],1); refresh(); return; }
+      var md = t.closest && t.closest("[data-mode]"); if(md){ state.opt.mode = md.getAttribute("data-mode"); persist(); render(); return; }
+      if(t.id===prefix+"exp"){ exportXlsx(); return; }
+      if(t.id===prefix+"more"){ state.showAll = true; render(); return; }
+      if(t.id===prefix+"pasteBtn"){ var l = pastedList(el("paste").value); if(!l.rows.length){ pulseNotice("В тексте не найдено ID договоров.", true); return; } put(state.src.lists, l); refresh(); }
+    });
+    el("bodyWrap").addEventListener("change", function(e){
+      var o = e.target.getAttribute && e.target.getAttribute("data-opt"); if(!o) return;
+      state.opt[o] = e.target.value; refresh();
+    });
+    window.__matchLoadAny = function(sheets, name){ var r = addSheets(sheets, name); refresh(); return r; };
+    window.__matchState = state;
+    refresh();
+  }
+
   function createDistribModule(prefix, settingsKey, dataKey, label){
     var root = document.getElementById(prefix+"root");
     function el(id){ return document.getElementById(prefix+id); }
@@ -6917,7 +7351,192 @@
   createGenericModule("pw_", "pulse_portfolio_all", {allowSecondary:false, label:"Портфель весь", portfolioAnalytics:true, keepColumns:PORTFOLIO_KEEP_COLUMNS});
   createPlanModule("pl_", "pulse_plan");
   createTopModule("tp_", "pulse_top");
+  createMatchModule("mt_", "pulse_match");
   createDistribModule("ds_", "pulse_distrib_settings", "pulse_distrib_data", "Распределение договоров");
+  // ===== Раскладка блоков: перетаскивание, ширина, скрытие. Работает на всех вкладках; порядок
+  // запоминается в браузере и накладывается поверх при каждой перерисовке (в т.ч. после загрузки файла).
+  (function initLayoutEditor(){
+    var LS = "pulse_layout_v1", lay = {}, editing = false;
+    try{ lay = JSON.parse(localStorage.getItem(LS)||"{}") || {}; }catch(e){ lay = {}; }
+    function save(){ try{ safeSetItem(LS, JSON.stringify(lay)); }catch(e){} }
+    var BSEL = ".dcard, .tile, section, details.more";
+    function pageOf(n){ return n.closest ? n.closest(".tab-page") : null; }
+    function titleOf(b){
+      var h = b.querySelector(".k-label, .label, .dc-head h3, .head h2, h2, h3, summary");
+      if(!h) return "";
+      var c = h.cloneNode(true); Array.prototype.forEach.call(c.querySelectorAll(".info-tip, .hint, .lay-ui, small"), function(x){ x.remove(); });
+      return c.textContent.replace(/\s+/g," ").trim().slice(0,70);
+    }
+    function blocksOf(page){
+      return Array.prototype.filter.call(page.querySelectorAll(BSEL), function(b){
+        if(b.closest(".lay-ui")) return false;
+        var p = b.parentElement; var a = p ? p.closest(BSEL) : null;
+        return !(a && page.contains(a));
+      });
+    }
+    function cpath(c, page){
+      var parts = [], n = c;
+      while(n && n!==page){
+        var cls = (n.className && typeof n.className==="string" ? n.className.split(/\s+/)[0] : ""), idx = 0, sib = n.parentElement ? n.parentElement.children : [];
+        for(var i=0;i<sib.length;i++){ if(sib[i]===n) break; if(sib[i].tagName===n.tagName && ((sib[i].className||"").split(/\s+/)[0]===cls)) idx++; }
+        parts.unshift(n.tagName.toLowerCase()+(n.id?"#"+n.id:"")+(cls?"."+cls:"")+":"+idx);
+        n = n.parentElement;
+      }
+      return parts.join(">");
+    }
+    function groups(page){
+      var map = [], bl = blocksOf(page);
+      bl.forEach(function(b){
+        var c = b.parentElement, g = null;
+        for(var i=0;i<map.length;i++) if(map[i].c===c){ g = map[i]; break; }
+        if(!g){ g = {c:c, key:cpath(c,page), blocks:[]}; map.push(g); }
+        g.blocks.push(b);
+      });
+      map.forEach(function(g){
+        var seen = {};
+        g.keys = g.blocks.map(function(b,i){ var t = titleOf(b) || ("блок "+(i+1)); seen[t] = (seen[t]||0)+1; return seen[t]>1 ? t+" #"+seen[t] : t; });
+        g.blocks.forEach(function(b,i){ b.__lk = g.keys[i]; });
+      });
+      return map;
+    }
+    function store(page, ckey, create){ var P = lay[page.id] || (create ? (lay[page.id] = {}) : null); if(!P) return null; return P[ckey] || (create ? (P[ckey] = {order:[], span:{}, hide:{}}) : null); }
+    function colsOf(c){ var gt = getComputedStyle(c).gridTemplateColumns; return (getComputedStyle(c).display==="grid" && gt && gt!=="none") ? gt.split(" ").length : 0; }
+    var busy = false, observers = {};
+    function applyPage(page){
+      if(busy) return; busy = true;
+      try{
+        groups(page).forEach(function(g){
+          var st = store(page, g.key, false);
+          if(st && st.order && st.order.length){
+            var rank = {}; st.order.forEach(function(k,i){ rank[k]=i; });
+            var sorted = g.blocks.map(function(b,i){ return {b:b, i:i, r:(rank[b.__lk]==null? 1e6+i : rank[b.__lk])}; }).sort(function(x,y){ return x.r-y.r || x.i-y.i; }).map(function(x){ return x.b; });
+            var same = sorted.every(function(b,i){ return b===g.blocks[i]; });
+            if(!same){
+              var kids = Array.prototype.slice.call(g.c.children), slot = 0, out = kids.map(function(k){ return g.blocks.indexOf(k)>-1 ? sorted[slot++] : k; });
+              out.forEach(function(k){ g.c.appendChild(k); });
+              g.blocks = sorted; g.keys = sorted.map(function(b){ return b.__lk; });
+            }
+          }
+          var cols = colsOf(g.c);
+          g.blocks.forEach(function(b,i){
+            var k = g.keys[i], sp = st && st.span && st.span[k], hid = st && st.hide && st.hide[k];
+            if(sp && cols){ b.classList.add("lay-sz"); b.style.setProperty("--lay-span", sp); } else { b.classList.remove("lay-sz"); b.style.removeProperty("--lay-span"); }
+            b.classList.toggle("lay-hidden", !!hid);
+            var host = b.matches("details") ? (b.querySelector(":scope > summary") || b) : b;
+            var ui = host.querySelector(":scope > .lay-ui");
+            if(editing){
+              b.classList.add("lay-block");
+              if(!ui){
+                ui = document.createElement("div"); ui.className = "lay-ui"; ui.setAttribute("contenteditable","false");
+                var h = '<span class="lay-h" title="Перетащить">⠿</span>';
+                if(cols) h += [["⅓",1/3],["½",1/2],["⅔",2/3],["▬",1]].map(function(f){ var n = Math.max(1, Math.round(cols*f[1])); return '<button type="button" data-lsz="'+n+'" title="Ширина: '+n+' из '+cols+'">'+f[0]+'</button>'; }).join("");
+                h += '<button type="button" data-lhide="1" title="Скрыть блок">✕</button>';
+                ui.innerHTML = h; host.insertBefore(ui, host.firstChild);
+              }
+              Array.prototype.forEach.call(ui.querySelectorAll("[data-lsz]"), function(x){ x.classList.toggle("on", String(sp)===x.getAttribute("data-lsz")); });
+            } else {
+              b.classList.remove("lay-block"); if(ui) ui.remove();
+            }
+          });
+        });
+      } finally { busy = false; }
+      if(observers[page.id]) observers[page.id].takeRecords();
+    }
+    function allPages(){ return Array.prototype.slice.call(document.querySelectorAll(".tab-page")); }
+    function watch(){
+      allPages().forEach(function(pg){
+        if(observers[pg.id]) return;
+        var t = null, ob = new MutationObserver(function(){ if(busy) return; clearTimeout(t); t = setTimeout(function(){ applyPage(pg); panel(); }, 40); });
+        ob.observe(pg, {childList:true, subtree:true}); observers[pg.id] = ob;
+        applyPage(pg);
+      });
+    }
+    function activePage(){ return document.querySelector(".tab-page.active"); }
+
+    // --- перетаскивание ---
+    var drag = null;
+    document.addEventListener("mousedown", function(e){
+      var h = e.target.closest && e.target.closest(".lay-h"); if(!h) return;
+      var b = h.closest(".lay-block"); if(b){ b.draggable = true; }
+    });
+    document.addEventListener("mouseup", function(){ document.querySelectorAll(".lay-block[draggable=true]").forEach(function(b){ b.draggable = false; }); });
+    document.addEventListener("dragstart", function(e){
+      var b = e.target.closest && e.target.closest(".lay-block"); if(!b || !b.draggable) return;
+      drag = b; b.classList.add("lay-drag"); try{ e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain","pulse-block"); }catch(x){}
+    });
+    document.addEventListener("dragover", function(e){
+      if(!drag) return;
+      var c = drag.parentElement; if(!c || !c.contains(e.target)) return;
+      e.preventDefault();
+      var cand = Array.prototype.filter.call(c.children, function(k){ return k!==drag && k.classList.contains("lay-block") && !k.classList.contains("lay-hidden"); });
+      var t = null, best = 1e12;
+      cand.forEach(function(k){
+        var r = k.getBoundingClientRect();
+        var dx = e.clientX<r.left ? r.left-e.clientX : (e.clientX>r.right ? e.clientX-r.right : 0), dy = e.clientY<r.top ? r.top-e.clientY : (e.clientY>r.bottom ? e.clientY-r.bottom : 0);
+        var dist = dx*dx+dy*dy; if(dist<best){ best = dist; t = k; }
+      });
+      if(!t) return;
+      var r2 = t.getBoundingClientRect(), dr = drag.getBoundingClientRect();
+      var sameRow = Math.abs(dr.top - r2.top) < Math.min(r2.height, dr.height)*0.5;
+      var before = sameRow ? (e.clientX < r2.left + r2.width/2) : (e.clientY < r2.top + r2.height/2);
+      var ref = before ? t : t.nextSibling;
+      if(ref!==drag && drag.nextSibling!==ref) c.insertBefore(drag, ref);
+    });
+    function endDrag(){
+      if(!drag) return; var b = drag; drag = null; b.draggable = false; b.classList.remove("lay-drag");
+      var page = pageOf(b); if(!page) return;
+      var g = groups(page).filter(function(x){ return x.c===b.parentElement; })[0]; if(!g) return;
+      var st = store(page, g.key, true); st.order = g.keys.slice(); save();
+    }
+    document.addEventListener("dragend", endDrag);
+    document.addEventListener("drop", function(e){ if(drag) e.preventDefault(); });
+
+    // --- кнопки блока ---
+    document.addEventListener("click", function(e){
+      if(e.target.closest && e.target.closest(".lay-ui")) e.preventDefault();
+      var s = e.target.closest && e.target.closest("[data-lsz]"), hd = e.target.closest && e.target.closest("[data-lhide]");
+      if(!s && !hd) return;
+      var b = e.target.closest(".lay-block"), page = pageOf(b); if(!b || !page) return;
+      var g = groups(page).filter(function(x){ return x.c===b.parentElement; })[0]; if(!g) return;
+      var st = store(page, g.key, true), k = b.__lk;
+      st.order = g.keys.slice();
+      if(s){ var n = s.getAttribute("data-lsz"); if(String(st.span[k])===n) delete st.span[k]; else st.span[k] = +n; }
+      if(hd){ st.hide[k] = 1; }
+      save(); applyPage(page); panel();
+    });
+
+    // --- панель ---
+    var fab = document.createElement("div"); fab.id = "layFab"; document.body.appendChild(fab);
+    function hiddenList(page){
+      var out = [];
+      groups(page).forEach(function(g){ var st = store(page, g.key, false); if(!st) return; g.keys.forEach(function(k,i){ if(st.hide && st.hide[k]) out.push({k:k, ck:g.key}); }); });
+      return out;
+    }
+    function panel(){
+      var page = activePage();
+      if(!page){ fab.style.display = "none"; return; }
+      fab.style.display = "";
+      if(!editing){ fab.innerHTML = '<button type="button" class="lay-fab-btn" data-lact="edit" title="Менять порядок и размер блоков на этой вкладке">✥ Раскладка</button>'; return; }
+      var hl = hiddenList(page);
+      fab.innerHTML = '<div class="lay-panel"><b>Режим раскладки</b><span>Тяните блок за ⠿, меняйте ширину кнопками ⅓ ½ ⅔ ▬, ✕ — скрыть.</span>'+
+        (hl.length ? '<div class="lay-hid">Скрыто: '+hl.map(function(x,i){ return '<button type="button" data-lshow="'+i+'">+ '+esc(x.k)+'</button>'; }).join("")+'</div>' : '')+
+        '<div class="lay-act"><button type="button" data-lact="reset">↺ Сбросить вкладку</button><button type="button" class="primary" data-lact="done">Готово</button></div></div>';
+      fab.__hl = hl;
+    }
+    fab.addEventListener("click", function(e){
+      var a = e.target.closest("[data-lact]"), sh = e.target.closest("[data-lshow]"), page = activePage(); if(!page) return;
+      if(sh){ var it = fab.__hl[+sh.getAttribute("data-lshow")]; var st = lay[page.id] && lay[page.id][it.ck]; if(st && st.hide){ delete st.hide[it.k]; save(); } applyPage(page); panel(); return; }
+      if(!a) return; var act = a.getAttribute("data-lact");
+      if(act==="edit"){ editing = true; document.body.classList.add("lay-on"); allPages().forEach(applyPage); panel(); }
+      if(act==="done"){ editing = false; document.body.classList.remove("lay-on"); allPages().forEach(applyPage); panel(); }
+      if(act==="reset"){ delete lay[page.id]; save(); // вернуть исходный порядок — перерисовкой вкладки
+        var btnFix = page.id; location.hash = ""; try{ sessionStorage.setItem("pulse_lay_page", btnFix); }catch(x){} location.reload(); }
+    });
+    document.getElementById("appTabs").addEventListener("click", function(){ setTimeout(function(){ allPages().forEach(applyPage); panel(); }, 60); });
+    watch(); panel();
+    try{ var rp = sessionStorage.getItem("pulse_lay_page"); if(rp){ sessionStorage.removeItem("pulse_lay_page"); var tb = document.querySelector('.app-tab[data-page="'+rp+'"]'); if(tb) tb.click(); } }catch(e){}
+  })();
+
   initOverview();
 
   var exportAllBtn = document.getElementById("gl_exportAllBtn");
