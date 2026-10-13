@@ -4947,7 +4947,7 @@
       var pts = dates.map(function(d,i){ return x(i)+","+y(map[d]||0); }).join(" ");
       var dots = dates.map(function(d,i){
         var v = map[d]||0;
-        return '<circle cx="'+x(i)+'" cy="'+y(v)+'" r="3.5" fill="'+color+'"><title>'+d+": "+fmtMoney.format(Math.round(v))+" ₽"+'</title></circle>';
+        return '<circle cx="'+x(i)+'" cy="'+y(v)+'" r="3.5" fill="'+color+'"/>';
       }).join("");
       return '<polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>'+dots;
     }
@@ -4957,7 +4957,36 @@
       if(i%step===0 || i===dates.length-1) labels += '<text class="chart-axis-label" x="'+x(i)+'" y="'+(H-10)+'" text-anchor="end" transform="rotate(-40 '+x(i)+' '+(H-10)+')">'+d.slice(5).replace("-",".")+'</text>';
     });
     svg.setAttribute("viewBox","0 0 "+W+" "+H); svg.style.minWidth = W+"px";
-    svg.innerHTML = gridLines + series(odv,"#8b6bff") + series(all,"#2dd4e0") + labels;
+    svg.innerHTML = gridLines + series(odv,"#8b6bff") + series(all,"#2dd4e0") + labels + '<g id="ov_trendHover" pointer-events="none"></g>';
+    svg.__tr = { dates:dates, odv:odv, all:all, x:x, y:y, padT:padT, innerH:innerH };
+    if(!svg.__bound){
+      svg.__bound = true;
+      var tip = document.createElement("div");
+      tip.id = "ov_trendTip"; tip.style.cssText = "position:fixed;z-index:80;display:none;pointer-events:none;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:8px 11px;box-shadow:var(--shadow-lg);font-size:13px;line-height:1.5;white-space:nowrap";
+      document.body.appendChild(tip);
+      var hide = function(){ tip.style.display = "none"; var g = document.getElementById("ov_trendHover"); if(g) g.innerHTML = ""; };
+      var move = function(e){
+        var T = svg.__tr; if(!T) return;
+        var pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+        var ctm = svg.getScreenCTM(); if(!ctm) return;
+        var q = pt.matrixTransform(ctm.inverse()), best = 0, bd = 1e12;
+        T.dates.forEach(function(d,i){ var dd = Math.abs(T.x(i)-q.x); if(dd<bd){ bd = dd; best = i; } });
+        var d = T.dates[best], a = T.odv[d]||0, b = T.all[d]||0, cx = T.x(best);
+        var g = document.getElementById("ov_trendHover");
+        if(g) g.innerHTML = '<line x1="'+cx+'" y1="'+T.padT+'" x2="'+cx+'" y2="'+(T.padT+T.innerH)+'" stroke="var(--text-faint)" stroke-width="1" stroke-dasharray="4,3"/>'+
+          '<circle cx="'+cx+'" cy="'+T.y(a)+'" r="6" fill="#8b6bff" stroke="#fff" stroke-width="2"/><circle cx="'+cx+'" cy="'+T.y(b)+'" r="6" fill="#2dd4e0" stroke="#fff" stroke-width="2"/>';
+        var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d), ds = m ? m[3]+"."+m[2]+"."+m[1] : d;
+        var m2 = function(v){ return fmtMoney.format(Math.round(v))+" ₽"; };
+        tip.innerHTML = '<b>'+ds+'</b><br><span style="color:#8b6bff">●</span> Платежи ОДВ: <b>'+m2(a)+'</b><br><span style="color:#2dd4e0">●</span> Все платежи: <b>'+m2(b)+'</b>';
+        tip.style.display = "block";
+        var tw = tip.offsetWidth, th = tip.offsetHeight, px = e.clientX+16, py = e.clientY+16;
+        if(px+tw > window.innerWidth-8) px = e.clientX-tw-16; if(py+th > window.innerHeight-8) py = e.clientY-th-16;
+        tip.style.left = Math.max(4,px)+"px"; tip.style.top = Math.max(4,py)+"px";
+      };
+      svg.addEventListener("pointermove", move); svg.addEventListener("pointerdown", move);
+      svg.addEventListener("pointerleave", hide);
+      svg.style.cursor = "crosshair";
+    }
   }
   function findOperatorColumn(headers){
     var named = headers.filter(function(h){ return /оператор|исполнитель|сотрудник|ответственн|коллектор/i.test(h); });
