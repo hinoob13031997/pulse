@@ -709,7 +709,7 @@
   /* ---- читаемость: крупнее шрифты, названия и цифры разными цветами ---- */
   .dash .hint{ color:var(--name); }
   .dash .gauge-wrap{ gap:12px; }
-  .dash .gauge-wrap .donut-svg, .dash .dcard .donut-svg{ width:140px; height:140px; }
+  .dash .gauge-wrap .donut-svg, .dash .dcard .donut-svg{ width:clamp(170px,14vw,230px); height:clamp(170px,14vw,230px); }
   .dash .kv{ gap:7px; min-width:140px; }
   .dash .kv > div{ font-size:15px; padding-bottom:5px; }
   .dash .kv dt{ color:var(--name); } .dash .kv dd{ color:var(--num); font-size:15.5px; }
@@ -5350,8 +5350,8 @@
       off += len;
     });
     return '<svg class="donut-svg" width="160" height="160" viewBox="0 0 160 160" role="img" aria-label="'+esc(topTxt+" "+(botTxt||""))+'"><circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="var(--surface-2)" stroke-width="17"/>'+segs+
-      '<text x="80" y="82" text-anchor="middle" font-size="'+Math.max(10,Math.min(16,Math.floor(96/(String(topTxt).length*0.62))))+'" font-weight="800" fill="var(--text)" font-family="JetBrains Mono, monospace">'+esc(topTxt)+'</text>'+
-      (botTxt?'<text x="80" y="102" text-anchor="middle" font-size="12" fill="var(--text-dim)" font-family="JetBrains Mono, monospace">'+esc(botTxt)+'</text>':'')+'</svg>';
+      '<text x="80" y="82" text-anchor="middle" font-size="'+Math.max(10,Math.min(19,Math.floor(100/(String(topTxt).length*0.62))))+'" font-weight="800" fill="var(--text)" font-family="JetBrains Mono, monospace">'+esc(topTxt)+'</text>'+
+      (botTxt?'<text x="80" y="104" text-anchor="middle" font-size="13" fill="var(--text-dim)" font-family="JetBrains Mono, monospace">'+esc(botTxt)+'</text>':'')+'</svg>';
   }
   function donutLegend(parts, fmt){
     var tot = parts.reduce(function(a,x){ return a+x.v; },0) || 1;
