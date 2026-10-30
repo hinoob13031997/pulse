@@ -396,6 +396,8 @@
   .barlist .row{ display:grid; grid-template-columns:1fr auto; gap:2px 10px; align-items:center; }
   /* На широком экране длинный рейтинг идёт в две колонки — название и цифра не разъезжаются на весь экран */
   .tab-page section{ container-type:inline-size; }
+  /* Широкая карточка с бубликом: легенда в две колонки, чтобы название и цифра были рядом, а карточка не пустовала справа */
+  @container (min-width:1000px){ .donut-row .legend{ display:grid; grid-auto-flow:column; grid-template-rows:repeat(5,auto); grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:56px; row-gap:10px; max-width:none; } }
   @container (min-width:1000px){ .barlist{ display:block; column-count:2; column-gap:48px; } .barlist .row{ break-inside:avoid; margin-bottom:9px; } }
   .barlist .name{ font-size:15px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .barlist .num{ font-size:14.5px; font-family:"JetBrains Mono",monospace; color:var(--text-dim); white-space:nowrap; }
