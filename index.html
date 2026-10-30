@@ -305,11 +305,13 @@
   .tile.accent::before{ opacity:1; }
   .tile.accent::after{ opacity:1; }
   .tile .label{ font-size:13px; color:var(--text-dim); font-weight:600; text-transform:uppercase; letter-spacing:.06em; position:relative; }
-  .tile .value{ font-size:24px; overflow-wrap:anywhere; font-weight:800; margin-top:8px; letter-spacing:-.02em; position:relative; }
+  .tile{ container-type:inline-size; }
+  .tile .value{ font-size:clamp(18px,12.5cqw,24px); white-space:nowrap; font-weight:800; margin-top:8px; letter-spacing:-.02em; position:relative; }
+  @media (max-width:520px){ .tile .value{ white-space:normal; overflow-wrap:anywhere; } }
   .tile .value small{ font-size:15px; font-weight:600; color:var(--text-dim); }
   .tile.accent .value{ color:var(--accent-ink); }
   .tile.bad .value{ color:var(--bad); }
-  .tile .delta{ font-size:13px; font-weight:700; margin-top:6px; display:inline-flex; align-items:center; gap:3px; padding:3px 8px; border-radius:999px; position:relative; }
+  .tile .delta{ font-size:13px; font-weight:700; margin-top:6px; display:inline-flex; align-items:center; gap:3px; padding:3px 8px; border-radius:10px; line-height:1.3; position:relative; }
   .tile .delta.up{ color:var(--good); background:var(--good-soft); }
   .tile .delta.down{ color:var(--bad); background:var(--bad-soft); }
   .tile-icon{
@@ -359,7 +361,7 @@
   section.collapsed{ padding-bottom:22px; margin-bottom:12px; }
   section.collapsed > .head{ margin-bottom:0; }
 
-  .grid2{ display:grid; grid-template-columns:1.35fr 1fr; gap:16px; }
+  .grid2{ display:grid; grid-template-columns:1.35fr 1fr; gap:16px; align-items:start; }
   @media (max-width:800px){ .grid2{ grid-template-columns:1fr; } }
 
   .chart-wrap{ overflow-x:auto; }
@@ -398,7 +400,25 @@
   .tab-page section{ container-type:inline-size; }
   /* Широкая карточка с бубликом: легенда в две колонки, чтобы название и цифра были рядом, а карточка не пустовала справа */
   @container (min-width:1000px){ .donut-row .legend{ display:grid; grid-auto-flow:column; grid-template-rows:repeat(5,auto); grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:56px; row-gap:10px; max-width:none; } }
-  @container (min-width:1000px){ .barlist{ display:block; column-count:2; column-gap:48px; } .barlist .row{ break-inside:avoid; margin-bottom:9px; } }
+
+  /* ===== Отчётный вид ===== */
+  /* длинные описания вкладок сворачиваются до двух строк */
+  .module-subtitle.clamped{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .sub-toggle{ appearance:none; border:0; background:none; padding:0; margin:-6px 0 12px; font:inherit; font-size:13.5px; font-weight:600; color:var(--accent-ink,var(--accent)); cursor:pointer; }
+  .sub-toggle:hover{ text-decoration:underline; }
+  /* на широком экране значения в таблицах не переносятся на вторую строку */
+  @media (min-width:1200px){ tbody td{ white-space:nowrap; } }
+  /* плитки «Обзора»: период отдельной строкой, чтобы все карточки были одной высоты */
+  .tile .tile-period{ font-size:13px; color:var(--text-faint); margin:-2px 0 8px; min-height:1.35em; font-family:"JetBrains Mono",monospace; }
+  /* «Распределение договоров»: аккуратная форма настроек */
+  #ds_root .controls:has(input[type=radio]){ gap:8px 10px; align-items:center; }
+  #ds_root .controls:has(input[type=radio]) > label{ font-size:15px !important; font-weight:600; padding:8px 14px; border:1px solid var(--border); border-radius:10px; background:var(--surface); }
+  #ds_root .controls:has(input[type=radio]) > label:has(input:checked){ border-color:var(--accent); background:var(--accent-soft); }
+  #ds_root .controls:has(input[type=radio]) > #ds_orderWrap{ margin-left:auto; border:0; background:none; padding-right:0; }
+  #ds_root #ds_orderSelect{ font-size:15px !important; }
+  #ds_root .controls:has(.fgroup){ display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:14px 18px; align-items:end; }
+  #ds_root .controls .fgroup{ width:auto !important; }
+  @container (min-width:1000px){ .barlist:has(.row:nth-child(8)){ display:block; column-count:2; column-gap:48px; } .barlist:has(.row:nth-child(8)) .row{ break-inside:avoid; margin-bottom:9px; } }
   .barlist .name{ font-size:15px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .barlist .num{ font-size:14.5px; font-family:"JetBrains Mono",monospace; color:var(--text-dim); white-space:nowrap; }
   .barlist .track{ grid-column:1/-1; height:7px; background:var(--surface-2); border-radius:999px; overflow:hidden; }
@@ -693,6 +713,7 @@
   .dash .kv{ gap:7px; min-width:140px; }
   .dash .kv > div{ font-size:15px; padding-bottom:5px; }
   .dash .kv dt{ color:var(--name); } .dash .kv dd{ color:var(--num); font-size:15.5px; }
+  @media (min-width:701px){ .dash .kv dd{ white-space:nowrap; } }
   .dash .mini3 b{ color:var(--num); } .dash .mini3 span{ color:var(--name); }
   .dash .dcard .donut-row{ gap:10px; }
   .dash .dcard .legend{ width:100%; min-width:0; flex:1 1 100%; gap:7px; }
@@ -1325,7 +1346,7 @@
           </select>
         </label>
       </div>
-      <table class="editable-table" id="ds_empTable" style="width:100%;border-collapse:collapse">
+      <div style="overflow-x:auto"><table class="editable-table" id="ds_empTable" style="width:100%;border-collapse:collapse;min-width:620px">
         <thead><tr>
           <th style="text-align:left;font-size:15px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.04em;padding:0 8px 8px">Сотрудник</th>
           <th class="ds-col-weight" style="text-align:left;width:100px;font-size:15px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.04em;padding:0 8px 8px;transition:opacity .15s">Доля</th>
@@ -1335,7 +1356,7 @@
           <th style="width:40px"></th>
         </tr></thead>
         <tbody id="ds_empBody"></tbody>
-      </table>
+      </table></div>
       <div class="controls" style="margin-top:12px">
         <button class="btn ghost" id="ds_addEmpBtn" style="font-size:16px">+ Добавить сотрудника</button>
         <span class="hint" id="ds_empHint" style="margin-left:auto;font-size:16px"></span>
@@ -2767,6 +2788,10 @@
       }).join("");
       var elc = el(elId);
       elc.innerHTML = html || '<div class="empty">Нет данных</div>';
+      // раздел, где нет ни одного осмысленного значения (одна пустая категория «—»), не показываем
+      var hideSec = entries.length<=1 && (!entries.length || !String(entries[0].name||"").replace(/[—–\-\s]/g,""));
+      var secEl = elc.closest ? elc.closest("section") : null;
+      if(secEl && opts.hideEmpty!==false) secEl.style.display = hideSec ? "none" : "";
       if(click){
         elc.addEventListener("click", function(e){
           var row = e.target.closest(".row.clickable"); if(!row) return;
@@ -2840,10 +2865,10 @@
     // summary tile) — the row-by-row listing was requested removed as not needed.
     function renderDup(s){
       var hint = el("dupHint"); var body = el("dupBody");
-      if(!s.dupGroups.length){ hint.textContent="не найдено"; body.innerHTML=""; return; }
+      if(!s.dupGroups.length){ hint.textContent="не найдено"; body.innerHTML='<div class="hint" style="margin-top:6px">Записей с одинаковыми договором, суммой и датой не найдено.</div>'; return; }
       var rowCount = s.dupGroups.reduce(function(a,g){return a+g.rows.length;},0);
       hint.textContent = s.dupGroups.length+" групп · "+rowCount+" записей";
-      body.innerHTML = "";
+      body.innerHTML = '<div class="hint" style="margin-top:6px">Совпали договор, сумма и дата — такие строки помечены «дубль?» в таблице «Все записи» ниже. Это повод проверить вручную, а не готовая ошибка.</div>';
     }
     function buildDupKeySet(s){ dupKeySet = {}; s.dupGroups.forEach(function(g){ dupKeySet[g.key] = true; }); }
 
@@ -3662,7 +3687,7 @@
           '<div class="table-wrap" style="margin-top:14px"><table><thead><tr><th>Группа</th>'+extraHeadCells+'<th class="amt">Звонки</th><th class="amt">RC, шт</th><th class="amt">RC, %</th><th class="amt">PTP, шт</th><th class="amt">PTP, %</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
         '</div>';
       }
-      var html = '<section><div class="head"><h2>Воронка обращений <span class="info-tip" title="Сводка звонков (не строки журнала): RC — дозвон/контакт установлен, PTP — обещание оплаты (положительный результат). Загружается отдельным файлом «Воронка» и не увеличивает число записей журнала.">i</span></h2>'+
+      var html = '<section><div class="head"><h2>Воронка по группам <span class="info-tip" title="Сводка звонков (не строки журнала): RC — дозвон/контакт установлен, PTP — обещание оплаты (положительный результат). Загружается отдельным файлом «Воронка» и не увеличивает число записей журнала.">i</span></h2>'+
         (state.funnelSource?'<span class="hint">'+esc(state.funnelSource)+'</span>':'')+'</div>'+
         (state.funnel.alt ? '<div class="fn-mode" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0 12px"><span class="hint">Сравнение:</span>'+
           '<button type="button" class="btn'+(state.funnel.mode==="days"?'':' ghost')+'" data-fnmode="days" style="font-size:14px">По дням (одинаковые дни месяца)</button>'+
@@ -4904,11 +4929,11 @@
       var iconHtml = '<div class="tile-icon'+(c.empty?"":" gold")+'">'+esc(c.icon||"▤")+'</div>';
       var goAttrs = c.pageId ? ' data-goto-page="'+esc(c.pageId)+'" tabindex="0" role="button" title="Перейти на вкладку «'+esc(c.label)+'»"' : "";
       if(c.empty){
-        return '<div class="tile clickable"'+goAttrs+'>'+iconHtml+'<div class="label">'+esc(c.label)+'</div><div class="value mono" style="color:var(--text-faint);font-size:16px">нет данных</div></div>';
+        return '<div class="tile clickable"'+goAttrs+'>'+iconHtml+'<div class="label">'+esc(c.label)+'</div><div class="tile-period">&nbsp;</div><div class="value mono" style="color:var(--text-faint);font-size:16px">нет данных</div></div>';
       }
       var val = fmtInt.format(c.count)+' <small>зап.</small>';
       if(c.sum!=null) val += '<br><span style="font-size:17.5px">'+fmtCompact(c.sum)+' <small>₽</small></span>';
-      return '<div class="tile accent clickable"'+goAttrs+'>'+iconHtml+'<div class="label">'+esc(c.label)+(c.dateRange?' · '+esc(c.dateRange):'')+'</div><div class="value mono">'+val+'</div></div>';
+      return '<div class="tile accent clickable"'+goAttrs+'>'+iconHtml+'<div class="label">'+esc(c.label)+'</div><div class="tile-period">'+(c.dateRange?esc(c.dateRange):'&nbsp;')+'</div><div class="value mono">'+val+'</div></div>';
     }).join("");
     if(!tilesEl.__gotoWired){
       tilesEl.__gotoWired = true;
@@ -6778,7 +6803,7 @@
         }).join("");
         var optHtml = empNames.map(function(n){ return '<option value="'+esc(n)+'"'+(n===r.__employee?" selected":"")+'>'+esc(n)+'</option>'; }).join("");
         var lastCell = '<td><select class="mini-input" data-rowidx="'+idx+'" data-act="reassign">'+optHtml+'</select></td>';
-        return '<tr>'+cells+lastCell+'</tr>';
+        return '<tr>'+lastCell+cells+'</tr>';
       }).join("");
 
       var table = '<section><div class="head"><h2>Список распределения</h2><span class="hint">'+
@@ -6786,8 +6811,8 @@
         ' · исключённые фильтром и «вне квот» договоры сюда не входят · строку можно переназначить вручную, полный список — в выгрузке Excel</span></div>'+
         '<div style="overflow:auto;max-height:560px;border:1px solid var(--border);border-radius:var(--radius)">'+
         '<table class="editable-table" style="width:100%;border-collapse:collapse">'+
-        '<thead><tr>'+state.headers.map(function(h){ return '<th style="text-align:left;position:sticky;top:0;background:var(--surface-2);padding:8px;font-size:13px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.04em">'+esc(h)+'</th>'; }).join("")+
-        '<th style="text-align:left;position:sticky;top:0;background:var(--surface-2);padding:8px;font-size:13px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.04em">Сотрудник</th></tr></thead>'+
+        '<thead><tr><th style="text-align:left;position:sticky;top:0;background:var(--surface-2);padding:8px;font-size:13px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.04em">Сотрудник</th>'+state.headers.map(function(h){ return '<th style="text-align:left;position:sticky;top:0;background:var(--surface-2);padding:8px;font-size:13px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.04em">'+esc(h)+'</th>'; }).join("")+
+        '</tr></thead>'+
         '<tbody id="'+prefix+'resultBody">'+(tableRows || '<tr><td colspan="'+(state.headers.length+1)+'">Нет строк</td></tr>')+'</tbody>'+
         '</table></div></section>';
 
@@ -7058,6 +7083,22 @@
       e.target.value = "";
     });
   }
+
+  // Длинные описания вкладок сворачиваются до двух строк с кнопкой «Подробнее».
+  (function(){
+    Array.prototype.forEach.call(document.querySelectorAll(".module-subtitle"), function(s){
+      if(s.__clamp) return;
+      if((s.textContent||"").trim().length < 230) return;
+      s.__clamp = true; s.classList.add("clamped");
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "sub-toggle"; b.textContent = "Подробнее ▾"; b.setAttribute("aria-expanded","false");
+      b.addEventListener("click", function(){
+        var open = !s.classList.toggle("clamped");
+        b.textContent = open ? "Свернуть ▴" : "Подробнее ▾"; b.setAttribute("aria-expanded", open?"true":"false");
+      });
+      s.insertAdjacentElement("afterend", b);
+    });
+  })();
 
   (function(){
     var root = document.documentElement;
